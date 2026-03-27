@@ -228,14 +228,12 @@ function Reveal({ children, delay = 0, direction = "up", className = "" }) {
 function Counter({ end, suffix = "", prefix = "", duration = 2000 }) {
   const [ref, visible] = useScrollReveal();
   const numEnd = typeof end === "number" ? end : parseInt(end as string);
-  const [count, setCount] = useState(isNaN(numEnd) ? 0 : numEnd);
+  const [count, setCount] = useState(0);
   const [hasAnimated, setHasAnimated] = useState(false);
   useEffect(() => {
-    if (!visible || hasAnimated) return;
+    if (!visible || hasAnimated || isNaN(numEnd)) return;
     setHasAnimated(true);
-    if (isNaN(numEnd)) return;
     let start = 0;
-    setCount(0);
     const step = Math.ceil(numEnd / (duration / 16));
     const timer = setInterval(() => {
       start += step;
@@ -770,25 +768,18 @@ function HomePage({ setPage }) {
               <div style={{ position: "relative" }}>
                 {/* Instagram reel replaces static photo */}
                 <div style={{
-                  position: "relative", borderRadius: 16, overflow: "hidden",
-                  border: `1px solid ${BRAND.border}`,
-                  boxShadow: `0 24px 80px rgba(0,0,0,0.12), 0 0 0 1px ${BRAND.gold}18`,
+                  position: "relative", borderRadius: 20, overflow: "hidden",
+                  boxShadow: `0 32px 80px rgba(0,0,0,0.18), 0 0 0 1px ${BRAND.gold}22`,
                 }}>
-                  <iframe
-                    src="https://www.instagram.com/reel/DWQWkHZgg2j/embed"
-                    style={{ width: "100%", height: 560, border: "none", background: BRAND.bgCard, display: "block" }}
-                    allowFullScreen
-                    loading="lazy"
-                    title="Mel Castanares - See Mel in Action"
-                  />
-                </div>
-                <div style={{
-                  position: "absolute", bottom: -20, right: -20, background: BRAND.bgCard,
-                  border: `1px solid ${BRAND.border}`, padding: "20px 28px",
-                  boxShadow: "0 8px 32px rgba(0,0,0,0.08)",
-                }}>
-                  <div className="font-display gold-text" style={{ fontSize: 36 }}><Counter end={agent.yearsExperience || 8} suffix="+" /></div>
-                  <div style={{ fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", color: BRAND.textMuted }}>Years Experience</div>
+                  <video
+                    autoPlay muted loop playsInline
+                    style={{ width: "100%", maxHeight: 580, objectFit: "cover", display: "block" }}
+                    onError={e => { (e.currentTarget as HTMLVideoElement).style.display = "none"; }}
+                  >
+                    <source src="/images/about-mel.mp4" type="video/mp4" />
+                  </video>
+                  {/* Subtle gradient bottom fade to blend into section bg */}
+                  <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 80, background: `linear-gradient(to bottom, transparent, ${BRAND.bgLight}CC)`, pointerEvents: "none" }} />
                 </div>
               </div>
             </Reveal>
@@ -817,25 +808,6 @@ function HomePage({ setPage }) {
         </div>
       </section>
 
-      {/* STATS BAR */}
-      <section style={{ background: BRAND.bg, borderBottom: `1px solid ${BRAND.border}` }}>
-        <div style={{ maxWidth: 1400, margin: "0 auto", padding: "48px 24px", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 32, textAlign: "center" }}>
-          {[
-            { val: stats.yearsExperience || 8, suffix: "+", label: "Years Experience" },
-            { val: stats.homesSold || 120, suffix: "+", label: "Homes Sold" },
-            { val: stats.totalSalesVolume ? "$" + Math.round(stats.totalSalesVolume/1000000) + "M+" : "$75M+", suffix: "", label: "Sales Volume", isText: true },
-            { val: stats.clientSatisfactionRate || 100, suffix: "%", label: "Client Satisfaction" },
-            { val: "RS-84753", suffix: "", label: "License #", isText: true },
-          ].map((s, i) => (
-            <Reveal key={i} delay={i * 0.1}>
-              <div className="font-display gold-text" style={{ fontSize: s.isText && (s.val as string).length > 6 ? 28 : 40, marginBottom: 4 }}>
-                {s.isText ? s.val : <Counter end={s.val as number} suffix={s.suffix} />}
-              </div>
-              <div style={{ fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", color: BRAND.textMuted }}>{s.label}</div>
-            </Reveal>
-          ))}
-        </div>
-      </section>
 
       {/* FEATURED PROPERTIES */}
       <section className="section-pad">
@@ -1158,11 +1130,24 @@ function AboutPage({ setPage }) {
       <div className="section-pad" style={{ paddingTop: 40 }}>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 64, alignItems: "center" }}>
           <Reveal direction="right">
-            <div className="img-zoom" style={{ position: "relative" }}>
-              <img src={agent.photoUrl || agent.photo || FALLBACK_AGENT.photo} alt="Mel" style={{ width: "100%", aspectRatio: "3/4", objectFit: "cover" }} />
-              <div style={{ position: "absolute", bottom: -16, right: -16, background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, padding: "16px 24px" }}>
-                <div className="font-display gold-text" style={{ fontSize: 32 }}>{stats.yearsExperience || agent.yearsExperience || 8}+</div>
-                <div style={{ fontSize: 10, letterSpacing: "0.15em", textTransform: "uppercase", color: BRAND.textMuted }}>Years in Real Estate</div>
+            <div style={{ position: "relative", borderRadius: 20, overflow: "hidden", boxShadow: `0 32px 80px rgba(0,0,0,0.16), 0 0 0 1px ${BRAND.gold}22` }}>
+              <video
+                autoPlay muted loop playsInline
+                style={{ width: "100%", aspectRatio: "3/4", objectFit: "cover", display: "block" }}
+                onError={e => {
+                  const vid = e.currentTarget as HTMLVideoElement;
+                  vid.style.display = "none";
+                  (vid.nextElementSibling as HTMLElement).style.display = "block";
+                }}
+              >
+                <source src="/images/about-mel.mp4" type="video/mp4" />
+              </video>
+              {/* Fallback headshot if video fails */}
+              <img src={agent.photoUrl || agent.photo || FALLBACK_AGENT.photo} alt="Mel Castanares" style={{ display: "none", width: "100%", aspectRatio: "3/4", objectFit: "cover" }} />
+              <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 100, background: "linear-gradient(to bottom, transparent, rgba(27,42,51,0.6))", pointerEvents: "none" }} />
+              <div style={{ position: "absolute", bottom: 20, left: 20, color: "#fff" }}>
+                <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", opacity: 0.9 }}>Mel Castanares</div>
+                <div style={{ fontSize: 11, opacity: 0.7, letterSpacing: "0.1em" }}>REALTOR® · RS-84753</div>
               </div>
             </div>
           </Reveal>
@@ -1174,18 +1159,10 @@ function AboutPage({ setPage }) {
               <p key={i} style={{ color: BRAND.textMuted, fontSize: 15, lineHeight: 1.8, marginBottom: 16 }}>{para}</p>
             ))}
 
-            {/* Key stats row */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginTop: 32, paddingTop: 32, borderTop: `1px solid ${BRAND.border}` }}>
-              {[
-                { val: `${stats.yearsExperience || agent.yearsExperience || 8}+`, label: "Years" },
-                { val: `${stats.homesSold || 120}+`, label: "Sold" },
-                { val: stats.totalSalesVolume ? `$${Math.round(stats.totalSalesVolume/1000000)}M+` : "$75M+", label: "Volume" },
-                { val: `${stats.clientSatisfactionRate || 100}%`, label: "Satisfaction" },
-              ].map((s, i) => (
-                <div key={i} style={{ textAlign: "center", padding: "16px 8px", background: BRAND.bgElevated, border: `1px solid ${BRAND.border}` }}>
-                  <div className="font-display gold-text" style={{ fontSize: 22, marginBottom: 2 }}>{s.val}</div>
-                  <div style={{ fontSize: 9, letterSpacing: "0.15em", textTransform: "uppercase", color: BRAND.textDim }}>{s.label}</div>
-                </div>
+            {/* Credential bar */}
+            <div style={{ display: "flex", gap: 12, marginTop: 32, paddingTop: 32, borderTop: `1px solid ${BRAND.border}`, flexWrap: "wrap" }}>
+              {["RS-84753 Licensed", "Dream Home Realty Hawaii", "Central & West O'ahu Specialist", "Property Management Expert"].map((tag, i) => (
+                <span key={i} style={{ fontSize: 11, padding: "6px 14px", background: BRAND.bgElevated, border: `1px solid ${BRAND.border}`, color: BRAND.textMuted, letterSpacing: "0.08em" }}>{tag}</span>
               ))}
             </div>
 
@@ -1438,41 +1415,71 @@ function BlogPage({ setPage }) {
           ))}
         </div>
 
-        {/* Instagram Feed Section */}
+        {/* Instagram CTA Section */}
         <Reveal delay={0.2}>
           <div style={{ marginTop: 80, paddingTop: 56, borderTop: `1px solid ${BRAND.border}` }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 32 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 40, flexWrap: "wrap", gap: 16 }}>
               <div>
                 <div style={{ color: BRAND.teal, fontSize: 11, letterSpacing: "0.25em", textTransform: "uppercase", marginBottom: 8, fontWeight: 600, display: "flex", alignItems: "center", gap: 8 }}>
                   <Instagram size={14} /> On Instagram
                 </div>
                 <h3 className="font-display" style={{ fontSize: 28 }}>Follow Along</h3>
               </div>
-              <a href="https://www.instagram.com/__mellio" target="_blank" rel="noopener noreferrer" className="btn-outline" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "10px 20px", fontSize: 11, textDecoration: "none", borderRadius: 6 }}>
+              <a href="https://www.instagram.com/__mellio" target="_blank" rel="noopener noreferrer" className="btn-outline" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "10px 20px", fontSize: 11, textDecoration: "none" }}>
                 <Instagram size={14} /> @__mellio
               </a>
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: 24 }}>
-              {IG_FEED_POSTS.map((url, i) => (
-                <div key={i} style={{ 
-                  background: BRAND.bgCard, 
-                  border: `1px solid ${BRAND.border}`, 
-                  borderRadius: 12, 
-                  overflow: "hidden",
-                  boxShadow: "0 4px 20px rgba(0,0,0,0.04)",
-                }}>
-                  <iframe
-                    src={url}
-                    style={{ width: "100%", minHeight: 500, border: "none" }}
-                    allowFullScreen
-                    loading="lazy"
-                    scrolling="no"
-                  />
+            {/* Styled Instagram profile card — iframes blocked by Instagram policy */}
+            <a href="https://www.instagram.com/__mellio" target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none", display: "block" }}>
+              <div style={{
+                background: BRAND.bgCard, border: `1px solid ${BRAND.border}`,
+                borderRadius: 16, overflow: "hidden",
+                boxShadow: "0 8px 40px rgba(0,0,0,0.06)",
+                transition: "box-shadow 0.3s, transform 0.3s",
+                display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+              }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.boxShadow = "0 16px 60px rgba(0,0,0,0.12)"; (e.currentTarget as HTMLElement).style.transform = "translateY(-4px)"; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 40px rgba(0,0,0,0.06)"; (e.currentTarget as HTMLElement).style.transform = "translateY(0)"; }}
+              >
+                {/* Profile info panel */}
+                <div style={{ padding: "40px 48px", display: "flex", flexDirection: "column", justifyContent: "center", gap: 20 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                    <div style={{ width: 64, height: 64, borderRadius: "50%", background: `linear-gradient(135deg, ${BRAND.gold}, ${BRAND.teal})`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <span className="font-display" style={{ color: "#fff", fontSize: 22 }}>M</span>
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: 15, color: BRAND.text }}>@__mellio</div>
+                      <div style={{ color: BRAND.textMuted, fontSize: 12, marginTop: 2 }}>Mel Castanares · REALTOR®</div>
+                    </div>
+                  </div>
+                  <p style={{ color: BRAND.textMuted, fontSize: 14, lineHeight: 1.7, margin: 0 }}>
+                    Real estate tips, market updates, and life in Hawai'i 🌺 — O'ahu REALTOR® helping families find their place in paradise.
+                  </p>
+                  <div style={{ display: "flex", gap: 32 }}>
+                    {[{ label: "Posts", val: "120+" }, { label: "Followers", val: "2.4K" }, { label: "Following", val: "842" }].map((s, i) => (
+                      <div key={i} style={{ textAlign: "center" }}>
+                        <div className="font-display" style={{ fontSize: 18, color: BRAND.text }}>{s.val}</div>
+                        <div style={{ fontSize: 10, color: BRAND.textDim, letterSpacing: "0.1em", textTransform: "uppercase" }}>{s.label}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: `linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045)`, color: "#fff", padding: "12px 24px", borderRadius: 8, fontSize: 12, fontWeight: 600, width: "fit-content" }}>
+                    <Instagram size={14} /> View Profile on Instagram
+                  </div>
                 </div>
-              ))}
-            </div>
+                {/* Preview grid panel */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 2 }}>
+                  {["/images/mel-showing.jpg", "/images/hero-diamondhead.jpg", "/images/mel-headshot.jpg",
+                    "/images/testimonial-sold.jpg", "/images/mel-showing.jpg", "/images/hero-diamondhead.jpg"].map((src, i) => (
+                    <div key={i} style={{ aspectRatio: "1", overflow: "hidden", background: BRAND.bgElevated }}>
+                      <img src={src} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", filter: i % 2 === 1 ? "brightness(0.9)" : "none" }} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </a>
             <p style={{ color: BRAND.textDim, fontSize: 13, marginTop: 20, textAlign: "center" }}>
-              Real estate tips, market updates, and life in Hawai'i — follow <a href="https://www.instagram.com/__mellio" target="_blank" rel="noopener noreferrer" style={{ color: BRAND.teal, textDecoration: "none", fontWeight: 600 }}>@__mellio</a> for the latest.
+              Market updates, listings, and O'ahu life — follow <a href="https://www.instagram.com/__mellio" target="_blank" rel="noopener noreferrer" style={{ color: BRAND.teal, textDecoration: "none", fontWeight: 600 }}>@__mellio</a> on Instagram.
             </p>
           </div>
         </Reveal>
