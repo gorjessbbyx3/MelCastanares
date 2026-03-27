@@ -385,6 +385,13 @@ const GlobalStyles = () => (
     /* ── MEET MEL — mobile stacks ── */
     @media(max-width:768px) { .mel-split { grid-template-columns: 1fr !important; } }
 
+    /* ── NEIGHBORHOOD DETAIL CARD — mobile ── */
+    @media(max-width:700px) { .nh-detail-grid { grid-template-columns: 1fr !important; } }
+
+    /* ── AI VALUATION LOADING BAR ── */
+    @keyframes loadSlide { 0% { width: 0%; } 85% { width: 92%; } 100% { width: 100%; } }
+    .ai-loading-bar { animation: loadSlide 2.5s cubic-bezier(0.4,0,0.2,1) forwards; height: 100%; background: linear-gradient(90deg, ${BRAND.goldDark}, ${BRAND.gold}, ${BRAND.goldLight}); border-radius: 2px; }
+
     /* ── INPUTS ── */
     .input-custom {
       width: 100%; background: ${BRAND.bgCard}; border: none;
@@ -507,9 +514,9 @@ function Nav({ page, setPage }) {
   const isScrolled = scrollY > 60;
 
   const navItems = [
-    { label: "Home", page: "home" },
     { label: "Meet Mel", page: "about" },
     { label: "Listings", page: "properties" },
+    { label: "Neighborhoods", page: "neighborhoods" },
     {
       label: "Tools", children: [
         { label: "Home Valuation", page: "valuation" },
@@ -519,11 +526,13 @@ function Nav({ page, setPage }) {
         { label: "Relocation Guide", page: "relocation" },
       ]
     },
-    { label: "Neighborhoods", page: "neighborhoods" },
-    { label: "Market Insights", page: "market" },
-    { label: "Resources", page: "blog" },
-    { label: "Testimonials", page: "testimonials" },
-    { label: "Contact", page: "contact" },
+    {
+      label: "More", children: [
+        { label: "Real Talk with Mel", page: "blog" },
+        { label: "Market Insights", page: "market" },
+        { label: "Meet the Firm", page: "about" },
+      ]
+    },
   ];
 
   const go = (p) => { setPage(p); setMobileOpen(false); setDropdown(null); window.scrollTo({ top: 0, behavior: "smooth" }); };
@@ -731,17 +740,16 @@ function HomePage({ setPage }) {
       </section>
 
       {/* QUICK LINKS — floating action bar */}
-      <section style={{ paddingTop: 0, paddingBottom: 0 }}>
+      <section style={{ paddingTop: 0, paddingBottom: 0, position: "relative", zIndex: 10 }}>
         <div className="section-pad" style={{ paddingTop: 0, paddingBottom: 0, maxWidth: 1100, margin: "0 auto" }}>
-          <Reveal>
-            <div className="ql-bar" style={{
+          <div className="ql-bar" style={{
               display: "grid",
               gridTemplateColumns: "repeat(3, 1fr)",
               background: BRAND.bgCard,
               border: `1px solid ${BRAND.border}`,
-              boxShadow: "0 8px 40px rgba(0,0,0,0.18)",
+              boxShadow: "0 8px 40px rgba(0,0,0,0.22)",
               overflow: "hidden",
-              marginTop: -40,
+              marginTop: -56,
               position: "relative",
               zIndex: 10,
             }}>
@@ -774,7 +782,6 @@ function HomePage({ setPage }) {
                 </button>
               ))}
             </div>
-          </Reveal>
         </div>
       </section>
 
@@ -926,7 +933,21 @@ function HomePage({ setPage }) {
 function NeighborhoodShowcase({ neighborhoods = [], onNavigate }) {
   const [active, setActive] = useState(0);
   const [fading, setFading] = useState(false);
+  const [hovered, setHovered] = useState<number|null>(null);
   const items = neighborhoods.slice(0, 8);
+
+  // Map pin positions aligned to FALLBACK_NEIGHBORHOODS order:
+  // mililani, ewa-beach, pearl-city, kaneohe, kailua, kaimuki, hawaii-kai, north-shore
+  const PINS = [
+    { x: 208, y: 122, label: "Mililani" },
+    { x: 108, y: 222, label: "Ewa Beach" },
+    { x: 238, y: 218, label: "Pearl City" },
+    { x: 375, y: 108, label: "Kāne'ohe" },
+    { x: 412, y: 152, label: "Kailua" },
+    { x: 330, y: 236, label: "Kaimuki" },
+    { x: 402, y: 220, label: "Hawai'i Kai" },
+    { x: 212, y: 42, label: "North Shore" },
+  ];
 
   const handleSelect = (i: number) => {
     if (i === active) return;
@@ -939,103 +960,165 @@ function NeighborhoodShowcase({ neighborhoods = [], onNavigate }) {
   const highlights: string[] = n.highlights || [];
 
   return (
-    <section style={{ background: BRAND.bgLight, borderTop: `1px solid ${BRAND.border}` }}>
-      {/* Section header */}
+    <section style={{ background: BRAND.bgLight, borderTop: `1px solid ${BRAND.border}`, paddingBottom: 80 }}>
+      {/* Header */}
       <div className="section-pad" style={{ paddingBottom: 0, textAlign: "center" }}>
         <Reveal>
           <div style={{ color: BRAND.teal, fontSize: 11, letterSpacing: "0.28em", textTransform: "uppercase", marginBottom: 12, fontWeight: 600 }}>Explore O'ahu</div>
-          <h2 className="font-display" style={{ fontSize: "clamp(32px, 4vw, 48px)", marginBottom: 48 }}>
+          <h2 className="font-display" style={{ fontSize: "clamp(32px, 4vw, 48px)", marginBottom: 12 }}>
             Find Your <em style={{ color: BRAND.gold }}>Neighborhood</em>
           </h2>
+          <p style={{ color: BRAND.textMuted, fontSize: 14, maxWidth: 440, margin: "0 auto 48px" }}>Tap any pin on the island map to explore each community</p>
         </Reveal>
       </div>
 
-      {/* Split layout */}
-      <div className="nh-split" style={{ display: "flex", minHeight: 560, maxWidth: 1400, margin: "0 auto", overflow: "hidden" }}>
-        {/* Left — neighborhood list */}
-        <div className="nh-list" style={{
-          width: "clamp(220px, 30%, 320px)", flexShrink: 0,
-          background: BRAND.bg, borderRight: `1px solid ${BRAND.border}`,
-          overflowY: "auto",
-        }}>
-          {items.map((item, i) => (
-            <button
-              key={item.id}
-              data-active={i === active ? "true" : "false"}
-              onClick={() => handleSelect(i)}
-              style={{
-                display: "block", width: "100%", textAlign: "left",
-                padding: "20px 28px", border: "none",
-                borderLeft: i === active ? `3px solid ${BRAND.gold}` : "3px solid transparent",
-                cursor: "pointer", transition: "all 0.2s",
-                borderBottom: `1px solid ${BRAND.border}`,
-                background: i === active ? `${BRAND.gold}10` : "transparent",
-              }}
-              onMouseEnter={e => { if (i !== active) (e.currentTarget as HTMLButtonElement).style.background = BRAND.bgElevated; }}
-              onMouseLeave={e => { if (i !== active) (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
-            >
-              <div style={{
-                fontWeight: i === active ? 700 : 500, fontSize: 15,
-                color: i === active ? BRAND.gold : BRAND.text,
-                marginBottom: 3, transition: "color 0.2s",
-              }}>{item.name}</div>
-              <div style={{ fontSize: 11, color: BRAND.textMuted, lineHeight: 1.4 }}>{item.tagline}</div>
-            </button>
-          ))}
+      {/* Island SVG Map */}
+      <Reveal>
+        <div style={{ maxWidth: 660, margin: "0 auto", padding: "0 24px 40px" }}>
+          <svg viewBox="0 0 500 280" style={{ width: "100%", display: "block", filter: "drop-shadow(0 12px 48px rgba(0,0,0,0.13))", borderRadius: 12 }}>
+            {/* Ocean */}
+            <defs>
+              <radialGradient id="oceanGrad" cx="50%" cy="50%" r="70%">
+                <stop offset="0%" stopColor="#C8E8F0" />
+                <stop offset="100%" stopColor="#A8CDD8" />
+              </radialGradient>
+              <radialGradient id="islandGrad" cx="50%" cy="50%" r="60%">
+                <stop offset="0%" stopColor="#C2B88A" />
+                <stop offset="100%" stopColor="#B0A070" />
+              </radialGradient>
+            </defs>
+            <rect width="500" height="280" fill="url(#oceanGrad)" rx="12" />
+            {/* Nautical grid lines */}
+            <g stroke="#8AB8C8" strokeWidth="0.4" opacity="0.4">
+              {[56,112,168,224].map(y => <line key={y} x1="0" y1={y} x2="500" y2={y} />)}
+              {[83,166,249,332,415].map(x => <line key={x} x1={x} y1="0" x2={x} y2="280" />)}
+            </g>
+            {/* Island outline */}
+            <path d="M 14,138 C 18,100 42,62 82,40 C 118,22 162,16 212,18 C 256,16 302,20 344,34 C 390,50 430,84 452,124 C 464,150 460,184 440,210 C 418,234 382,252 342,260 C 304,270 264,272 224,268 C 180,264 140,254 102,240 C 64,224 24,198 14,162 Z"
+              fill="url(#islandGrad)" stroke="#96864A" strokeWidth="1.5" />
+            {/* Inner highland contours */}
+            <path d="M 58,148 C 64,114 84,82 116,64 C 150,46 186,40 218,40 C 254,38 290,44 324,58 C 362,74 396,106 414,136 C 424,156 420,180 404,198 C 386,218 358,232 328,238 C 296,246 260,247 228,244 C 192,240 160,230 132,218 C 100,204 62,184 58,162 Z"
+              fill="#B0A070" opacity="0.45" />
+            <path d="M 120,150 C 126,124 144,102 168,87 C 193,72 222,66 246,66 C 272,64 300,70 322,84 C 350,100 368,126 376,150 C 382,168 374,188 358,200 C 338,214 310,220 282,222 C 252,224 222,220 198,210 C 168,198 122,180 120,162 Z"
+              fill="#A89860" opacity="0.28" />
+            {/* Landmark micro-labels */}
+            <text x="344" y="256" textAnchor="middle" fontSize="6.5" fill="#6A5A2A" opacity="0.65" fontFamily="sans-serif" fontStyle="italic">Honolulu</text>
+            <text x="22" y="152" textAnchor="start" fontSize="5.5" fill="#6A5A2A" opacity="0.55" fontFamily="sans-serif" transform="rotate(-25,22,152)">Kaena Pt.</text>
+            <text x="454" y="146" textAnchor="start" fontSize="5.5" fill="#6A5A2A" opacity="0.55" fontFamily="sans-serif">Makapuu</text>
+            <text x="220" y="14" textAnchor="middle" fontSize="6" fill="#6A5A2A" opacity="0.55" fontFamily="sans-serif">North Shore</text>
+            {/* Neighborhood pins */}
+            {items.map((item, i) => {
+              const pin = PINS[i];
+              if (!pin) return null;
+              const isActive = i === active;
+              const isHov = hovered === i;
+              const hl = isActive || isHov;
+              // Label positioning: offset up for bottom-area pins to avoid overlap
+              const labelY = (pin.y > 200) ? pin.y - 16 : pin.y + (hl ? 22 : 20);
+              return (
+                <g key={item.id || i}
+                  onClick={() => handleSelect(i)}
+                  onMouseEnter={() => setHovered(i)}
+                  onMouseLeave={() => setHovered(null)}
+                  style={{ cursor: "pointer" }}>
+                  {/* Active pulse ring */}
+                  {isActive && (<>
+                    <circle cx={pin.x} cy={pin.y} r="10" fill={BRAND.gold} opacity="0">
+                      <animate attributeName="r" from="10" to="26" dur="1.8s" repeatCount="indefinite" />
+                      <animate attributeName="opacity" from="0.4" to="0" dur="1.8s" repeatCount="indefinite" />
+                    </circle>
+                  </>)}
+                  {/* Drop shadow */}
+                  <circle cx={pin.x} cy={pin.y + 1.5} r={hl ? 10 : 7.5} fill="rgba(0,0,0,0.18)" />
+                  {/* Pin circle */}
+                  <circle cx={pin.x} cy={pin.y} r={hl ? 10 : 7.5}
+                    fill={isActive ? BRAND.gold : (isHov ? BRAND.teal : "#FDFAF5")}
+                    stroke={isActive ? BRAND.goldDark : BRAND.teal}
+                    strokeWidth={isActive ? 2 : 1.5}
+                    style={{ transition: "r 0.15s, fill 0.15s" }}
+                  />
+                  {/* Inner marker */}
+                  {isActive
+                    ? <circle cx={pin.x} cy={pin.y} r="4" fill="#fff" />
+                    : <circle cx={pin.x} cy={pin.y} r="3" fill={isHov ? "#fff" : BRAND.teal} opacity="0.8" />
+                  }
+                  {/* Label with text-stroke for readability */}
+                  <text x={pin.x} y={labelY} textAnchor="middle"
+                    fontSize={hl ? "9.5" : "8.5"} fontWeight={isActive ? "700" : "600"}
+                    fill={isActive ? BRAND.goldDark : BRAND.teal}
+                    fontFamily="DM Sans, sans-serif"
+                    stroke="#C8E8F0" strokeWidth="3" paintOrder="stroke">
+                    {pin.label}
+                  </text>
+                </g>
+              );
+            })}
+          </svg>
         </div>
+      </Reveal>
 
-        {/* Right — image + info overlay */}
-        <div className="nh-img" style={{ flex: 1, position: "relative", minHeight: 520, overflow: "hidden" }}>
-          {/* Crossfading image */}
+      {/* Detail card */}
+      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px" }}>
+        <div style={{
+          display: "grid", gridTemplateColumns: "1.3fr 1fr",
+          overflow: "hidden", background: BRAND.bgCard,
+          border: `1px solid ${BRAND.border}`,
+          boxShadow: "0 20px 64px rgba(0,0,0,0.08)",
+        }} className="nh-detail-grid">
+          {/* Photo */}
+          <div style={{ position: "relative", minHeight: 380, overflow: "hidden" }}>
+            <div style={{
+              position: "absolute", inset: 0,
+              backgroundImage: imgUrl ? `url('${imgUrl}')` : "none",
+              backgroundSize: "cover", backgroundPosition: "center",
+              opacity: fading ? 0 : 1, transition: "opacity 0.28s ease",
+            }} />
+            <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to right, transparent 65%, rgba(255,249,240,0.15) 100%)" }} />
+          </div>
+          {/* Info */}
           <div style={{
-            position: "absolute", inset: 0,
-            backgroundImage: `url('${imgUrl}')`,
-            backgroundSize: "cover", backgroundPosition: "center",
-            opacity: fading ? 0 : 1,
-            transition: "opacity 0.28s ease",
-          }} />
-          {/* Gradient overlay */}
-          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(5,5,5,0.92) 0%, rgba(5,5,5,0.3) 55%, transparent 100%)" }} />
-
-          {/* Info overlay */}
-          <div style={{
-            position: "absolute", bottom: 0, left: 0, right: 0, padding: "40px 48px",
+            padding: "44px 40px", display: "flex", flexDirection: "column", justifyContent: "center",
             opacity: fading ? 0 : 1, transition: "opacity 0.28s ease",
           }}>
-            <div style={{ color: BRAND.gold, fontSize: 11, letterSpacing: "0.3em", textTransform: "uppercase", marginBottom: 10, fontWeight: 600 }}>
-              {n.medianHomePrice && `Median ${n.medianHomePrice}`}{n.growth && ` · ${n.growth} YoY`}
-            </div>
-            <h3 className="font-display" style={{ fontSize: "clamp(28px, 3.5vw, 44px)", color: "#fff", marginBottom: 10, lineHeight: 1.1 }}>{n.name}</h3>
-            <p style={{ color: "rgba(255,255,255,0.72)", fontSize: 14, marginBottom: 20, maxWidth: 480, lineHeight: 1.65 }}>{n.tagline}</p>
+            <div style={{ color: BRAND.teal, fontSize: 10, letterSpacing: "0.3em", textTransform: "uppercase", marginBottom: 10, fontWeight: 600 }}>O'ahu · {n.name}</div>
+            <h3 className="font-display" style={{ fontSize: "clamp(24px, 3vw, 36px)", marginBottom: 6, lineHeight: 1.15 }}>{n.name}</h3>
+            <p style={{ color: BRAND.gold, fontSize: 13, fontWeight: 600, marginBottom: 18 }}>{n.tagline}</p>
+            {n.medianHomePrice && (
+              <div style={{ display: "flex", gap: 28, marginBottom: 20, paddingBottom: 20, borderBottom: `1px solid ${BRAND.border}` }}>
+                <div>
+                  <div style={{ fontSize: 10, color: BRAND.textDim, marginBottom: 3, textTransform: "uppercase", letterSpacing: "0.1em" }}>Median Price</div>
+                  <div style={{ fontSize: 20, fontWeight: 700, color: BRAND.text }}>{n.medianHomePrice}</div>
+                </div>
+                {n.growth && <div>
+                  <div style={{ fontSize: 10, color: BRAND.textDim, marginBottom: 3, textTransform: "uppercase", letterSpacing: "0.1em" }}>YoY Growth</div>
+                  <div style={{ fontSize: 20, fontWeight: 700, color: BRAND.teal }}>{n.growth}</div>
+                </div>}
+              </div>
+            )}
+            <p style={{ color: BRAND.textMuted, fontSize: 13, lineHeight: 1.75, marginBottom: 20 }}>
+              {(n.description || "").slice(0, 200)}{(n.description || "").length > 200 ? "..." : ""}
+            </p>
             {highlights.length > 0 && (
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 28 }}>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 28 }}>
                 {highlights.map(h => (
-                  <span key={h} style={{
-                    fontSize: 10, padding: "5px 12px",
-                    border: "1px solid rgba(255,255,255,0.25)",
-                    color: "rgba(255,255,255,0.85)", letterSpacing: "0.08em",
-                    background: "rgba(255,255,255,0.08)", backdropFilter: "blur(8px)",
-                  }}>{h}</span>
+                  <span key={h} style={{ fontSize: 10, padding: "5px 12px", border: `1px solid ${BRAND.border}`, color: BRAND.textMuted, background: BRAND.bgElevated, letterSpacing: "0.06em" }}>{h}</span>
                 ))}
               </div>
             )}
             <button onClick={onNavigate} style={{
               display: "inline-flex", alignItems: "center", gap: 8,
               background: BRAND.gold, color: "#fff", border: "none",
-              padding: "12px 28px", fontSize: 11, fontWeight: 700,
-              letterSpacing: "0.18em", textTransform: "uppercase",
-              cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
-              transition: "background 0.2s",
+              padding: "12px 26px", fontSize: 11, fontWeight: 700, letterSpacing: "0.18em",
+              textTransform: "uppercase", cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+              alignSelf: "flex-start", transition: "background 0.2s",
             }}
               onMouseEnter={e => (e.currentTarget.style.background = BRAND.goldDark)}
-              onMouseLeave={e => (e.currentTarget.style.background = BRAND.gold)}
-            >
+              onMouseLeave={e => (e.currentTarget.style.background = BRAND.gold)}>
               Explore {n.name} <ArrowRight size={12} />
             </button>
           </div>
         </div>
       </div>
-
     </section>
   );
 }
@@ -1119,18 +1202,19 @@ function PropertyCard({ property: p, onClick }) {
 // ─────────────────────────────────────────────
 
 function PropertiesPage({ setPage }) {
-  const [filter, setFilter] = useState({ status: "", type: "" });
-  const filtered = FALLBACK_PROPERTIES.filter(p =>
-    (!filter.status || p.status === filter.status) && (!filter.type || p.type === filter.type)
-  );
+  const [tab, setTab] = useState<"sale"|"rental">("sale");
+  const isRentalProp = (p) => p.type === "rental" || (p.priceLabel && p.priceLabel.includes("/mo")) || p.price < 10000;
+  const forSale = FALLBACK_PROPERTIES.filter(p => !isRentalProp(p));
+  const rentals = FALLBACK_PROPERTIES.filter(p => isRentalProp(p));
+  const shown = tab === "sale" ? forSale : rentals;
 
   return (
     <div style={{ paddingTop: 120 }}>
       <div className="section-pad" style={{ paddingTop: 40 }}>
         <Reveal>
-          <h1 className="font-display" style={{ fontSize: "clamp(40px, 6vw, 64px)", marginBottom: 12 }}>Portfolio</h1>
-          <p style={{ color: BRAND.textMuted, fontSize: 16, maxWidth: 600, marginBottom: 24 }}>
-            Discover our curated selection of extraordinary properties across O'ahu.
+          <h1 className="font-display" style={{ fontSize: "clamp(40px, 6vw, 64px)", marginBottom: 12 }}>Listings</h1>
+          <p style={{ color: BRAND.textMuted, fontSize: 16, maxWidth: 600, marginBottom: 32 }}>
+            Homes for sale and rentals across O'ahu — curated by Mel.
           </p>
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 40 }}>
             <a href="https://portal.onehome.com/en-US/share/1039187l44771" target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ textDecoration: "none", fontSize: 11, padding: "10px 24px" }}>
@@ -1141,33 +1225,50 @@ function PropertiesPage({ setPage }) {
             </a>
           </div>
         </Reveal>
-        <Reveal delay={0.1}>
-          <div style={{ display: "flex", gap: 16, marginBottom: 48, flexWrap: "wrap", padding: 24, background: BRAND.bgCard, border: `1px solid ${BRAND.border}` }}>
-            <select className="input-custom" style={{ maxWidth: 200 }} value={filter.status} onChange={e => setFilter(f => ({ ...f, status: e.target.value }))}>
-              <option value="">All Statuses</option>
-              <option value="Active">Active</option>
-              <option value="Pending">Pending</option>
-              <option value="Sold">Sold</option>
-            </select>
-            <select className="input-custom" style={{ maxWidth: 200 }} value={filter.type} onChange={e => setFilter(f => ({ ...f, type: e.target.value }))}>
-              <option value="">All Types</option>
-              <option value="Luxury">Luxury</option>
-              <option value="Single Family">Single Family</option>
-              <option value="Condo">Condo</option>
-            </select>
+
+        {/* Tab switcher */}
+        <div style={{ display: "flex", borderBottom: `2px solid ${BRAND.border}`, marginBottom: 40 }}>
+          {([
+            { key: "sale", label: "For Sale & Land", count: forSale.length },
+            { key: "rental", label: "Rentals", count: rentals.length },
+          ] as const).map(t => (
+            <button key={t.key} onClick={() => setTab(t.key)} style={{
+              background: "none", border: "none", cursor: "pointer",
+              padding: "14px 28px", fontSize: 13, fontWeight: tab === t.key ? 700 : 500,
+              color: tab === t.key ? BRAND.text : BRAND.textMuted,
+              borderBottom: `2px solid ${tab === t.key ? BRAND.gold : "transparent"}`,
+              marginBottom: -2, transition: "all 0.2s", fontFamily: "'DM Sans', sans-serif",
+              display: "flex", alignItems: "center", gap: 8,
+            }}>
+              {t.label}
+              <span style={{
+                fontSize: 10, padding: "2px 8px", borderRadius: 20,
+                background: tab === t.key ? BRAND.gold : BRAND.bgElevated,
+                color: tab === t.key ? "#fff" : BRAND.textDim,
+                fontWeight: 700,
+              }}>{t.count}</span>
+            </button>
+          ))}
+        </div>
+
+        {tab === "rental" && (
+          <div style={{ background: `${BRAND.teal}10`, border: `1px solid ${BRAND.teal}30`, padding: "14px 20px", marginBottom: 32, display: "flex", alignItems: "center", gap: 10 }}>
+            <Home size={16} color={BRAND.teal} />
+            <span style={{ fontSize: 13, color: BRAND.teal, fontWeight: 500 }}>Rental prices are monthly. Contact Mel to schedule a showing or apply.</span>
           </div>
-        </Reveal>
+        )}
+
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: 24 }}>
-          {filtered.map((p, i) => (
+          {shown.map((p, i) => (
             <Reveal key={p.id} delay={i * 0.08} direction="up">
               <PropertyCard property={p} onClick={() => { setPage("property-detail"); window.__selectedProperty = p; window.scrollTo({ top: 0, behavior: "smooth" }); }} />
             </Reveal>
           ))}
         </div>
-        {filtered.length === 0 && (
+        {shown.length === 0 && (
           <div style={{ textAlign: "center", padding: 80, border: `1px dashed ${BRAND.border}` }}>
-            <p className="font-display" style={{ fontSize: 24, marginBottom: 8 }}>No properties found</p>
-            <p style={{ color: BRAND.textMuted }}>Adjust filters to see more results.</p>
+            <p className="font-display" style={{ fontSize: 24, marginBottom: 8 }}>No listings right now</p>
+            <p style={{ color: BRAND.textMuted }}>Check back soon or contact Mel directly.</p>
           </div>
         )}
       </div>
@@ -1316,8 +1417,99 @@ function AboutPage({ setPage }) {
                 <Instagram size={14} /> @__mellio
               </a>
             </div>
-
           </Reveal>
+        </div>
+      </div>
+
+      {/* THE FIRM */}
+      <div style={{ background: BRAND.bgCard, borderTop: `1px solid ${BRAND.border}`, borderBottom: `1px solid ${BRAND.border}` }}>
+        <div className="section-pad" style={{ paddingTop: 80, paddingBottom: 80 }}>
+          <Reveal>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 64, alignItems: "center" }}>
+              {/* Firm identity */}
+              <div>
+                <div style={{ color: BRAND.teal, fontSize: 11, letterSpacing: "0.28em", textTransform: "uppercase", marginBottom: 16, fontWeight: 600 }}>The Brokerage</div>
+                <h2 className="font-display" style={{ fontSize: "clamp(28px, 3.5vw, 42px)", marginBottom: 16, lineHeight: 1.15 }}>
+                  Dream Home Realty <em style={{ color: BRAND.gold }}>Hawai'i</em>
+                </h2>
+                <p style={{ color: BRAND.textMuted, fontSize: 15, lineHeight: 1.8, marginBottom: 24 }}>
+                  Dream Home Realty Hawaii LLC is a boutique, locally-owned real estate firm headquartered in Mililani — built on the belief that every client deserves expert guidance without the corporate runaround. We specialize in residential sales, rentals, and property management across O'ahu.
+                </p>
+                <p style={{ color: BRAND.textMuted, fontSize: 15, lineHeight: 1.8, marginBottom: 32 }}>
+                  As a smaller firm, we are intentionally selective about the clients we work with — so every buyer and seller gets <strong style={{ color: BRAND.text }}>Mel's direct attention</strong>, not a junior agent. No hand-offs, no surprises.
+                </p>
+                <a href="http://www.dreamhomerealtyhawaii.com" target="_blank" rel="noopener noreferrer" className="btn-outline" style={{ textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8, fontSize: 11, padding: "12px 24px" }}>
+                  Visit the Firm ↗
+                </a>
+              </div>
+              {/* Firm stats */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+                {[
+                  { icon: "🏡", val: "Boutique", label: "Locally Owned & Operated" },
+                  { icon: "📍", val: "Mililani", label: "Headquartered on O'ahu" },
+                  { icon: "🤝", val: "Full-Service", label: "Sales · Rentals · Mgmt" },
+                  { icon: "⭐", val: "5-Star", label: "Client Satisfaction Rating" },
+                ].map((s, i) => (
+                  <div key={i} style={{ background: BRAND.bgElevated, border: `1px solid ${BRAND.border}`, padding: "24px 20px" }}>
+                    <div style={{ fontSize: 28, marginBottom: 8 }}>{s.icon}</div>
+                    <div style={{ fontWeight: 700, fontSize: 18, color: BRAND.text, marginBottom: 4 }}>{s.val}</div>
+                    <div style={{ fontSize: 11, color: BRAND.textDim, lineHeight: 1.4 }}>{s.label}</div>
+                  </div>
+                ))}
+                <div style={{ gridColumn: "1 / -1", background: BRAND.bgElevated, border: `1px solid ${BRAND.border}`, padding: "20px 20px", display: "flex", alignItems: "center", gap: 16 }}>
+                  <MapPin size={18} color={BRAND.teal} style={{ flexShrink: 0 }} />
+                  <div>
+                    <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 2 }}>95-1249 Meheula Parkway, #B-15B</div>
+                    <div style={{ fontSize: 12, color: BRAND.textDim }}>Mililani, HI 96789 · (808) 285-8774</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Reveal>
+        </div>
+      </div>
+
+      {/* TESTIMONIALS */}
+      <div className="section-pad">
+        <Reveal>
+          <div style={{ textAlign: "center", marginBottom: 56 }}>
+            <div style={{ color: BRAND.teal, fontSize: 11, letterSpacing: "0.28em", textTransform: "uppercase", marginBottom: 12, fontWeight: 600 }}>Client Stories</div>
+            <h2 className="font-display" style={{ fontSize: "clamp(32px, 4vw, 48px)" }}>What Clients Are <em style={{ color: BRAND.gold }}>Saying</em></h2>
+          </div>
+        </Reveal>
+        {/* Featured first-person quote */}
+        <Reveal delay={0.1}>
+          <div style={{ background: BRAND.bgCard, border: `2px solid ${BRAND.gold}33`, padding: "40px 48px", marginBottom: 32, position: "relative", overflow: "hidden" }}>
+            <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${BRAND.gold}, ${BRAND.teal})` }} />
+            <div style={{ display: "flex", gap: 32, alignItems: "center", flexWrap: "wrap" }}>
+              <img src="/images/testimonial-sold.jpg" alt="Happy clients" style={{ width: 100, height: 100, borderRadius: "50%", objectFit: "cover", objectPosition: "center top", border: `3px solid ${BRAND.gold}44`, flexShrink: 0 }} />
+              <div style={{ flex: 1, minWidth: 240 }}>
+                <div style={{ display: "flex", gap: 3, marginBottom: 12 }}>
+                  {[...Array(5)].map((_, j) => <Star key={j} size={16} fill={BRAND.gold} color={BRAND.gold} />)}
+                </div>
+                <p className="font-display" style={{ fontSize: "clamp(16px, 2vw, 20px)", fontStyle: "italic", lineHeight: 1.65, marginBottom: 16, color: BRAND.text }}>
+                  "This was the first time renting a house on my own so I was really skeptical on which company to go with. I put my trust in Mel and they made the entire process smooth and easy. Anytime I've had a problem or concern they were able to get back to me right away!"
+                </p>
+                <div style={{ color: BRAND.teal, fontWeight: 600, fontSize: 13 }}>First-Time Renter · Kāne'ohe</div>
+              </div>
+            </div>
+          </div>
+        </Reveal>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 20 }}>
+          {FALLBACK_TESTIMONIALS.slice(1).map((t, i) => (
+            <Reveal key={i} delay={i * 0.08} direction="up">
+              <div style={{ background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, padding: "28px 28px", height: "100%", display: "flex", flexDirection: "column" }}>
+                <div style={{ display: "flex", gap: 3, marginBottom: 14 }}>
+                  {[...Array(t.rating)].map((_, j) => <Star key={j} size={13} fill={BRAND.teal} color={BRAND.teal} />)}
+                </div>
+                <p style={{ fontStyle: "italic", fontSize: 14, lineHeight: 1.7, color: BRAND.textMuted, flex: 1, marginBottom: 16 }}>"{t.quote || t.text}"</p>
+                <div style={{ borderTop: `1px solid ${BRAND.border}`, paddingTop: 14 }}>
+                  <div style={{ fontWeight: 600, fontSize: 13, color: BRAND.text }}>{t.clientName || t.name}</div>
+                  <div style={{ fontSize: 11, color: BRAND.textDim, textTransform: "uppercase", letterSpacing: "0.1em", marginTop: 2 }}>{t.transactionType}</div>
+                </div>
+              </div>
+            </Reveal>
+          ))}
         </div>
       </div>
     </div>
@@ -1477,7 +1669,7 @@ function BlogPage({ setPage }) {
         <Reveal>
           <div style={{ marginBottom: 64 }}>
             <div style={{ color: BRAND.teal, fontSize: 11, letterSpacing: "0.25em", textTransform: "uppercase", marginBottom: 16, fontWeight: 500 }}>The Journal</div>
-            <h1 className="font-display" style={{ fontSize: "clamp(40px, 6vw, 64px)", marginBottom: 16, lineHeight: 1.05 }}>Real Talk About<br/><span style={{ fontStyle: "italic" }} className="gold-text">Real Estate</span></h1>
+            <h1 className="font-display" style={{ fontSize: "clamp(40px, 6vw, 64px)", marginBottom: 16, lineHeight: 1.05 }}>Real Talk<br/><em style={{ color: BRAND.gold }}>with Mel</em></h1>
             <p style={{ color: BRAND.textMuted, fontSize: 16, maxWidth: 560, lineHeight: 1.7 }}>
               No fluff, no jargon. Just honest perspectives from years in O'ahu's market — the trends, traps, and opportunities most agents won't tell you about.
             </p>
@@ -2368,7 +2560,7 @@ function Footer({ setPage }) {
             { label: "Portfolio", page: "properties" },
             { label: "Neighborhoods", page: "neighborhoods" },
             { label: "Market Data", page: "market" },
-            { label: "Resources", page: "blog" },
+            { label: "Real Talk with Mel", page: "blog" },
             { label: "About Mel", page: "about" },
           ].map((link, i) => (
             <button key={i} onClick={() => go(link.page)} style={{
@@ -2398,7 +2590,7 @@ function Footer({ setPage }) {
             { label: "Seller's Experience", page: "sellers" },
             { label: "Home Valuation", page: "valuation" },
             { label: "Relocation Guide", page: "relocation" },
-            { label: "Testimonials", page: "testimonials" },
+            { label: "Meet the Firm", page: "about" },
           ].map((link, i) => (
             <button key={i} onClick={() => go(link.page)} style={{
               display: "block", background: "none", border: "none", color: BRAND.textMuted, cursor: "pointer",
@@ -2774,7 +2966,7 @@ export default function App() {
       case "valuation": return <ValuationPage />;
       case "mortgage": return <MortgageCalculatorPage setPage={setPage} />;
       case "relocation": return <RelocationPage setPage={setPage} />;
-      case "testimonials": return <TestimonialsPage />;
+      case "testimonials": return <AboutPage setPage={setPage} />;
       default: return <HomePage setPage={setPage} />;
     }
   };
