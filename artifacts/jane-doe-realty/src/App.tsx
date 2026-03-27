@@ -333,6 +333,7 @@ function Nav({ page, setPage }) {
       label: "Your Experience", children: [
         { label: "Buyer's Experience", page: "buyers" },
         { label: "Seller's Experience", page: "sellers" },
+        { label: "Mortgage Calculator", page: "mortgage" },
         { label: "Relocation Guide", page: "relocation" },
       ]
     },
@@ -532,7 +533,7 @@ function HomePage({ setPage }) {
           {[
             { icon: <Search size={24} />, title: "Home Search", desc: "Browse all active listings on O'ahu", page: "properties" },
             { icon: <DollarSign size={24} />, title: "Home Valuation", desc: "Find out what your home is worth", page: "valuation" },
-            { icon: <Calendar size={24} />, title: "Book Consultation", desc: "Schedule a private meeting with Mel", page: "contact" },
+            { icon: <Calendar size={24} />, title: "Mortgage Calculator", desc: "Estimate your monthly payment instantly", page: "mortgage" },
           ].map((item, i) => (
             <Reveal key={i} delay={i * 0.15}>
               <div className="card-hover shimmer" onClick={() => go(item.page)} style={{
@@ -1519,6 +1520,190 @@ function SellersPage({ setPage }) {
 }
 
 // ─────────────────────────────────────────────
+// MORTGAGE CALCULATOR PAGE
+// ─────────────────────────────────────────────
+
+function MortgageCalculatorPage({ setPage }) {
+  const go = (p) => { setPage(p); window.scrollTo({ top: 0, behavior: "smooth" }); };
+  const [price, setPrice] = useState(850000);
+  const [down, setDown] = useState(20);
+  const [rate, setRate] = useState(6.75);
+  const [term, setTerm] = useState(30);
+  const [tax, setTax] = useState(0.35);
+  const [insurance, setInsurance] = useState(150);
+  const [hoa, setHoa] = useState(0);
+
+  const loanAmount = price * (1 - down / 100);
+  const monthlyRate = rate / 100 / 12;
+  const numPayments = term * 12;
+  const monthlyPI = monthlyRate > 0 
+    ? (loanAmount * monthlyRate * Math.pow(1 + monthlyRate, numPayments)) / (Math.pow(1 + monthlyRate, numPayments) - 1)
+    : loanAmount / numPayments;
+  const monthlyTax = (price * (tax / 100)) / 12;
+  const totalMonthly = monthlyPI + monthlyTax + insurance + hoa;
+  const totalInterest = (monthlyPI * numPayments) - loanAmount;
+  const totalCost = monthlyPI * numPayments + monthlyTax * numPayments + insurance * numPayments + hoa * numPayments;
+
+  const piPct = (monthlyPI / totalMonthly * 100).toFixed(0);
+  const taxPct = (monthlyTax / totalMonthly * 100).toFixed(0);
+  const insPct = (insurance / totalMonthly * 100).toFixed(0);
+  const hoaPct = hoa > 0 ? (hoa / totalMonthly * 100).toFixed(0) : 0;
+
+  const SliderInput = ({ label, value, onChange, min, max, step, prefix="", suffix="" }) => (
+    <div style={{ marginBottom: 28 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+        <label style={{ fontSize: 12, letterSpacing: "0.1em", textTransform: "uppercase", color: BRAND.textMuted, fontWeight: 500 }}>{label}</label>
+        <span className="font-display" style={{ fontSize: 22, color: BRAND.text }}>{prefix}{typeof value === "number" ? value.toLocaleString() : value}{suffix}</span>
+      </div>
+      <input type="range" min={min} max={max} step={step} value={value} onChange={e => onChange(Number(e.target.value))} 
+        style={{ width: "100%", accentColor: BRAND.teal, height: 6, cursor: "pointer" }} />
+      <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: BRAND.textDim, marginTop: 4 }}>
+        <span>{prefix}{min.toLocaleString()}{suffix}</span>
+        <span>{prefix}{max.toLocaleString()}{suffix}</span>
+      </div>
+    </div>
+  );
+
+  return (
+    <div style={{ paddingTop: 120 }}>
+      <div className="section-pad" style={{ paddingTop: 40 }}>
+        <Reveal>
+          <div style={{ textAlign: "center", maxWidth: 600, margin: "0 auto 56px" }}>
+            <div style={{ color: BRAND.teal, fontSize: 11, letterSpacing: "0.25em", textTransform: "uppercase", marginBottom: 12, fontWeight: 500 }}>Plan Your Budget</div>
+            <h1 className="font-display" style={{ fontSize: "clamp(36px, 5vw, 56px)", marginBottom: 12 }}>Mortgage Calculator</h1>
+            <p style={{ color: BRAND.textMuted, fontSize: 16, lineHeight: 1.7 }}>
+              Estimate your monthly payment and see how different scenarios affect your budget. Hawai'i property tax rates are among the lowest in the nation.
+            </p>
+          </div>
+        </Reveal>
+
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))", gap: 40 }}>
+          {/* Left: Sliders */}
+          <Reveal direction="right">
+            <div style={{ background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, padding: 36, borderRadius: 12 }}>
+              <SliderInput label="Home Price" value={price} onChange={setPrice} min={200000} max={5000000} step={25000} prefix="$" />
+              <SliderInput label="Down Payment" value={down} onChange={setDown} min={0} max={50} step={1} suffix="%" />
+              <SliderInput label="Interest Rate" value={rate} onChange={setRate} min={2} max={12} step={0.125} suffix="%" />
+              
+              <div style={{ marginBottom: 28 }}>
+                <label style={{ fontSize: 12, letterSpacing: "0.1em", textTransform: "uppercase", color: BRAND.textMuted, fontWeight: 500, display: "block", marginBottom: 10 }}>Loan Term</label>
+                <div style={{ display: "flex", gap: 12 }}>
+                  {[15, 20, 30].map(t => (
+                    <button key={t} onClick={() => setTerm(t)} style={{
+                      flex: 1, padding: "12px 0", border: `1px solid ${term === t ? BRAND.teal : BRAND.border}`,
+                      background: term === t ? `${BRAND.teal}12` : "transparent", color: term === t ? BRAND.teal : BRAND.textMuted,
+                      fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 14, cursor: "pointer", borderRadius: 8,
+                      transition: "all 0.3s",
+                    }}>{t} yr</button>
+                  ))}
+                </div>
+              </div>
+
+              <div style={{ borderTop: `1px solid ${BRAND.border}`, paddingTop: 24, marginTop: 8 }}>
+                <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: BRAND.textDim, marginBottom: 16 }}>Additional Costs</div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                  <div>
+                    <label style={{ fontSize: 11, color: BRAND.textMuted, display: "block", marginBottom: 4 }}>Property Tax Rate</label>
+                    <input className="input-custom" type="number" step="0.01" value={tax} onChange={e => setTax(Number(e.target.value))} style={{ fontSize: 14 }} />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: 11, color: BRAND.textMuted, display: "block", marginBottom: 4 }}>Insurance $/mo</label>
+                    <input className="input-custom" type="number" step="10" value={insurance} onChange={e => setInsurance(Number(e.target.value))} style={{ fontSize: 14 }} />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: 11, color: BRAND.textMuted, display: "block", marginBottom: 4 }}>HOA $/mo</label>
+                    <input className="input-custom" type="number" step="25" value={hoa} onChange={e => setHoa(Number(e.target.value))} style={{ fontSize: 14 }} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Reveal>
+
+          {/* Right: Results */}
+          <Reveal direction="left" delay={0.15}>
+            <div style={{ position: "sticky", top: 120 }}>
+              {/* Monthly Payment Hero */}
+              <div style={{ background: `linear-gradient(135deg, ${BRAND.teal}, ${BRAND.tealDark})`, padding: 40, borderRadius: 12, color: "#fff", textAlign: "center", marginBottom: 24 }}>
+                <div style={{ fontSize: 12, letterSpacing: "0.2em", textTransform: "uppercase", opacity: 0.7, marginBottom: 8 }}>Estimated Monthly Payment</div>
+                <div className="font-display" style={{ fontSize: 56, lineHeight: 1, marginBottom: 8 }}>${Math.round(totalMonthly).toLocaleString()}</div>
+                <div style={{ fontSize: 13, opacity: 0.6 }}>per month</div>
+              </div>
+
+              {/* Breakdown */}
+              <div style={{ background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, padding: 32, borderRadius: 12 }}>
+                <h3 className="font-display" style={{ fontSize: 20, marginBottom: 20 }}>Payment Breakdown</h3>
+                
+                {[
+                  { label: "Principal & Interest", value: monthlyPI, color: BRAND.teal, pct: piPct },
+                  { label: "Property Tax", value: monthlyTax, color: BRAND.gold, pct: taxPct },
+                  { label: "Insurance", value: insurance, color: BRAND.coral, pct: insPct },
+                  ...(hoa > 0 ? [{ label: "HOA", value: hoa, color: "#8B5CF6", pct: hoaPct }] : []),
+                ].map((item, i) => (
+                  <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0", borderBottom: `1px solid ${BRAND.border}` }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <div style={{ width: 10, height: 10, borderRadius: "50%", background: item.color }} />
+                      <span style={{ fontSize: 14, color: BRAND.textMuted }}>{item.label}</span>
+                    </div>
+                    <div style={{ textAlign: "right" }}>
+                      <span style={{ fontWeight: 600, fontSize: 15 }}>${Math.round(item.value).toLocaleString()}</span>
+                      <span style={{ fontSize: 12, color: BRAND.textDim, marginLeft: 8 }}>{item.pct}%</span>
+                    </div>
+                  </div>
+                ))}
+
+                {/* Stacked bar */}
+                <div style={{ display: "flex", height: 8, borderRadius: 4, overflow: "hidden", marginTop: 20, marginBottom: 24 }}>
+                  <div style={{ width: `${piPct}%`, background: BRAND.teal }} />
+                  <div style={{ width: `${taxPct}%`, background: BRAND.gold }} />
+                  <div style={{ width: `${insPct}%`, background: BRAND.coral }} />
+                  {hoa > 0 && <div style={{ width: `${hoaPct}%`, background: "#8B5CF6" }} />}
+                </div>
+
+                {/* Summary stats */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                  <div style={{ padding: 16, background: BRAND.bgElevated, borderRadius: 8 }}>
+                    <div style={{ fontSize: 11, color: BRAND.textDim, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 4 }}>Loan Amount</div>
+                    <div className="font-display" style={{ fontSize: 20 }}>${Math.round(loanAmount).toLocaleString()}</div>
+                  </div>
+                  <div style={{ padding: 16, background: BRAND.bgElevated, borderRadius: 8 }}>
+                    <div style={{ fontSize: 11, color: BRAND.textDim, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 4 }}>Down Payment</div>
+                    <div className="font-display" style={{ fontSize: 20 }}>${Math.round(price * down / 100).toLocaleString()}</div>
+                  </div>
+                  <div style={{ padding: 16, background: BRAND.bgElevated, borderRadius: 8 }}>
+                    <div style={{ fontSize: 11, color: BRAND.textDim, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 4 }}>Total Interest</div>
+                    <div className="font-display" style={{ fontSize: 20 }}>${Math.round(totalInterest).toLocaleString()}</div>
+                  </div>
+                  <div style={{ padding: 16, background: BRAND.bgElevated, borderRadius: 8 }}>
+                    <div style={{ fontSize: 11, color: BRAND.textDim, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 4 }}>Total Cost</div>
+                    <div className="font-display" style={{ fontSize: 20 }}>${Math.round(totalCost).toLocaleString()}</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* CTA */}
+              <div style={{ marginTop: 20, padding: 24, background: BRAND.bgLight, border: `1px solid ${BRAND.border}`, borderRadius: 12, textAlign: "center" }}>
+                <p style={{ color: BRAND.textMuted, fontSize: 14, marginBottom: 16 }}>Ready to explore homes in your budget?</p>
+                <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+                  <button className="btn-primary" onClick={() => go("contact")}>Talk to Mel</button>
+                  <button className="btn-outline" onClick={() => go("properties")}>Browse Listings</button>
+                </div>
+              </div>
+            </div>
+          </Reveal>
+        </div>
+
+        {/* Disclaimer */}
+        <Reveal delay={0.3}>
+          <p style={{ color: BRAND.textDim, fontSize: 12, marginTop: 48, lineHeight: 1.7, maxWidth: 700 }}>
+            * This calculator provides estimates for informational purposes only. Actual payments may vary based on lender terms, credit score, and other factors. Hawai'i's effective property tax rate averages ~0.35%, among the lowest in the U.S. Contact Mel for personalized guidance and lender recommendations.
+          </p>
+        </Reveal>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
 // HOME VALUATION PAGE
 // ─────────────────────────────────────────────
 
@@ -1789,6 +1974,7 @@ export default function App() {
       case "buyers": return <BuyersPage setPage={setPage} />;
       case "sellers": return <SellersPage setPage={setPage} />;
       case "valuation": return <ValuationPage />;
+      case "mortgage": return <MortgageCalculatorPage setPage={setPage} />;
       case "relocation": return <RelocationPage setPage={setPage} />;
       case "testimonials": return <TestimonialsPage />;
       default: return <HomePage setPage={setPage} />;
