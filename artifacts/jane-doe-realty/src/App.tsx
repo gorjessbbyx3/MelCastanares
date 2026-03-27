@@ -96,8 +96,8 @@ const FALLBACK_AGENT = {
   license: "RS-84753",
   phone: "(808) 285-8774",
   email: "mel@homesweethomehawaii.com",
-  instagram: "https://www.instagram.com/mel.castanares",
-  instagramHandle: "@mel.castanares",
+  instagram: "https://www.instagram.com/__mellio",
+  instagramHandle: "@__mellio",
   brokerage: "Dream Home Realty Hawaii LLC",
   brokerageAddress: "95-1249 Meheula Parkway, #B-15B\nMililani, HI 96789",
   address: "95-1249 Meheula Parkway, #B-15B\nMililani, HI 96789",
@@ -438,7 +438,10 @@ const GlobalStyles = () => (
     @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
 
     /* ── HERO ENTRANCE ── */
-    .hero-text-anim { animation: heroEntrance 1.4s cubic-bezier(0.22,1,0.36,1) forwards; opacity: 0; }
+    .hero-text-anim {
+      animation: heroEntrance 1.4s cubic-bezier(0.22,1,0.36,1) both;
+      animation-fill-mode: both;
+    }
     .hero-text-anim-d1 { animation-delay: 0.15s; }
     .hero-text-anim-d2 { animation-delay: 0.4s; }
     .hero-text-anim-d3 { animation-delay: 0.7s; }
@@ -648,24 +651,21 @@ function HomePage({ setPage }) {
     <div>
       {/* HERO — cinematic parallax with particles + orbs */}
       <section style={{ position: "relative", height: "100vh", minHeight: 700, overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        {/* Hero background — video if available, else parallax image */}
-        <div style={{ position: "absolute", inset: 0, zIndex: 0, transform: `translateY(${scrollY * 0.15}px)` }}>
+        {/* Hero background — image always visible; video plays on top if file exists */}
+        <div style={{
+          position: "absolute", inset: 0, zIndex: 0,
+          transform: `translateY(${scrollY * 0.15}px)`,
+          backgroundImage: "url('/images/hero-diamondhead.jpg')",
+          backgroundSize: "cover", backgroundPosition: "center 35%",
+        }}>
           <video
             autoPlay muted loop playsInline
-            poster="/images/hero-diamondhead.jpg"
-            style={{ width: "100%", height: "120%", objectFit: "cover", objectPosition: "center 35%", display: "block" }}
+            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 35%", display: "block" }}
             onError={e => { (e.currentTarget as HTMLVideoElement).style.display = "none"; }}
           >
             <source src="/images/hero-bg.mp4" type="video/mp4" />
             <source src="/images/hero-bg.webm" type="video/webm" />
-            {/* Fallback: poster image shown automatically */}
           </video>
-          {/* Static image fallback (shown if video not found) */}
-          <img
-            src="/images/hero-diamondhead.jpg"
-            alt="Diamond Head infinity pool overlooking the ocean"
-            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 35%", zIndex: -1 }}
-          />
         </div>
 
         {/* Gradient overlay */}
@@ -807,9 +807,9 @@ function HomePage({ setPage }) {
                 <button className="btn-primary" onClick={() => go("about")} style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   Full Story <ArrowRight size={14} />
                 </button>
-                <a href="https://www.instagram.com/mel.castanares" target="_blank" rel="noopener noreferrer"
+                <a href="https://www.instagram.com/__mellio" target="_blank" rel="noopener noreferrer"
                   className="btn-outline" style={{ display: "inline-flex", alignItems: "center", gap: 8, textDecoration: "none", fontSize: 11, padding: "14px 20px" }}>
-                  <Instagram size={14} /> @mel.castanares
+                  <Instagram size={14} /> @__mellio
                 </a>
               </div>
             </Reveal>
@@ -1023,9 +1023,17 @@ function PropertiesPage({ setPage }) {
       <div className="section-pad" style={{ paddingTop: 40 }}>
         <Reveal>
           <h1 className="font-display" style={{ fontSize: "clamp(40px, 6vw, 64px)", marginBottom: 12 }}>Portfolio</h1>
-          <p style={{ color: BRAND.textMuted, fontSize: 16, maxWidth: 600, marginBottom: 40 }}>
+          <p style={{ color: BRAND.textMuted, fontSize: 16, maxWidth: 600, marginBottom: 24 }}>
             Discover our curated selection of extraordinary properties across O'ahu.
           </p>
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 40 }}>
+            <a href="https://portal.onehome.com/en-US/share/1039187l44771" target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ textDecoration: "none", fontSize: 11, padding: "10px 24px" }}>
+              View Featured Listing ↗
+            </a>
+            <a href="https://propertysearch.hicentral.com/HBR/OpenHouses/?/Results/HotSheet/d///" target="_blank" rel="noopener noreferrer" className="btn-outline" style={{ textDecoration: "none", fontSize: 11, padding: "10px 24px" }}>
+              Open Houses This Week ↗
+            </a>
+          </div>
         </Reveal>
         <Reveal delay={0.1}>
           <div style={{ display: "flex", gap: 16, marginBottom: 48, flexWrap: "wrap", padding: 24, background: BRAND.bgCard, border: `1px solid ${BRAND.border}` }}>
@@ -1193,8 +1201,8 @@ function AboutPage({ setPage }) {
             </div>
             <div style={{ display: "flex", gap: 12, marginTop: 32, flexWrap: "wrap" }}>
               <button className="btn-primary" onClick={() => go("contact")}>Work with Mel</button>
-              <a href="https://www.instagram.com/mel.castanares" target="_blank" rel="noopener noreferrer" className="btn-outline" style={{ display: "inline-flex", alignItems: "center", gap: 8, textDecoration: "none", fontSize: 11, padding: "14px 24px" }}>
-                <Instagram size={14} /> @mel.castanares
+              <a href="https://www.instagram.com/__mellio" target="_blank" rel="noopener noreferrer" className="btn-outline" style={{ display: "inline-flex", alignItems: "center", gap: 8, textDecoration: "none", fontSize: 11, padding: "14px 24px" }}>
+                <Instagram size={14} /> @__mellio
               </a>
             </div>
 
@@ -1440,8 +1448,8 @@ function BlogPage({ setPage }) {
                 </div>
                 <h3 className="font-display" style={{ fontSize: 28 }}>Follow Along</h3>
               </div>
-              <a href="https://www.instagram.com/mel.castanares" target="_blank" rel="noopener noreferrer" className="btn-outline" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "10px 20px", fontSize: 11, textDecoration: "none", borderRadius: 6 }}>
-                <Instagram size={14} /> @mel.castanares
+              <a href="https://www.instagram.com/__mellio" target="_blank" rel="noopener noreferrer" className="btn-outline" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "10px 20px", fontSize: 11, textDecoration: "none", borderRadius: 6 }}>
+                <Instagram size={14} /> @__mellio
               </a>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: 24 }}>
@@ -1464,7 +1472,7 @@ function BlogPage({ setPage }) {
               ))}
             </div>
             <p style={{ color: BRAND.textDim, fontSize: 13, marginTop: 20, textAlign: "center" }}>
-              Real estate tips, market updates, and life in Hawai'i — follow <a href="https://www.instagram.com/mel.castanares" target="_blank" rel="noopener noreferrer" style={{ color: BRAND.teal, textDecoration: "none", fontWeight: 600 }}>@mel.castanares</a> for the latest.
+              Real estate tips, market updates, and life in Hawai'i — follow <a href="https://www.instagram.com/__mellio" target="_blank" rel="noopener noreferrer" style={{ color: BRAND.teal, textDecoration: "none", fontWeight: 600 }}>@__mellio</a> for the latest.
             </p>
           </div>
         </Reveal>
@@ -1490,7 +1498,7 @@ const BLOG_IG_EMBEDS = {
 // Mel's Instagram posts to feature on the blog page
 const IG_FEED_POSTS = [
   "https://www.instagram.com/reel/DWQWkHZgg2j/embed",
-  "https://www.instagram.com/mel.castanares/embed",
+  "https://www.instagram.com/__mellio/embed",
 ];
 
 function InstagramEmbed({ url, caption }) {
@@ -1633,7 +1641,8 @@ function ContactPage() {
             {[
               { icon: <Phone size={20} color={BRAND.teal} />, label: "Phone", value: agent.phone || FALLBACK_AGENT.phone, href: `tel:${(agent.phone || FALLBACK_AGENT.phone).replace(/\D/g,"")}` },
               { icon: <Mail size={20} color={BRAND.teal} />, label: "Email", value: agent.email || FALLBACK_AGENT.email, href: `mailto:${agent.email || FALLBACK_AGENT.email}` },
-              { icon: <Instagram size={20} color={BRAND.teal} />, label: "Instagram", value: "@mel.castanares", href: "https://www.instagram.com/mel.castanares" },
+              { icon: <Instagram size={20} color={BRAND.teal} />, label: "Instagram", value: "@__mellio", href: "https://www.instagram.com/__mellio" },
+              { icon: <User size={20} color={BRAND.teal} />, label: "Digital Business Card", value: "dot.cards/melcastanares", href: "https://dot.cards/melcastanares" },
               { icon: <MapPin size={20} color={BRAND.teal} />, label: "Office", value: `${agent.brokerage || FALLBACK_AGENT.brokerage}\n${agent.brokerageAddress || agent.address || FALLBACK_AGENT.address}`, href: undefined },
             ].map((c, i) => (
               <div key={i} style={{ display: "flex", gap: 16, marginBottom: 28 }}>
@@ -2021,7 +2030,7 @@ function ValuationPage() {
             <p style={{ color: BRAND.textMuted, fontSize: 15, lineHeight: 1.7, marginBottom: 24 }}>
               Get a comprehensive market analysis of your property. Mel will review comparable sales, market conditions, and unique features to provide an accurate estimate of your home's current value.
             </p>
-            <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 20, marginBottom: 32 }}>
               {[
                 { icon: <BarChart3 size={20} color={BRAND.teal} />, text: "Detailed comparative market analysis" },
                 { icon: <TrendingUp size={20} color={BRAND.teal} />, text: "Current market trends and projections" },
@@ -2032,6 +2041,12 @@ function ValuationPage() {
                   <span style={{ color: BRAND.textMuted, fontSize: 14 }}>{item.text}</span>
                 </div>
               ))}
+            </div>
+            <div style={{ borderTop: `1px solid ${BRAND.border}`, paddingTop: 24 }}>
+              <p style={{ color: BRAND.textDim, fontSize: 13, marginBottom: 12 }}>Prefer a quick form?</p>
+              <a href="https://docs.google.com/forms/d/e/1FAIpQLScxHvlGhr7mD8n-fjXwglrVsJe9xquMlb9qQFKa5V63UtOYRA/viewform?usp=sf_link" target="_blank" rel="noopener noreferrer" className="btn-outline" style={{ textDecoration: "none", fontSize: 11, display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 24px" }}>
+                <FileText size={14} /> Free Market Analysis Questionnaire ↗
+              </a>
             </div>
           </Reveal>
 
@@ -2192,9 +2207,9 @@ function Footer({ setPage }) {
           </p>
           <div style={{ display: "flex", gap: 12 }}>
             {[
-              { Icon: Instagram, href: "https://www.instagram.com/mel.castanares", label: "Instagram" },
+              { Icon: Instagram, href: "https://www.instagram.com/__mellio", label: "Instagram" },
               { Icon: Facebook, href: "https://www.facebook.com/dreamhomehi", label: "Facebook" },
-              { Icon: Linkedin, href: "#", label: "LinkedIn" },
+              { Icon: Linkedin, href: "http://twitter.com/mel_castanares", label: "Twitter / X" },
             ].map(({ Icon, href, label }, i) => (
               <a key={i} href={href} target="_blank" rel="noopener noreferrer" aria-label={label}
                 style={{ width: 36, height: 36, border: `1px solid ${BRAND.border}`, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", transition: "all 0.3s", textDecoration: "none" }}
@@ -2212,7 +2227,7 @@ function Footer({ setPage }) {
             { label: "Portfolio", page: "properties" },
             { label: "Neighborhoods", page: "neighborhoods" },
             { label: "Market Data", page: "market" },
-            { label: "Insights", page: "blog" },
+            { label: "Resources", page: "blog" },
             { label: "About Mel", page: "about" },
           ].map((link, i) => (
             <button key={i} onClick={() => go(link.page)} style={{
@@ -2221,6 +2236,17 @@ function Footer({ setPage }) {
             }} onMouseEnter={e => e.target.style.color = BRAND.gold} onMouseLeave={e => e.target.style.color = BRAND.textMuted}>
               {link.label}
             </button>
+          ))}
+          {[
+            { label: "Featured Listing ↗", href: "https://portal.onehome.com/en-US/share/1039187l44771" },
+            { label: "Open Houses ↗", href: "https://propertysearch.hicentral.com/HBR/OpenHouses/?/Results/HotSheet/d///" },
+            { label: "Dream Home Realty ↗", href: "http://www.dreamhomerealtyhawaii.com" },
+          ].map((link, i) => (
+            <a key={i} href={link.href} target="_blank" rel="noopener noreferrer" style={{
+              display: "block", color: BRAND.textMuted, fontSize: 13, marginBottom: 12, textDecoration: "none", transition: "color 0.3s",
+            }} onMouseEnter={e => (e.currentTarget.style.color = BRAND.gold)} onMouseLeave={e => (e.currentTarget.style.color = BRAND.textMuted)}>
+              {link.label}
+            </a>
           ))}
         </div>
 
@@ -2251,8 +2277,11 @@ function Footer({ setPage }) {
             <a href={`mailto:${agent.email || FALLBACK_AGENT.email}`} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: BRAND.textMuted, textDecoration: "none" }}>
               <Mail size={14} color={BRAND.teal} /> {agent.email || FALLBACK_AGENT.email}
             </a>
-            <a href="https://www.instagram.com/mel.castanares" target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: BRAND.textMuted, textDecoration: "none" }}>
-              <Instagram size={14} color={BRAND.teal} /> @mel.castanares
+            <a href="https://www.instagram.com/__mellio" target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: BRAND.textMuted, textDecoration: "none" }}>
+              <Instagram size={14} color={BRAND.teal} /> @__mellio
+            </a>
+            <a href="https://dot.cards/melcastanares" target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: BRAND.textMuted, textDecoration: "none" }}>
+              <User size={14} color={BRAND.teal} /> Save My Contact Info
             </a>
             <div style={{ display: "flex", alignItems: "flex-start", gap: 8, fontSize: 13, color: BRAND.textMuted }}>
               <MapPin size={14} color={BRAND.teal} style={{ flexShrink: 0, marginTop: 2 }} />
@@ -2271,9 +2300,9 @@ function Footer({ setPage }) {
             © {new Date().getFullYear()} Mel Castanares · RS-84753 · Dream Home Realty Hawaii LLC. All Rights Reserved.
           </p>
           <div style={{ display: "flex", gap: 20, alignItems: "center" }}>
-            <a href="https://www.instagram.com/mel.castanares" target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: BRAND.textDim, textDecoration: "none", transition: "color 0.3s" }}
+            <a href="https://www.instagram.com/__mellio" target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: BRAND.textDim, textDecoration: "none", transition: "color 0.3s" }}
               onMouseEnter={e => (e.currentTarget.style.color = BRAND.teal)} onMouseLeave={e => (e.currentTarget.style.color = BRAND.textDim)}>
-              <Instagram size={13} /> @mel.castanares
+              <Instagram size={13} /> @__mellio
             </a>
             <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: BRAND.textDim, cursor: "pointer" }}>Privacy Policy</span>
             <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: BRAND.textDim, cursor: "pointer" }}>Terms</span>
@@ -2381,9 +2410,9 @@ function FloatingActions({ setPage }) {
             <div style={{ width: 36, height: 36, borderRadius: 10, background: `${BRAND.gold}15`, display: "flex", alignItems: "center", justifyContent: "center" }}><Mail size={16} color={BRAND.gold} /></div>
             <div><div style={{ fontWeight: 600 }}>Email Mel</div><div style={{ fontSize: 12, color: BRAND.textDim }}>mel@homesweethome...</div></div>
           </a>
-          <a href="https://www.instagram.com/mel.castanares" target="_blank" rel="noopener noreferrer">
+          <a href="https://www.instagram.com/__mellio" target="_blank" rel="noopener noreferrer">
             <div style={{ width: 36, height: 36, borderRadius: 10, background: `${BRAND.coral}15`, display: "flex", alignItems: "center", justifyContent: "center" }}><Instagram size={16} color={BRAND.coral} /></div>
-            <div><div style={{ fontWeight: 600 }}>Instagram</div><div style={{ fontSize: 12, color: BRAND.textDim }}>@mel.castanares</div></div>
+            <div><div style={{ fontWeight: 600 }}>Instagram</div><div style={{ fontSize: 12, color: BRAND.textDim }}>@__mellio</div></div>
           </a>
         </div>
       )}
