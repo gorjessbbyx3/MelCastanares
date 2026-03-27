@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import {
   Home as HomeIcon, Search, MapPin, Phone, Mail, Menu, X, ChevronDown, ChevronRight,
   ArrowRight, ArrowLeft, Star, Bed, Bath, Square, Calendar, Clock, User,
@@ -236,6 +236,39 @@ function Counter({ end, suffix = "", prefix = "", duration = 2000 }) {
 }
 
 // ─────────────────────────────────────────────
+// MAGNETIC TILT CARD — premium 3D hover effect
+// ─────────────────────────────────────────────
+
+function MagneticCard({ children, className = "", style = {}, onClick }: { children: React.ReactNode; className?: string; style?: React.CSSProperties; onClick?: () => void }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const el = ref.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const cx = rect.width / 2;
+    const cy = rect.height / 2;
+    const tiltX = ((y - cy) / cy) * -6;
+    const tiltY = ((x - cx) / cx) * 6;
+    el.style.transform = `perspective(800px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) scale(1.02) translateY(-6px)`;
+    el.style.boxShadow = `${-tiltY * 2}px ${tiltX * 2}px 40px rgba(0,0,0,0.12), 0 0 0 1px ${BRAND.gold}18`;
+  }, []);
+  const handleMouseLeave = useCallback(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.style.transform = "perspective(800px) rotateX(0deg) rotateY(0deg) scale(1) translateY(0px)";
+    el.style.boxShadow = "";
+  }, []);
+  return (
+    <div ref={ref} className={className} style={{ transition: "transform 0.5s cubic-bezier(0.22,1,0.36,1), box-shadow 0.5s", willChange: "transform", ...style }}
+      onMouseMove={handleMouseMove} onMouseLeave={handleMouseLeave} onClick={onClick}>
+      {children}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
 // STYLES (injected via style tag)
 // ─────────────────────────────────────────────
 
@@ -243,84 +276,201 @@ const GlobalStyles = () => (
   <style>{`
     @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap');
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html, body, #root, #__next { background: ${BRAND.bg} !important; color: ${BRAND.text} !important; }
     html { scroll-behavior: smooth; }
     body { font-family: 'DM Sans', sans-serif; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
     ::selection { background: ${BRAND.teal}33; color: ${BRAND.teal}; }
-    
+
     .font-display { font-family: 'DM Serif Display', serif; }
     .font-body { font-family: 'DM Sans', sans-serif; }
-    
+
     .gold-text { color: ${BRAND.teal}; }
-    .gold-gradient { background: linear-gradient(135deg, ${BRAND.goldDark}, ${BRAND.gold}, ${BRAND.goldLight}, ${BRAND.gold}); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-    
+    .gold-gradient {
+      background: linear-gradient(135deg, ${BRAND.goldDark}, ${BRAND.gold}, ${BRAND.goldLight}, ${BRAND.gold});
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+
+    /* ── GRAIN OVERLAY ── */
+    .grain { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; opacity: 0.028; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E"); }
+
+    /* ── LIQUID SHIMMER (premium card sheen) ── */
     .shimmer { position: relative; overflow: hidden; }
-    .shimmer::after { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(26,138,125,0.06), transparent); animation: shimmer 3s infinite; }
-    @keyframes shimmer { 100% { left: 100%; } }
-    
-    .line-reveal { display: inline-block; }
-    .line-reveal span { display: inline-block; animation: lineUp 0.8s ease forwards; opacity: 0; }
-    @keyframes lineUp { from { opacity: 0; transform: translateY(100%); } to { opacity: 1; transform: translateY(0); } }
-    
-    .float { animation: float 6s ease-in-out infinite; }
-    @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
-    
-    .pulse-ring { position: relative; }
-    .pulse-ring::before { content: ''; position: absolute; inset: -4px; border: 1px solid ${BRAND.gold}44; border-radius: inherit; animation: pulseRing 2.5s ease-in-out infinite; }
-    @keyframes pulseRing { 0%,100% { opacity: 0; transform: scale(0.95); } 50% { opacity: 1; transform: scale(1.05); } }
-    
-    .grain { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; opacity: 0.025; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E"); }
-    
-    .nav-link { position: relative; }
-    .nav-link::after { content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 1px; background: ${BRAND.teal}; transition: width 0.4s cubic-bezier(0.22,1,0.36,1); }
-    .nav-link:hover::after, .nav-link.active::after { width: 100%; }
-    
-    .card-hover { transition: all 0.5s cubic-bezier(0.22,1,0.36,1); }
-    .card-hover:hover { transform: translateY(-8px); box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 0 1px ${BRAND.gold}22; }
-    
+    .shimmer::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(115deg, transparent 40%, rgba(212,168,83,0.07) 50%, transparent 60%);
+      background-size: 200% 100%;
+      animation: liquidShimmer 4s ease-in-out infinite;
+    }
+    @keyframes liquidShimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* ── MAGNETIC HOVER (cards lift + glow) ── */
+    .card-hover { transition: transform 0.55s cubic-bezier(0.22,1,0.36,1), box-shadow 0.55s cubic-bezier(0.22,1,0.36,1); will-change: transform; }
+    .card-hover:hover {
+      transform: translateY(-10px) scale(1.01);
+      box-shadow: 0 28px 60px rgba(0,0,0,0.13), 0 0 0 1px ${BRAND.gold}22, 0 8px 30px ${BRAND.teal}10;
+    }
+
+    /* ── IMAGE KENBURNS ZOOM ── */
     .img-zoom { overflow: hidden; }
-    .img-zoom img { transition: transform 1.2s cubic-bezier(0.22,1,0.36,1); }
-    .img-zoom:hover img { transform: scale(1.08); }
-    
-    .input-custom { width: 100%; background: ${BRAND.bgCard}; border: none; border-bottom: 1px solid ${BRAND.border}; padding: 14px 16px; color: ${BRAND.text}; font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; transition: border-color 0.3s; }
-    .input-custom:focus { border-bottom-color: ${BRAND.gold}; }
-    .input-custom::placeholder { color: ${BRAND.textDim}; }
-    select.input-custom option { background: ${BRAND.bgCard}; color: ${BRAND.text}; }
-    
-    .btn-primary { display: inline-flex; align-items: center; justify-content: center; padding: 14px 32px; background: ${BRAND.teal}; color: #FFFFFF; font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase; border: none; cursor: pointer; transition: all 0.4s cubic-bezier(0.22,1,0.36,1); position: relative; overflow: hidden; }
-    .btn-primary:hover { background: ${BRAND.tealLight}; transform: translateY(-2px); box-shadow: 0 8px 30px ${BRAND.teal}33; }
-    .btn-primary::after { content: ''; position: absolute; top: 50%; left: 50%; width: 0; height: 0; background: rgba(255,255,255,0.15); border-radius: 50%; transform: translate(-50%,-50%); transition: width 0.6s, height 0.6s; }
-    .btn-primary:active::after { width: 300px; height: 300px; }
-    
-    .btn-outline { display: inline-flex; align-items: center; justify-content: center; padding: 14px 32px; background: transparent; color: ${BRAND.teal}; font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase; border: 1px solid ${BRAND.teal}55; cursor: pointer; transition: all 0.4s; }
-    .btn-outline:hover { background: ${BRAND.teal}11; border-color: ${BRAND.teal}; }
-    
+    .img-zoom img { transition: transform 1.8s cubic-bezier(0.22,1,0.36,1); transform-origin: center; }
+    .img-zoom:hover img { transform: scale(1.1) rotate(0.5deg); }
+
+    /* ── NAV LINK UNDERLINE ── */
+    .nav-link { position: relative; }
+    .nav-link::after {
+      content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 1px;
+      background: linear-gradient(90deg, ${BRAND.teal}, ${BRAND.gold});
+      transition: width 0.45s cubic-bezier(0.22,1,0.36,1);
+    }
+    .nav-link:hover::after, .nav-link.active::after { width: 100%; }
+
+    /* ── RIPPLE BUTTON ── */
+    .btn-primary {
+      display: inline-flex; align-items: center; justify-content: center; padding: 14px 32px;
+      background: ${BRAND.teal}; color: #FFFFFF; font-family: 'DM Sans', sans-serif;
+      font-weight: 600; font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase;
+      border: none; cursor: pointer; position: relative; overflow: hidden;
+      transition: background 0.4s, transform 0.3s cubic-bezier(0.22,1,0.36,1), box-shadow 0.4s;
+    }
+    .btn-primary:hover { background: ${BRAND.tealLight}; transform: translateY(-2px); box-shadow: 0 10px 36px ${BRAND.teal}40; }
+    .btn-primary:active { transform: scale(0.97); }
+    .btn-primary .ripple-circle {
+      position: absolute; border-radius: 50%; background: rgba(255,255,255,0.25);
+      transform: scale(0); animation: rippleOut 0.7s linear;
+      pointer-events: none;
+    }
+    @keyframes rippleOut { to { transform: scale(4); opacity: 0; } }
+
+    .btn-outline {
+      display: inline-flex; align-items: center; justify-content: center; padding: 14px 32px;
+      background: transparent; color: ${BRAND.teal}; font-family: 'DM Sans', sans-serif;
+      font-weight: 600; font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase;
+      border: 1px solid ${BRAND.teal}55; cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.22,1,0.36,1); position: relative; overflow: hidden;
+    }
+    .btn-outline::before {
+      content: ''; position: absolute; inset: 0;
+      background: ${BRAND.teal}; transform: scaleX(0); transform-origin: right;
+      transition: transform 0.45s cubic-bezier(0.22,1,0.36,1);
+    }
+    .btn-outline:hover { color: #fff; border-color: ${BRAND.teal}; }
+    .btn-outline:hover::before { transform: scaleX(1); transform-origin: left; }
+    .btn-outline > * { position: relative; z-index: 1; }
+
+    /* ── SECTION PADDING ── */
     .section-pad { padding: 100px 24px; max-width: 1400px; margin: 0 auto; }
     @media(min-width:768px) { .section-pad { padding: 120px 48px; } }
     @media(min-width:1024px) { .section-pad { padding: 140px 64px; } }
-    
-    .tracking-mega { letter-spacing: 0.25em; }
-    .tracking-wide2 { letter-spacing: 0.15em; }
-    
-    .border-gold { border-color: ${BRAND.gold}22; }
-    .border-subtle { border-color: ${BRAND.border}; }
-    
+
+    /* ── INPUTS ── */
+    .input-custom {
+      width: 100%; background: ${BRAND.bgCard}; border: none;
+      border-bottom: 1px solid ${BRAND.border}; padding: 14px 16px;
+      color: ${BRAND.text}; font-family: 'DM Sans', sans-serif; font-size: 14px;
+      outline: none; transition: border-color 0.35s;
+    }
+    .input-custom:focus { border-bottom-color: ${BRAND.gold}; }
+    .input-custom::placeholder { color: ${BRAND.textDim}; }
+    select.input-custom option { background: ${BRAND.bgCard}; color: ${BRAND.text}; }
+
     .scrollbar-hide::-webkit-scrollbar { display: none; }
     .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-    
-    @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ── FLOATING PARTICLES (hero decoration) ── */
+    .particle {
+      position: absolute; border-radius: 50%; pointer-events: none;
+      background: radial-gradient(circle, ${BRAND.gold}60, transparent 70%);
+      animation: particleDrift var(--dur, 12s) ease-in-out infinite;
+      animation-delay: var(--delay, 0s);
+    }
+    @keyframes particleDrift {
+      0%,100% { transform: translateY(0) translateX(0) scale(1); opacity: 0.4; }
+      33% { transform: translateY(-30px) translateX(15px) scale(1.1); opacity: 0.7; }
+      66% { transform: translateY(-15px) translateX(-20px) scale(0.9); opacity: 0.3; }
+    }
+
+    /* ── WAVE FLOAT (decorative SVG) ── */
+    @keyframes waveFloat {
+      0%,100% { transform: translateX(0) translateY(0) scaleX(1); }
+      33% { transform: translateX(12px) translateY(-6px) scaleX(1.01); }
+      66% { transform: translateX(-8px) translateY(-10px) scaleX(0.99); }
+    }
+
+    /* ── ORBS (abstract background blobs) ── */
+    .orb {
+      position: absolute; border-radius: 50%; pointer-events: none; filter: blur(80px);
+      animation: orbPulse var(--dur, 10s) ease-in-out infinite;
+      animation-delay: var(--delay, 0s);
+    }
+    @keyframes orbPulse {
+      0%,100% { transform: scale(1) translate(0,0); opacity: 0.35; }
+      50% { transform: scale(1.15) translate(20px,-10px); opacity: 0.55; }
+    }
+
+    /* ── MAGNETIC STATS CARD ── */
+    .stat-card {
+      transition: transform 0.4s cubic-bezier(0.22,1,0.36,1), box-shadow 0.4s;
+      cursor: default;
+    }
+    .stat-card:hover {
+      transform: translateY(-6px) scale(1.03);
+      box-shadow: 0 16px 40px rgba(26,138,125,0.15), 0 0 0 1px ${BRAND.teal}22;
+    }
+
+    /* ── TEXT CURSOR BLINK ── */
+    .cursor-blink::after { content: '|'; animation: blink 1.1s step-end infinite; }
+    @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+
+    /* ── HERO ENTRANCE ── */
+    .hero-text-anim { animation: heroEntrance 1.4s cubic-bezier(0.22,1,0.36,1) forwards; opacity: 0; }
+    .hero-text-anim-d1 { animation-delay: 0.15s; }
+    .hero-text-anim-d2 { animation-delay: 0.4s; }
+    .hero-text-anim-d3 { animation-delay: 0.7s; }
+    .hero-text-anim-d4 { animation-delay: 1.0s; }
+    @keyframes heroEntrance {
+      from { opacity: 0; transform: translateY(40px) skewY(1deg); filter: blur(4px); }
+      to   { opacity: 1; transform: translateY(0) skewY(0deg); filter: blur(0px); }
+    }
+
+    /* ── FADE IN UP (general) ── */
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes slideInRight { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
-    @keyframes scaleIn { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }
-    @keyframes dash { to { stroke-dashoffset: 0; } }
-    @keyframes waveFloat { 0%,100% { transform: translateX(0) translateY(0); } 25% { transform: translateX(10px) translateY(-5px); } 50% { transform: translateX(0) translateY(-10px); } 75% { transform: translateX(-10px) translateY(-5px); } }
-    
-    .hero-text-anim { animation: fadeInUp 1.2s cubic-bezier(0.22,1,0.36,1) forwards; opacity: 0; }
-    .hero-text-anim-d1 { animation-delay: 0.2s; }
-    .hero-text-anim-d2 { animation-delay: 0.5s; }
-    .hero-text-anim-d3 { animation-delay: 0.8s; }
-    .hero-text-anim-d4 { animation-delay: 1.1s; }
+    @keyframes scaleIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+
+    /* ── FLOAT (scroll indicator) ── */
+    .float { animation: floatY 2.8s ease-in-out infinite; }
+    @keyframes floatY { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+    /* ── GLOW PULSE (stat cards, CTAs) ── */
+    .glow-pulse { animation: glowPulse 3s ease-in-out infinite; }
+    @keyframes glowPulse {
+      0%,100% { box-shadow: 0 0 0 0 ${BRAND.teal}00; }
+      50% { box-shadow: 0 0 28px 6px ${BRAND.teal}28; }
+    }
+
+    /* ── STAGGER LINE (horizontal reveal bar) ── */
+    .line-reveal-h {
+      position: relative; overflow: hidden;
+    }
+    .line-reveal-h::before {
+      content: ''; position: absolute; left: 0; top: 0; height: 100%; width: 0;
+      background: linear-gradient(90deg, ${BRAND.teal}20, transparent);
+      animation: lineRevealH 1.5s cubic-bezier(0.22,1,0.36,1) forwards;
+      animation-delay: 0.3s;
+    }
+    @keyframes lineRevealH { to { width: 100%; } }
+
+    /* ── MOBILE MENU ── */
+    .hidden-mobile { display: flex !important; }
+    .show-mobile { display: none !important; }
+    @media(max-width:1024px) {
+      .hidden-mobile { display: none !important; }
+      .show-mobile { display: block !important; }
+    }
   `}</style>
 );
 
@@ -460,14 +610,6 @@ function Nav({ page, setPage }) {
         </div>
       )}
 
-      <style>{`
-        .hidden-mobile { display: flex !important; }
-        .show-mobile { display: none !important; }
-        @media(max-width:1024px) {
-          .hidden-mobile { display: none !important; }
-          .show-mobile { display: block !important; }
-        }
-      `}</style>
     </>
   );
 }
@@ -489,38 +631,80 @@ function HomePage({ setPage }) {
 
   return (
     <div>
-      {/* HERO — cinematic parallax */}
+      {/* HERO — cinematic parallax with particles + orbs */}
       <section style={{ position: "relative", height: "100vh", minHeight: 700, overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <div style={{
-          position: "absolute", inset: 0, zIndex: 0,
-          transform: `translateY(${scrollY * 0.15}px)`,
-        }}>
-          <img 
-            src="/images/hero-diamondhead.jpg" 
-            alt="Diamond Head infinity pool overlooking the ocean" 
-            style={{ width: "100%", height: "120%", objectFit: "cover", objectPosition: "center 35%" }}
+        {/* Hero background — video if available, else parallax image */}
+        <div style={{ position: "absolute", inset: 0, zIndex: 0, transform: `translateY(${scrollY * 0.15}px)` }}>
+          <video
+            autoPlay muted loop playsInline
+            poster="/images/hero-diamondhead.jpg"
+            style={{ width: "100%", height: "120%", objectFit: "cover", objectPosition: "center 35%", display: "block" }}
+            onError={e => { (e.currentTarget as HTMLVideoElement).style.display = "none"; }}
+          >
+            <source src="/images/hero-bg.mp4" type="video/mp4" />
+            <source src="/images/hero-bg.webm" type="video/webm" />
+            {/* Fallback: poster image shown automatically */}
+          </video>
+          {/* Static image fallback (shown if video not found) */}
+          <img
+            src="/images/hero-diamondhead.jpg"
+            alt="Diamond Head infinity pool overlooking the ocean"
+            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 35%", zIndex: -1 }}
           />
         </div>
-        <div style={{ position: "absolute", inset: 0, background: `linear-gradient(to bottom, rgba(27,42,51,0.3) 0%, rgba(27,42,51,0.5) 50%, ${BRAND.bg}F0 100%)` }} />
-        
-        {/* Decorative wave lines */}
-        <svg style={{ position: "absolute", bottom: 0, left: 0, right: 0, zIndex: 1, opacity: 0.06 }} viewBox="0 0 1440 200" preserveAspectRatio="none">
-          <path d="M0,100 C360,180 720,20 1440,100 L1440,200 L0,200 Z" fill={BRAND.teal} style={{ animation: "waveFloat 8s ease-in-out infinite" }} />
+
+        {/* Gradient overlay */}
+        <div style={{ position: "absolute", inset: 0, zIndex: 1, background: `linear-gradient(to bottom, rgba(27,42,51,0.25) 0%, rgba(27,42,51,0.55) 50%, ${BRAND.bg}F5 100%)` }} />
+
+        {/* Ambient orbs */}
+        <div className="orb" style={{ "--dur": "14s", "--delay": "0s", width: 500, height: 500, background: `${BRAND.teal}22`, top: "10%", left: "-10%", zIndex: 1 } as React.CSSProperties} />
+        <div className="orb" style={{ "--dur": "18s", "--delay": "-6s", width: 400, height: 400, background: `${BRAND.gold}18`, top: "30%", right: "-8%", zIndex: 1 } as React.CSSProperties} />
+        <div className="orb" style={{ "--dur": "11s", "--delay": "-3s", width: 300, height: 300, background: `${BRAND.tealLight}15`, bottom: "20%", left: "30%", zIndex: 1 } as React.CSSProperties} />
+
+        {/* Floating gold particles */}
+        {[
+          { size: 6, top: "20%", left: "15%", dur: "9s", delay: "0s" },
+          { size: 4, top: "35%", left: "80%", dur: "13s", delay: "-3s" },
+          { size: 8, top: "60%", left: "25%", dur: "11s", delay: "-5s" },
+          { size: 5, top: "15%", left: "65%", dur: "15s", delay: "-2s" },
+          { size: 3, top: "70%", left: "70%", dur: "8s", delay: "-7s" },
+          { size: 7, top: "45%", left: "5%", dur: "16s", delay: "-4s" },
+        ].map((p, i) => (
+          <div key={i} className="particle" style={{
+            "--dur": p.dur, "--delay": p.delay,
+            width: p.size, height: p.size, top: p.top, left: p.left, zIndex: 2,
+          } as React.CSSProperties} />
+        ))}
+
+        {/* Decorative wave */}
+        <svg style={{ position: "absolute", bottom: 0, left: 0, right: 0, zIndex: 2, opacity: 0.07 }} viewBox="0 0 1440 120" preserveAspectRatio="none">
+          <path d="M0,60 C240,110 480,10 720,60 C960,110 1200,10 1440,60 L1440,120 L0,120 Z"
+            fill={BRAND.teal} style={{ animation: "waveFloat 10s ease-in-out infinite" }} />
+        </svg>
+        <svg style={{ position: "absolute", bottom: 0, left: 0, right: 0, zIndex: 2, opacity: 0.04 }} viewBox="0 0 1440 120" preserveAspectRatio="none">
+          <path d="M0,80 C360,20 720,100 1080,40 C1260,10 1380,80 1440,60 L1440,120 L0,120 Z"
+            fill={BRAND.gold} style={{ animation: "waveFloat 14s ease-in-out infinite", animationDelay: "-5s" }} />
         </svg>
 
-        <div style={{ position: "relative", zIndex: 2, textAlign: "center", padding: "0 24px", maxWidth: 900, marginTop: 40 }}>
-          <div className="hero-text-anim hero-text-anim-d1" style={{ color: BRAND.teal, fontSize: 11, letterSpacing: "0.35em", textTransform: "uppercase", marginBottom: 24, fontWeight: 500 }}>
-            O'ahu Real Estate
+        {/* Hero content */}
+        <div style={{ position: "relative", zIndex: 3, textAlign: "center", padding: "0 24px", maxWidth: 900, marginTop: 40 }}>
+          <div className="hero-text-anim hero-text-anim-d1" style={{
+            display: "inline-flex", alignItems: "center", gap: 12, marginBottom: 28,
+            background: `${BRAND.teal}15`, border: `1px solid ${BRAND.teal}30`,
+            padding: "6px 20px", backdropFilter: "blur(8px)",
+          }}>
+            <div style={{ width: 6, height: 6, borderRadius: "50%", background: BRAND.teal, animation: "glowPulse 2s infinite" }} />
+            <span style={{ color: BRAND.teal, fontSize: 11, letterSpacing: "0.35em", textTransform: "uppercase", fontWeight: 600 }}>O'ahu Real Estate · RS-84753</span>
           </div>
-          <h1 className="font-display hero-text-anim hero-text-anim-d2" style={{ fontSize: "clamp(40px, 7vw, 80px)", lineHeight: 1.05, marginBottom: 24 }}>
+          <h1 className="font-display hero-text-anim hero-text-anim-d2" style={{ fontSize: "clamp(40px, 7vw, 82px)", lineHeight: 1.02, marginBottom: 24, textShadow: "0 2px 40px rgba(27,42,51,0.3)" }}>
             Welcome Home to{" "}
             <span className="gold-gradient" style={{ fontStyle: "italic" }}>Paradise</span>
           </h1>
-          <p className="hero-text-anim hero-text-anim-d3" style={{ color: BRAND.textMuted, fontSize: "clamp(15px, 1.8vw, 18px)", lineHeight: 1.7, maxWidth: 600, margin: "0 auto 40px", fontWeight: 300 }}>
+          <p className="hero-text-anim hero-text-anim-d3" style={{ color: "rgba(253,250,245,0.85)", fontSize: "clamp(15px, 1.8vw, 18px)", lineHeight: 1.75, maxWidth: 560, margin: "0 auto 44px", fontWeight: 300 }}>
             Your dream home in Hawai'i starts with the right guide. Let's find it together — Mel Castanares.
           </p>
           <div className="hero-text-anim hero-text-anim-d4" style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}>
-            <button className="btn-primary" onClick={() => go("properties")}>
+            <button className="btn-primary glow-pulse" onClick={() => go("properties")}>
               <Search size={14} style={{ marginRight: 8 }} /> Start Your Search
             </button>
             <button className="btn-outline" onClick={() => go("valuation")}>Home Valuation</button>
@@ -529,12 +713,12 @@ function HomePage({ setPage }) {
 
         {/* Scroll indicator */}
         <div style={{
-          position: "absolute", bottom: 40, left: "50%", transform: "translateX(-50%)", zIndex: 2,
-          display: "flex", flexDirection: "column", alignItems: "center", gap: 8,
-          opacity: scrollY > 100 ? 0 : 1, transition: "opacity 0.5s",
+          position: "absolute", bottom: 40, left: "50%", transform: "translateX(-50%)", zIndex: 3,
+          display: "flex", flexDirection: "column", alignItems: "center", gap: 10,
+          opacity: scrollY > 100 ? 0 : 1, transition: "opacity 0.6s",
         }}>
-          <span style={{ fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", color: BRAND.textDim }}>Scroll</span>
-          <div style={{ width: 1, height: 40, background: `linear-gradient(to bottom, ${BRAND.gold}, transparent)`, animation: "float 2s ease-in-out infinite" }} />
+          <span style={{ fontSize: 10, letterSpacing: "0.3em", textTransform: "uppercase", color: "rgba(253,250,245,0.5)" }}>Scroll</span>
+          <div style={{ width: 1, height: 48, background: `linear-gradient(to bottom, ${BRAND.gold}, transparent)` }} className="float" />
         </div>
       </section>
 
@@ -547,31 +731,46 @@ function HomePage({ setPage }) {
             { icon: <Calendar size={24} />, title: "Mortgage Calculator", desc: "Estimate your monthly payment instantly", page: "mortgage" },
           ].map((item, i) => (
             <Reveal key={i} delay={i * 0.15}>
-              <div className="card-hover shimmer" onClick={() => go(item.page)} style={{
+              <MagneticCard onClick={() => go(item.page)} style={{
                 cursor: "pointer", padding: 40, background: BRAND.bgCard,
                 border: `1px solid ${BRAND.border}`, position: "relative",
-              }}>
+              }} className="shimmer">
                 <div style={{ color: BRAND.teal, marginBottom: 20 }}>{item.icon}</div>
                 <h3 className="font-display" style={{ fontSize: 24, marginBottom: 8 }}>{item.title}</h3>
                 <p style={{ color: BRAND.textMuted, fontSize: 14, lineHeight: 1.6, marginBottom: 20 }}>{item.desc}</p>
                 <span style={{ color: BRAND.teal, fontSize: 11, letterSpacing: "0.15em", textTransform: "uppercase", fontWeight: 600, display: "flex", alignItems: "center", gap: 8 }}>
                   Explore <ArrowRight size={14} />
                 </span>
-              </div>
+              </MagneticCard>
             </Reveal>
           ))}
         </div>
       </section>
 
-      {/* MEET JANE — split layout */}
+      {/* MEET MEL — split layout with Instagram reel */}
       <section style={{ background: BRAND.bgLight, borderTop: `1px solid ${BRAND.border}`, borderBottom: `1px solid ${BRAND.border}` }}>
         <div className="section-pad">
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 64, alignItems: "center" }}>
             <Reveal direction="right">
-              <div className="img-zoom" style={{ position: "relative" }}>
-                <img src={agent.photoUrl || agent.photo || agent.photoUrl || FALLBACK_AGENT.photo} alt="Mel" style={{ width: "100%", aspectRatio: "3/4", objectFit: "cover" }} />
+              <div style={{ position: "relative" }}>
+                {/* Instagram reel replaces static photo */}
                 <div style={{
-                  position: "absolute", bottom: -20, right: -20, background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, padding: "20px 28px",
+                  position: "relative", borderRadius: 16, overflow: "hidden",
+                  border: `1px solid ${BRAND.border}`,
+                  boxShadow: `0 24px 80px rgba(0,0,0,0.12), 0 0 0 1px ${BRAND.gold}18`,
+                }}>
+                  <iframe
+                    src="https://www.instagram.com/reel/DWQWkHZgg2j/embed"
+                    style={{ width: "100%", height: 560, border: "none", background: BRAND.bgCard, display: "block" }}
+                    allowFullScreen
+                    loading="lazy"
+                    title="Mel Castanares - See Mel in Action"
+                  />
+                </div>
+                <div style={{
+                  position: "absolute", bottom: -20, right: -20, background: BRAND.bgCard,
+                  border: `1px solid ${BRAND.border}`, padding: "20px 28px",
+                  boxShadow: "0 8px 32px rgba(0,0,0,0.08)",
                 }}>
                   <div className="font-display gold-text" style={{ fontSize: 36 }}><Counter end={agent.yearsExperience || 8} suffix="+" /></div>
                   <div style={{ fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", color: BRAND.textMuted }}>Years Experience</div>
@@ -579,16 +778,25 @@ function HomePage({ setPage }) {
               </div>
             </Reveal>
             <Reveal direction="left" delay={0.2}>
-              <div style={{ color: BRAND.teal, fontSize: 11, letterSpacing: "0.25em", textTransform: "uppercase", marginBottom: 16, fontWeight: 500 }}>About</div>
+              <div style={{ color: BRAND.teal, fontSize: 11, letterSpacing: "0.25em", textTransform: "uppercase", marginBottom: 16, fontWeight: 500 }}>About Mel</div>
               <h2 className="font-display" style={{ fontSize: "clamp(32px, 4vw, 48px)", lineHeight: 1.15, marginBottom: 24 }}>
                 Meet <span style={{ fontStyle: "italic" }} className="gold-text">Mel</span>
               </h2>
-              <p style={{ color: BRAND.textMuted, fontSize: 15, lineHeight: 1.8, marginBottom: 32 }}>
-                {(agent.bio || agent.shortBio || FALLBACK_AGENT.bio || "").split("\n")[0]}
+              <p style={{ color: BRAND.textMuted, fontSize: 15, lineHeight: 1.8, marginBottom: 16 }}>
+                {(agent.bio || FALLBACK_AGENT.bio || "").split("\n\n")[0]}
               </p>
-              <button className="btn-outline" onClick={() => go("about")} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                Learn More <ArrowRight size={14} />
-              </button>
+              <p style={{ color: BRAND.textMuted, fontSize: 14, lineHeight: 1.8, marginBottom: 32, opacity: 0.85 }}>
+                {(agent.bio || FALLBACK_AGENT.bio || "").split("\n\n")[1]}
+              </p>
+              <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+                <button className="btn-primary" onClick={() => go("about")} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  Full Story <ArrowRight size={14} />
+                </button>
+                <a href="https://www.instagram.com/mel.castanares" target="_blank" rel="noopener noreferrer"
+                  className="btn-outline" style={{ display: "inline-flex", alignItems: "center", gap: 8, textDecoration: "none", fontSize: 11, padding: "14px 20px" }}>
+                  <Instagram size={14} /> @mel.castanares
+                </a>
+              </div>
             </Reveal>
           </div>
         </div>
@@ -975,18 +1183,6 @@ function AboutPage({ setPage }) {
               </a>
             </div>
 
-            {/* Instagram Reel Feature */}
-            <div style={{ marginTop: 48, paddingTop: 32, borderTop: `1px solid ${BRAND.border}` }}>
-              <h4 style={{ fontSize: 12, letterSpacing: "0.15em", textTransform: "uppercase", color: BRAND.teal, marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}><Play size={14} /> See Mel in Action</h4>
-              <div style={{ position: "relative", borderRadius: 12, overflow: "hidden", maxWidth: 340, border: `1px solid ${BRAND.border}`, boxShadow: "0 8px 32px rgba(0,0,0,0.08)" }}>
-                <iframe
-                  src="https://www.instagram.com/reel/DWQWkHZgg2j/embed"
-                  style={{ width: "100%", height: 480, border: "none", background: BRAND.bgCard }}
-                  allowFullScreen
-                  loading="lazy"
-                />
-              </div>
-            </div>
           </Reveal>
         </div>
       </div>
