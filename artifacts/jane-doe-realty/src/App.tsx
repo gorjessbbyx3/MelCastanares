@@ -93,20 +93,22 @@ const BRAND = {
 const FALLBACK_AGENT = {
   name: "Mel Castanares",
   title: "REALTOR® | Dream Home Realty Hawai'i",
+  license: "RS-84753",
   phone: "(808) 285-8774",
   email: "mel@homesweethomehawaii.com",
+  instagram: "https://www.instagram.com/mel.castanares",
+  instagramHandle: "@mel.castanares",
   brokerage: "Dream Home Realty Hawaii LLC",
   brokerageAddress: "95-1249 Meheula Parkway, #B-15B\nMililani, HI 96789",
   address: "95-1249 Meheula Parkway, #B-15B\nMililani, HI 96789",
-  bio: "Born and raised on O'ahu, Mel knows these islands like the back of her hand. Before real estate, she managed properties across Honolulu — giving her an inside look at what makes a home truly livable, not just marketable.\n\nAt Dream Home Realty Hawai'i, Mel specializes in helping first-time buyers, growing families, and investors find their perfect fit. Whether you're searching for your forever home in Mililani, a rental investment in Kāne'ohe, or your first condo in town, Mel makes the process feel easy, personal, and — dare we say — fun. She treats every client like 'ohana because that's exactly what you become.",
-  shortBio: "O'ahu born & raised. Helping you find your dream home in paradise.",
+  bio: "Born and raised on O'ahu, Mel is a mama, a REALTOR®, and your honest guide to Hawaii real estate. Before earning her license (RS-84753), she spent years managing properties across Honolulu — giving her a practical, investor-level view of what makes a home truly livable, not just marketable.\n\nAs a mom herself, Mel gets it: buying a home isn't just a financial decision, it's a life decision. She takes the time to understand your family's needs — the school zone, the commute, the backyard big enough for the kids — and won't push you into something that doesn't fit. Whether you're a first-time buyer navigating Mililani, an investor eyeing a Kāne'ohe rental, or relocating from the mainland, Mel makes the process feel personal, transparent, and — yes — actually fun.\n\nAt Dream Home Realty Hawai'i, she specializes in Central and West O'ahu: Mililani, Waipahu, Pearl City, Kapolei, and Ewa Beach — neighborhoods she knows like the back of her hand.",
+  shortBio: "O'ahu-born mama REALTOR® · Honest guidance · Local expertise.",
   photo: "/images/mel-headshot.jpg",
   photoUrl: "/images/mel-headshot.jpg",
   specialties: ["First-Time Buyers", "Residential Sales", "Property Management", "Investment Properties", "Relocation Services"],
   serviceAreas: ["Mililani", "Waipahu", "Kāne'ohe", "Honolulu", "Kapolei", "Ewa Beach", "Pearl City"],
   areas: ["Mililani", "Waipahu", "Kāne'ohe", "Honolulu", "Kapolei", "Ewa Beach", "Pearl City"],
   yearsExperience: 8,
-  instagram: "https://www.instagram.com/mel.castanares",
   facebook: "https://www.facebook.com/dreamhomehi",
   linkedin: "#",
   stats: { years: 8, sold: 120, volume: "$75M+", satisfaction: "100%" },
@@ -122,12 +124,14 @@ const FALLBACK_PROPERTIES = [
 ];
 
 const FALLBACK_NEIGHBORHOODS = [
-  { id: "kaimuki", name: "Kaimuki", tagline: "Eclectic local character", description: "Known for its eclectic local character and convenience. Walkable streets lined with boutique shops, craft coffee, and some of Honolulu's best restaurants.", images: [{url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80", isPrimary: true}], medianHomePrice: "$985K", growth: "+4.2%" },
-  { id: "kailua", name: "Kailua", tagline: "World-class beaches", description: "Home to consistently ranked world-class beaches. A family-friendly town with excellent schools, charming boutiques, and an active outdoor lifestyle.", images: [{url: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800&q=80", isPrimary: true}], medianHomePrice: "$1.4M", growth: "+6.1%" },
-  { id: "manoa", name: "Mānoa", tagline: "Lush valley living", description: "Known for its beautiful historical plantation style architecture, lush greenery, and cool valley breezes. Home to the University of Hawaii.", images: [{url: "https://images.unsplash.com/photo-1518495973542-4542c06a5843?w=800&q=80", isPrimary: true}], medianHomePrice: "$1.2M", growth: "+3.8%" },
-  { id: "north-shore", name: "North Shore", tagline: "Surf culture lifestyle", description: "Known for its legendary surf culture and laidback lifestyle. World-famous waves in winter, calm snorkeling in summer, and farm-to-table dining year-round.", images: [{url: "https://images.unsplash.com/photo-1505228395891-9a51e7e86bf6?w=800&q=80", isPrimary: true}], medianHomePrice: "$1.1M", growth: "+5.3%" },
-  { id: "hawaii-kai", name: "Hawai'i Kai", tagline: "Marina & waterfront living", description: "Known for the Hawaii Kai Marina, easy ocean access and waterfront living. A master-planned community with golf, hiking, and water sports.", images: [{url: "https://images.unsplash.com/photo-1506929562872-bb421503ef21?w=800&q=80", isPrimary: true}], medianHomePrice: "$1.3M", growth: "+4.7%" },
-  { id: "kaneohe", name: "Kāne'ohe", tagline: "Peaceful windward living", description: "Known for cooler weather and peaceful neighborhoods on the windward side. Sandbar adventures, botanical gardens, and breathtaking mountain ridges.", images: [{url: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800&q=80", isPrimary: true}], medianHomePrice: "$890K", growth: "+3.5%" },
+  { id: "mililani", name: "Mililani", tagline: "Mel's home turf · Best schools on O'ahu", description: "Central O'ahu's crown jewel — Mililani is a master-planned community built for families. Top-ranked schools (Mililani High, Mililani Uka Elementary), 23 parks, 7 recreation centers, and HOA-maintained common areas make it one of the most livable communities in the state. Easy H-2 freeway access puts downtown Honolulu 30 minutes away. Mel grew up in Central O'ahu and knows every street, school district, and neighborhood park here. Median prices range from $600K (townhomes) to $900K+ (single-family). A perennial seller's market due to limited inventory and strong demand from families.", images: [{url: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&q=80", isPrimary: true}], medianHomePrice: "$820K", growth: "+4.8%", highlights: ["Top-Rated Schools", "23 Parks", "Family-Friendly", "Master-Planned"] },
+  { id: "ewa-beach", name: "Ewa Beach / Kapolei", tagline: "O'ahu's fastest-growing 'second city'", description: "The west side is booming — and for good reason. Newer construction, more space per dollar, and a rapidly expanding infrastructure (restaurants, Target, Costco, soon the rail) make Ewa Beach and Kapolei the best value on island right now. Single-family homes from $700K–$1.1M. Great schools, beach parks, and a strong sense of community. Mel has helped dozens of families make the move west and knows which streets, builders, and HOAs are worth your time. This is where savvy buyers are investing right now.", images: [{url: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80", isPrimary: true}], medianHomePrice: "$780K", growth: "+6.2%", highlights: ["New Construction", "Rail Access", "Great Value", "Growing Infrastructure"] },
+  { id: "pearl-city", name: "Pearl City / Aiea", tagline: "Central location, unbeatable convenience", description: "Sitting at the geographic center of O'ahu, Pearl City and Aiea offer the perfect balance of affordability and access. Quick freeway on-ramps to every part of the island, the Pearl Highlands shopping center, and strong public schools. Condos from $350K–$600K; single-family from $750K+. Great for first-time buyers who want more home for their money without sacrificing convenience. Mel specializes in this corridor and has extensive knowledge of the condo market here.", images: [{url: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80", isPrimary: true}], medianHomePrice: "$620K", growth: "+3.9%", highlights: ["Central Location", "Freeway Access", "First-Time Buyers", "Condo Value"] },
+  { id: "kaneohe", name: "Kāne'ohe", tagline: "Peaceful windward living", description: "Known for cooler weather and peaceful neighborhoods on the windward side. Sandbar adventures, botanical gardens, and breathtaking mountain ridges. Mel has helped multiple families find rental investments and primary homes in this community. Local tips: the Kāne'ohe sandbar is life-changing, and the morning drive over the Pali is one of the most scenic in the world.", images: [{url: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800&q=80", isPrimary: true}], medianHomePrice: "$890K", growth: "+3.5%", highlights: ["Cooler Climate", "Windward Side", "Mountain Views", "Rental Potential"] },
+  { id: "kailua", name: "Kailua", tagline: "World-class beaches · Charming town", description: "Home to consistently ranked world-class beaches (Kailua Beach, Lanikai). A family-friendly town with excellent schools, charming boutiques, and an active outdoor lifestyle. High demand keeps prices strong. Great for buyers who want island living without the urban hustle — and for investors, short-term rental potential is significant.", images: [{url: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800&q=80", isPrimary: true}], medianHomePrice: "$1.4M", growth: "+6.1%", highlights: ["World-Class Beaches", "Top Schools", "Investment Potential", "Beach Lifestyle"] },
+  { id: "kaimuki", name: "Kaimuki", tagline: "Local food scene · Walkable streets", description: "Known for its eclectic local character and unbeatable food scene. Walkable streets lined with boutique shops, craft coffee, and some of Honolulu's best restaurants (12th Ave Grill, Mud Hen Water, Koko Head Cafe). Strong appreciation history. A great option for buyers wanting urban walkability with neighborhood character.", images: [{url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80", isPrimary: true}], medianHomePrice: "$985K", growth: "+4.2%", highlights: ["Best Food Scene", "Walkable", "Local Character", "Strong Appreciation"] },
+  { id: "hawaii-kai", name: "Hawai'i Kai", tagline: "Marina & waterfront living", description: "Known for the Hawaii Kai Marina, easy ocean access and waterfront living. A master-planned community with golf, hiking (Koko Head!), and water sports. Mel's bold prediction for 2026: Hawai'i Kai is the most undervalued neighborhood on O'ahu right now. New marina renovations, school improvements, and strong community investment are converging.", images: [{url: "https://images.unsplash.com/photo-1506929562872-bb421503ef21?w=800&q=80", isPrimary: true}], medianHomePrice: "$1.3M", growth: "+4.7%", highlights: ["Marina Access", "Koko Head", "Waterfront", "Undervalued Gem"] },
+  { id: "north-shore", name: "North Shore", tagline: "Surf culture · Farm-to-table living", description: "Known for its legendary surf culture and laidback lifestyle. World-famous waves in winter, calm snorkeling in summer, and farm-to-table dining year-round (Giovanni's Shrimp Truck is obligatory). Low inventory keeps prices competitive. Great for buyers seeking a completely different pace of island life.", images: [{url: "https://images.unsplash.com/photo-1505228395891-9a51e7e86bf6?w=800&q=80", isPrimary: true}], medianHomePrice: "$1.1M", growth: "+5.3%", highlights: ["Surf Culture", "Farm-to-Table", "Low Inventory", "Unique Lifestyle"] },
 ];
 
 const FALLBACK_TESTIMONIALS = [
@@ -211,21 +215,24 @@ function Reveal({ children, delay = 0, direction = "up", className = "" }) {
 
 function Counter({ end, suffix = "", prefix = "", duration = 2000 }) {
   const [ref, visible] = useScrollReveal();
-  const [count, setCount] = useState(0);
+  const numEnd = typeof end === "number" ? end : parseInt(end as string);
+  const [count, setCount] = useState(isNaN(numEnd) ? 0 : numEnd);
+  const [hasAnimated, setHasAnimated] = useState(false);
   useEffect(() => {
-    if (!visible) return;
-    const num = typeof end === "number" ? end : parseInt(end);
-    if (isNaN(num)) { setCount(end); return; }
+    if (!visible || hasAnimated) return;
+    setHasAnimated(true);
+    if (isNaN(numEnd)) return;
     let start = 0;
-    const step = Math.ceil(num / (duration / 16));
+    setCount(0);
+    const step = Math.ceil(numEnd / (duration / 16));
     const timer = setInterval(() => {
       start += step;
-      if (start >= num) { setCount(num); clearInterval(timer); }
+      if (start >= numEnd) { setCount(numEnd); clearInterval(timer); }
       else setCount(start);
     }, 16);
     return () => clearInterval(timer);
-  }, [visible, end, duration]);
-  return <span ref={ref}>{prefix}{typeof end === "number" ? count : end}{suffix}</span>;
+  }, [visible, numEnd, duration, hasAnimated]);
+  return <span ref={ref}>{prefix}{isNaN(numEnd) ? end : count}{suffix}</span>;
 }
 
 // ─────────────────────────────────────────────
@@ -365,6 +372,14 @@ function Nav({ page, setPage }) {
           </div>
 
           <nav style={{ display: "flex", alignItems: "center", gap: 28 }} className="hidden-mobile">
+            <a href="tel:8082858774" style={{
+              display: "flex", alignItems: "center", gap: 6, textDecoration: "none",
+              color: BRAND.textMuted, fontSize: 11, letterSpacing: "0.1em", fontFamily: "'DM Sans', sans-serif",
+              transition: "color 0.3s",
+            }} onMouseEnter={e => (e.currentTarget.style.color = BRAND.teal)} onMouseLeave={e => (e.currentTarget.style.color = BRAND.textMuted)}>
+              <Phone size={12} color={BRAND.teal} /> (808) 285-8774
+            </a>
+            <div style={{ width: 1, height: 16, background: BRAND.border }} />
             {navItems.map((item, i) => item.children ? (
               <div key={i} style={{ position: "relative" }} onMouseEnter={() => setDropdown(i)} onMouseLeave={() => setDropdown(null)}>
                 <button className="nav-link" style={{
@@ -558,7 +573,7 @@ function HomePage({ setPage }) {
                 <div style={{
                   position: "absolute", bottom: -20, right: -20, background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, padding: "20px 28px",
                 }}>
-                  <div className="font-display gold-text" style={{ fontSize: 36 }}><Counter end={15} suffix="+" /></div>
+                  <div className="font-display gold-text" style={{ fontSize: 36 }}><Counter end={agent.yearsExperience || 8} suffix="+" /></div>
                   <div style={{ fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", color: BRAND.textMuted }}>Years Experience</div>
                 </div>
               </div>
@@ -583,15 +598,15 @@ function HomePage({ setPage }) {
       <section style={{ background: BRAND.bg, borderBottom: `1px solid ${BRAND.border}` }}>
         <div style={{ maxWidth: 1400, margin: "0 auto", padding: "48px 24px", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 32, textAlign: "center" }}>
           {[
-            { val: stats.yearsExperience || 8, suffix: "+", label: "Years" },
+            { val: stats.yearsExperience || 8, suffix: "+", label: "Years Experience" },
             { val: stats.homesSold || 120, suffix: "+", label: "Homes Sold" },
-            { val: stats.totalSalesVolume ? "$" + Math.round(stats.totalSalesVolume/1000000) + "M+" : "$500M+", suffix: "", label: "Volume", isText: true },
-            { val: stats.clientSatisfactionRate || 99, suffix: "%", label: "Satisfaction" },
+            { val: stats.totalSalesVolume ? "$" + Math.round(stats.totalSalesVolume/1000000) + "M+" : "$75M+", suffix: "", label: "Sales Volume", isText: true },
+            { val: stats.clientSatisfactionRate || 100, suffix: "%", label: "Client Satisfaction" },
+            { val: "RS-84753", suffix: "", label: "License #", isText: true },
           ].map((s, i) => (
             <Reveal key={i} delay={i * 0.1}>
-              <div className="font-display gold-text" style={{ fontSize: 40, marginBottom: 4 }}>
-                {s.isText ? s.val : <Counter end={s.val} suffix={s.suffix} />}
-                {!s.isText && s.suffix}
+              <div className="font-display gold-text" style={{ fontSize: s.isText && (s.val as string).length > 6 ? 28 : 40, marginBottom: 4 }}>
+                {s.isText ? s.val : <Counter end={s.val as number} suffix={s.suffix} />}
               </div>
               <div style={{ fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", color: BRAND.textMuted }}>{s.label}</div>
             </Reveal>
@@ -741,7 +756,12 @@ function TestimonialCarousel({ testimonials = [] }) {
 // ─────────────────────────────────────────────
 
 function PropertyCard({ property: p, onClick }) {
-  const isRental = p.type === "rental" || p.price < 10000;
+  const isRental = p.type === "rental" || (p.priceLabel && p.priceLabel.includes("/mo")) || p.price < 10000;
+  const priceDisplay = isRental
+    ? `$${p.price.toLocaleString()}${p.priceLabel || "/mo"}`
+    : p.price >= 1000000
+      ? `$${(p.price / 1000000).toFixed(p.price >= 10000000 ? 1 : 2)}M`
+      : `$${(p.price / 1000).toFixed(0)}K`;
   return (
     <div className="card-hover" onClick={onClick} style={{ cursor: "pointer", background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, overflow: "hidden" }}>
       <div className="img-zoom" style={{ position: "relative", aspectRatio: "4/3" }}>
@@ -752,13 +772,13 @@ function PropertyCard({ property: p, onClick }) {
         </div>
       </div>
       <div style={{ padding: 24 }}>
-        <div className="font-display gold-text" style={{ fontSize: 24, marginBottom: 6 }}>${(p.price / 1000000).toFixed(p.price >= 1000000 ? 2 : 0)}M</div>
+        <div className="font-display gold-text" style={{ fontSize: 24, marginBottom: 6 }}>{priceDisplay}</div>
         <h3 className="font-display" style={{ fontSize: 18, marginBottom: 6, lineHeight: 1.3 }}>{p.title}</h3>
         <p style={{ color: BRAND.textMuted, fontSize: 13, marginBottom: 16 }}>{p.address}, {p.city}</p>
         <div style={{ display: "flex", gap: 20, paddingTop: 16, borderTop: `1px solid ${BRAND.border}`, fontSize: 13, color: BRAND.textMuted }}>
-          <span style={{ display: "flex", alignItems: "center", gap: 6 }}><Bed size={14} color={BRAND.teal} />{p.bedrooms}</span>
-          <span style={{ display: "flex", alignItems: "center", gap: 6 }}><Bath size={14} color={BRAND.teal} />{p.bathrooms}</span>
-          <span style={{ display: "flex", alignItems: "center", gap: 6 }}><Square size={14} color={BRAND.teal} />{p.sqft.toLocaleString()}</span>
+          {(p.bedrooms > 0 || p.type !== "land") && <span style={{ display: "flex", alignItems: "center", gap: 6 }}><Bed size={14} color={BRAND.teal} />{p.bedrooms || "—"}</span>}
+          {(p.bathrooms > 0 || p.type !== "land") && <span style={{ display: "flex", alignItems: "center", gap: 6 }}><Bath size={14} color={BRAND.teal} />{p.bathrooms || "—"}</span>}
+          <span style={{ display: "flex", alignItems: "center", gap: 6 }}><Square size={14} color={BRAND.teal} />{p.sqft.toLocaleString()} {p.type === "land" ? "sq ft lot" : "sq ft"}</span>
         </div>
       </div>
     </div>
@@ -839,7 +859,11 @@ function PropertyDetailPage({ setPage }) {
               <h1 className="font-display" style={{ fontSize: "clamp(32px, 5vw, 56px)", marginBottom: 8 }}>{p.title}</h1>
               <p style={{ color: BRAND.textMuted, fontSize: 16, display: "flex", alignItems: "center", gap: 8 }}><MapPin size={16} color={BRAND.teal} /> {p.address}, {p.city}, {p.state} {p.zip}</p>
             </div>
-            <div className="font-display gold-text" style={{ fontSize: "clamp(32px, 4vw, 48px)" }}>${(p.price).toLocaleString()}</div>
+            <div className="font-display gold-text" style={{ fontSize: "clamp(32px, 4vw, 48px)" }}>
+              {(p.type === "rental" || (p.priceLabel && p.priceLabel.includes("/mo")) || p.price < 10000)
+                ? `$${p.price.toLocaleString()}${p.priceLabel || "/mo"}`
+                : `$${p.price.toLocaleString()}`}
+            </div>
           </div>
         </Reveal>
 
@@ -913,11 +937,28 @@ function AboutPage({ setPage }) {
           </Reveal>
           <Reveal direction="left" delay={0.2}>
             <h1 className="font-display" style={{ fontSize: "clamp(40px, 5vw, 60px)", marginBottom: 8 }}>{agent.name}</h1>
-            <p style={{ color: BRAND.teal, fontSize: 12, letterSpacing: "0.2em", textTransform: "uppercase", fontWeight: 600, marginBottom: 28 }}>{agent.title || FALLBACK_AGENT.title}</p>
+            <p style={{ color: BRAND.teal, fontSize: 12, letterSpacing: "0.2em", textTransform: "uppercase", fontWeight: 600, marginBottom: 4 }}>{agent.title || FALLBACK_AGENT.title}</p>
+            <p style={{ color: BRAND.textDim, fontSize: 11, letterSpacing: "0.12em", marginBottom: 28 }}>License {agent.license || FALLBACK_AGENT.license} · Hawaii Real Estate</p>
             {(agent.bio || agent.shortBio || FALLBACK_AGENT.bio || "").split("\n\n").map((para, i) => (
               <p key={i} style={{ color: BRAND.textMuted, fontSize: 15, lineHeight: 1.8, marginBottom: 16 }}>{para}</p>
             ))}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, marginTop: 32, paddingTop: 32, borderTop: `1px solid ${BRAND.border}` }}>
+
+            {/* Key stats row */}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginTop: 32, paddingTop: 32, borderTop: `1px solid ${BRAND.border}` }}>
+              {[
+                { val: `${stats.yearsExperience || agent.yearsExperience || 8}+`, label: "Years" },
+                { val: `${stats.homesSold || 120}+`, label: "Sold" },
+                { val: stats.totalSalesVolume ? `$${Math.round(stats.totalSalesVolume/1000000)}M+` : "$75M+", label: "Volume" },
+                { val: `${stats.clientSatisfactionRate || 100}%`, label: "Satisfaction" },
+              ].map((s, i) => (
+                <div key={i} style={{ textAlign: "center", padding: "16px 8px", background: BRAND.bgElevated, border: `1px solid ${BRAND.border}` }}>
+                  <div className="font-display gold-text" style={{ fontSize: 22, marginBottom: 2 }}>{s.val}</div>
+                  <div style={{ fontSize: 9, letterSpacing: "0.15em", textTransform: "uppercase", color: BRAND.textDim }}>{s.label}</div>
+                </div>
+              ))}
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, marginTop: 32 }}>
               <div>
                 <h4 style={{ fontSize: 12, letterSpacing: "0.15em", textTransform: "uppercase", color: BRAND.teal, marginBottom: 12, display: "flex", alignItems: "center", gap: 8 }}><Award size={14} /> Specialties</h4>
                 {(agent.specialties || FALLBACK_AGENT.specialties).map(s => <div key={s} style={{ color: BRAND.textMuted, fontSize: 13, marginBottom: 6 }}>• {s}</div>)}
@@ -927,7 +968,12 @@ function AboutPage({ setPage }) {
                 {(agent.serviceAreas || agent.areas || FALLBACK_AGENT.areas).map(a => <div key={a} style={{ color: BRAND.textMuted, fontSize: 13, marginBottom: 6 }}>• {a}</div>)}
               </div>
             </div>
-            <button className="btn-primary" style={{ marginTop: 32 }} onClick={() => go("contact")}>Work with Mel</button>
+            <div style={{ display: "flex", gap: 12, marginTop: 32, flexWrap: "wrap" }}>
+              <button className="btn-primary" onClick={() => go("contact")}>Work with Mel</button>
+              <a href="https://www.instagram.com/mel.castanares" target="_blank" rel="noopener noreferrer" className="btn-outline" style={{ display: "inline-flex", alignItems: "center", gap: 8, textDecoration: "none", fontSize: 11, padding: "14px 24px" }}>
+                <Instagram size={14} /> @mel.castanares
+              </a>
+            </div>
 
             {/* Instagram Reel Feature */}
             <div style={{ marginTop: 48, paddingTop: 32, borderTop: `1px solid ${BRAND.border}` }}>
@@ -972,11 +1018,19 @@ function NeighborhoodsPage() {
                   <img src={n.coverImage || n.images?.[0]?.url || n.img} alt={n.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                 </div>
                 <div style={{ padding: 28 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-                    <h3 className="font-display" style={{ fontSize: 26 }}>{n.name}</h3>
-                    <span className="gold-text" style={{ fontSize: 12, fontWeight: 600 }}>{n.growth}</span>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+                    <h3 className="font-display" style={{ fontSize: 24, lineHeight: 1.2 }}>{n.name}</h3>
+                    <span className="gold-text" style={{ fontSize: 12, fontWeight: 600, whiteSpace: "nowrap", marginLeft: 8 }}>{n.growth}</span>
                   </div>
-                  <p style={{ color: BRAND.textMuted, fontSize: 14, lineHeight: 1.7, marginBottom: 20 }}>{n.description || n.desc}</p>
+                  <p style={{ color: BRAND.teal, fontSize: 11, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 12 }}>{n.tagline}</p>
+                  <p style={{ color: BRAND.textMuted, fontSize: 13, lineHeight: 1.7, marginBottom: 16 }}>{(n.description || n.desc || "").slice(0, 180)}{(n.description || "").length > 180 ? "…" : ""}</p>
+                  {(n as any).highlights && (
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 16 }}>
+                      {(n as any).highlights.map((h: string) => (
+                        <span key={h} style={{ fontSize: 10, padding: "3px 8px", background: `${BRAND.teal}12`, color: BRAND.teal, border: `1px solid ${BRAND.teal}30`, letterSpacing: "0.08em", textTransform: "uppercase" }}>{h}</span>
+                      ))}
+                    </div>
+                  )}
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 16, borderTop: `1px solid ${BRAND.border}` }}>
                     <div>
                       <div style={{ fontSize: 10, letterSpacing: "0.12em", textTransform: "uppercase", color: BRAND.textDim }}>Median Price</div>
@@ -1366,18 +1420,29 @@ function ContactPage() {
           <Reveal direction="right">
             <h3 className="font-display" style={{ fontSize: 28, marginBottom: 32 }}>Direct Contact</h3>
             {[
-              { icon: <Phone size={20} color={BRAND.teal} />, label: "Phone", value: agent.phone || FALLBACK_AGENT.phone },
-              { icon: <Mail size={20} color={BRAND.teal} />, label: "Email", value: agent.email || FALLBACK_AGENT.email },
-              { icon: <MapPin size={20} color={BRAND.teal} />, label: "Office", value: `${agent.brokerage || FALLBACK_AGENT.brokerage}\n${agent.brokerageAddress || agent.address || FALLBACK_AGENT.address}` },
+              { icon: <Phone size={20} color={BRAND.teal} />, label: "Phone", value: agent.phone || FALLBACK_AGENT.phone, href: `tel:${(agent.phone || FALLBACK_AGENT.phone).replace(/\D/g,"")}` },
+              { icon: <Mail size={20} color={BRAND.teal} />, label: "Email", value: agent.email || FALLBACK_AGENT.email, href: `mailto:${agent.email || FALLBACK_AGENT.email}` },
+              { icon: <Instagram size={20} color={BRAND.teal} />, label: "Instagram", value: "@mel.castanares", href: "https://www.instagram.com/mel.castanares" },
+              { icon: <MapPin size={20} color={BRAND.teal} />, label: "Office", value: `${agent.brokerage || FALLBACK_AGENT.brokerage}\n${agent.brokerageAddress || agent.address || FALLBACK_AGENT.address}`, href: undefined },
             ].map((c, i) => (
               <div key={i} style={{ display: "flex", gap: 16, marginBottom: 28 }}>
                 <div style={{ width: 48, height: 48, background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{c.icon}</div>
                 <div>
                   <div style={{ fontSize: 10, letterSpacing: "0.15em", textTransform: "uppercase", color: BRAND.textDim, marginBottom: 4 }}>{c.label}</div>
-                  <div style={{ fontSize: 16, whiteSpace: "pre-line" }}>{c.value}</div>
+                  {c.href ? (
+                    <a href={c.href} target={c.href.startsWith("http") ? "_blank" : undefined} rel="noopener noreferrer" style={{ fontSize: 16, whiteSpace: "pre-line", color: BRAND.text, textDecoration: "none" }}
+                      onMouseEnter={e => (e.currentTarget.style.color = BRAND.teal)} onMouseLeave={e => (e.currentTarget.style.color = BRAND.text)}>
+                      {c.value}
+                    </a>
+                  ) : (
+                    <div style={{ fontSize: 16, whiteSpace: "pre-line" }}>{c.value}</div>
+                  )}
                 </div>
               </div>
             ))}
+            <div style={{ marginTop: 8, padding: "16px 20px", background: BRAND.bgElevated, border: `1px solid ${BRAND.border}`, fontSize: 12, color: BRAND.textDim }}>
+              <span style={{ color: BRAND.teal, fontWeight: 600 }}>License RS-84753</span> · Dream Home Realty Hawaii LLC · State of Hawai'i
+            </div>
           </Reveal>
 
           <Reveal direction="left" delay={0.2}>
@@ -1908,14 +1973,24 @@ function Footer({ setPage }) {
             </div>
             <span className="font-display" style={{ fontSize: 18, letterSpacing: "0.12em", textTransform: "uppercase", color: BRAND.teal }}>Mel Castanares</span>
           </div>
-          <p style={{ color: BRAND.textMuted, fontSize: 13, lineHeight: 1.7, marginBottom: 20 }}>
-            Curating extraordinary living experiences across O'ahu with discretion and expertise.
+          <p style={{ color: BRAND.textMuted, fontSize: 13, lineHeight: 1.7, marginBottom: 8 }}>
+            O'ahu-born mama REALTOR® helping families find their place in paradise.
+          </p>
+          <p style={{ color: BRAND.textDim, fontSize: 11, letterSpacing: "0.05em", marginBottom: 20 }}>
+            License RS-84753 · Dream Home Realty Hawaii LLC
           </p>
           <div style={{ display: "flex", gap: 12 }}>
-            {[Instagram, Facebook, Linkedin, Youtube].map((Icon, i) => (
-              <div key={i} style={{ width: 36, height: 36, border: `1px solid ${BRAND.border}`, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", transition: "all 0.3s" }}>
+            {[
+              { Icon: Instagram, href: "https://www.instagram.com/mel.castanares", label: "Instagram" },
+              { Icon: Facebook, href: "https://www.facebook.com/dreamhomehi", label: "Facebook" },
+              { Icon: Linkedin, href: "#", label: "LinkedIn" },
+            ].map(({ Icon, href, label }, i) => (
+              <a key={i} href={href} target="_blank" rel="noopener noreferrer" aria-label={label}
+                style={{ width: 36, height: 36, border: `1px solid ${BRAND.border}`, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", transition: "all 0.3s", textDecoration: "none" }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = BRAND.teal; (e.currentTarget as HTMLElement).style.background = `${BRAND.teal}10`; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = BRAND.border; (e.currentTarget as HTMLElement).style.background = "transparent"; }}>
                 <Icon size={16} color={BRAND.textMuted} />
-              </div>
+              </a>
             ))}
           </div>
         </div>
@@ -1959,12 +2034,15 @@ function Footer({ setPage }) {
         <div>
           <h4 style={{ fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", color: BRAND.text, marginBottom: 20 }}>Contact</h4>
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: BRAND.textMuted }}>
+            <a href={`tel:${(agent.phone || FALLBACK_AGENT.phone).replace(/\D/g,"")}`} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: BRAND.textMuted, textDecoration: "none" }}>
               <Phone size={14} color={BRAND.teal} /> {agent.phone || FALLBACK_AGENT.phone}
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: BRAND.textMuted }}>
+            </a>
+            <a href={`mailto:${agent.email || FALLBACK_AGENT.email}`} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: BRAND.textMuted, textDecoration: "none" }}>
               <Mail size={14} color={BRAND.teal} /> {agent.email || FALLBACK_AGENT.email}
-            </div>
+            </a>
+            <a href="https://www.instagram.com/mel.castanares" target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: BRAND.textMuted, textDecoration: "none" }}>
+              <Instagram size={14} color={BRAND.teal} /> @mel.castanares
+            </a>
             <div style={{ display: "flex", alignItems: "flex-start", gap: 8, fontSize: 13, color: BRAND.textMuted }}>
               <MapPin size={14} color={BRAND.teal} style={{ flexShrink: 0, marginTop: 2 }} />
               <span style={{ whiteSpace: "pre-line" }}>{agent.brokerage || FALLBACK_AGENT.brokerage}{"\n"}{agent.brokerageAddress || agent.address || FALLBACK_AGENT.address}</span>
@@ -1973,13 +2051,22 @@ function Footer({ setPage }) {
         </div>
       </div>
 
-      <div style={{ maxWidth: 1400, margin: "0 auto", padding: "32px 24px 0", marginTop: 48, borderTop: `1px solid ${BRAND.border}`, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 16 }}>
-        <p style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: BRAND.textDim }}>
-          © {new Date().getFullYear()} Mel Castanares. All Rights Reserved.
+      <div style={{ maxWidth: 1400, margin: "0 auto", padding: "32px 24px 0", marginTop: 48, borderTop: `1px solid ${BRAND.border}` }}>
+        <p style={{ fontSize: 12, color: BRAND.textDim, lineHeight: 1.7, marginBottom: 20, maxWidth: 900 }}>
+          Mel Castanares is a licensed REALTOR® in the State of Hawai'i (License RS-84753), affiliated with Dream Home Realty Hawaii LLC. All information provided on this website is for general informational purposes only and is subject to change. Property listings, market data, and estimates are not guarantees of sale or value. Contact Mel for personalized real estate advice.
         </p>
-        <div style={{ display: "flex", gap: 20 }}>
-          <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: BRAND.textDim, cursor: "pointer" }}>Privacy Policy</span>
-          <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: BRAND.textDim, cursor: "pointer" }}>Terms</span>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
+          <p style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: BRAND.textDim }}>
+            © {new Date().getFullYear()} Mel Castanares · RS-84753 · Dream Home Realty Hawaii LLC. All Rights Reserved.
+          </p>
+          <div style={{ display: "flex", gap: 20, alignItems: "center" }}>
+            <a href="https://www.instagram.com/mel.castanares" target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: BRAND.textDim, textDecoration: "none", transition: "color 0.3s" }}
+              onMouseEnter={e => (e.currentTarget.style.color = BRAND.teal)} onMouseLeave={e => (e.currentTarget.style.color = BRAND.textDim)}>
+              <Instagram size={13} /> @mel.castanares
+            </a>
+            <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: BRAND.textDim, cursor: "pointer" }}>Privacy Policy</span>
+            <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: BRAND.textDim, cursor: "pointer" }}>Terms</span>
+          </div>
         </div>
       </div>
     </footer>
@@ -2150,6 +2237,11 @@ function FloatingActions({ setPage }) {
 
 export default function App() {
   const [page, setPage] = useState("home");
+
+  // Scroll to top instantly on every page change
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
+  }, [page]);
 
   const renderPage = () => {
     switch (page) {
