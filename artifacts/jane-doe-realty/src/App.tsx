@@ -1091,7 +1091,7 @@ function BlogPage({ setPage }) {
             <div style={{ color: BRAND.teal, fontSize: 11, letterSpacing: "0.25em", textTransform: "uppercase", marginBottom: 16, fontWeight: 500 }}>The Journal</div>
             <h1 className="font-display" style={{ fontSize: "clamp(40px, 6vw, 64px)", marginBottom: 16, lineHeight: 1.05 }}>Real Talk About<br/><span style={{ fontStyle: "italic" }} className="gold-text">Real Estate</span></h1>
             <p style={{ color: BRAND.textMuted, fontSize: 16, maxWidth: 560, lineHeight: 1.7 }}>
-              No fluff, no jargon. Just honest perspectives from 15 years in O'ahu's market — the trends, traps, and opportunities most agents won't tell you about.
+              No fluff, no jargon. Just honest perspectives from years in O'ahu's market — the trends, traps, and opportunities most agents won't tell you about.
             </p>
           </div>
         </Reveal>
@@ -1160,6 +1160,45 @@ function BlogPage({ setPage }) {
             </Reveal>
           ))}
         </div>
+
+        {/* Instagram Feed Section */}
+        <Reveal delay={0.2}>
+          <div style={{ marginTop: 80, paddingTop: 56, borderTop: `1px solid ${BRAND.border}` }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 32 }}>
+              <div>
+                <div style={{ color: BRAND.teal, fontSize: 11, letterSpacing: "0.25em", textTransform: "uppercase", marginBottom: 8, fontWeight: 600, display: "flex", alignItems: "center", gap: 8 }}>
+                  <Instagram size={14} /> On Instagram
+                </div>
+                <h3 className="font-display" style={{ fontSize: 28 }}>Follow Along</h3>
+              </div>
+              <a href="https://www.instagram.com/mel.castanares" target="_blank" rel="noopener noreferrer" className="btn-outline" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "10px 20px", fontSize: 11, textDecoration: "none", borderRadius: 6 }}>
+                <Instagram size={14} /> @mel.castanares
+              </a>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: 24 }}>
+              {IG_FEED_POSTS.map((url, i) => (
+                <div key={i} style={{ 
+                  background: BRAND.bgCard, 
+                  border: `1px solid ${BRAND.border}`, 
+                  borderRadius: 12, 
+                  overflow: "hidden",
+                  boxShadow: "0 4px 20px rgba(0,0,0,0.04)",
+                }}>
+                  <iframe
+                    src={url}
+                    style={{ width: "100%", minHeight: 500, border: "none" }}
+                    allowFullScreen
+                    loading="lazy"
+                    scrolling="no"
+                  />
+                </div>
+              ))}
+            </div>
+            <p style={{ color: BRAND.textDim, fontSize: 13, marginTop: 20, textAlign: "center" }}>
+              Real estate tips, market updates, and life in Hawai'i — follow <a href="https://www.instagram.com/mel.castanares" target="_blank" rel="noopener noreferrer" style={{ color: BRAND.teal, textDecoration: "none", fontWeight: 600 }}>@mel.castanares</a> for the latest.
+            </p>
+          </div>
+        </Reveal>
       </div>
     </div>
   );
@@ -1168,6 +1207,49 @@ function BlogPage({ setPage }) {
 // ─────────────────────────────────────────────
 // BLOG POST PAGE — Full Article with Rich Content
 // ─────────────────────────────────────────────
+
+// Map blog slugs to relevant Instagram post/reel URLs for embedding
+const BLOG_IG_EMBEDS = {
+  "why-oahu-buyers-are-winning-right-now": [
+    { url: "https://www.instagram.com/reel/DWQWkHZgg2j/embed", caption: "See what's happening in the market right now" },
+  ],
+  "i-toured-50-open-houses-so-you-dont-have-to": [
+    { url: "https://www.instagram.com/p/mel.castanares/embed", caption: "Behind the scenes at open houses" },
+  ],
+};
+
+// Mel's Instagram posts to feature on the blog page
+const IG_FEED_POSTS = [
+  "https://www.instagram.com/reel/DWQWkHZgg2j/embed",
+  "https://www.instagram.com/mel.castanares/embed",
+];
+
+function InstagramEmbed({ url, caption }) {
+  return (
+    <div style={{ margin: "36px 0" }}>
+      <div style={{ 
+        background: BRAND.bgLight, 
+        border: `1px solid ${BRAND.border}`, 
+        borderRadius: 12, 
+        overflow: "hidden",
+        maxWidth: 480,
+      }}>
+        <iframe
+          src={url}
+          style={{ width: "100%", minHeight: 520, border: "none" }}
+          allowFullScreen
+          loading="lazy"
+          scrolling="no"
+        />
+      </div>
+      {caption && (
+        <p style={{ color: BRAND.textDim, fontSize: 12, marginTop: 10, fontStyle: "italic", display: "flex", alignItems: "center", gap: 6 }}>
+          <Instagram size={13} color={BRAND.teal} /> {caption}
+        </p>
+      )}
+    </div>
+  );
+}
 
 const ARTICLE_CONTENT = {
   "why-oahu-buyers-are-winning-right-now": `The dynamic on O'ahu has shifted dramatically in the last six months, and if you're a buyer, this is the window you've been waiting for.\n\nInventory across Honolulu County rose 22% year-over-year, the largest jump since 2019. That means more choices, less competition, and — crucially — more room to negotiate. I've had three buyers in the past month get seller concessions on closing costs that would have been laughed at a year ago.\n\nHere's what's driving the shift: sellers who listed in late 2025 expecting bidding wars are now sitting at 60+ days on market. Price reductions are up 34%. And the psychological effect is real — when buyers see "price reduced" badges, they smell blood in the water.\n\nBut here's the part nobody talks about: mortgage creativity. We're seeing 2-1 buydowns, seller-paid rate locks, and even assumable mortgage transfers on VA and FHA loans. One of my buyers just assumed a 3.2% rate on a Kailua property. That's a game-changer.\n\nFor sellers, the message is clear: the days of "list it and they will come" are over. You need professional photography, strategic pricing from day one, and an agent who actually markets — not just posts on the MLS and prays. If your home has been sitting for 30+ days, we should talk.\n\nThe bottom line: O'ahu is still a fundamentally strong market with limited land, growing demand, and incredible quality of life. But the tactics that work today are different from six months ago. Adapt or wait.`,
@@ -1222,6 +1304,22 @@ function BlogPostPage({ setPage }) {
             })}
           </div>
         </Reveal>
+
+        {/* Instagram embeds related to this article */}
+        {BLOG_IG_EMBEDS[post.slug] && BLOG_IG_EMBEDS[post.slug].length > 0 && (
+          <Reveal delay={0.35}>
+            <div style={{ marginTop: 48, paddingTop: 32, borderTop: `1px solid ${BRAND.border}` }}>
+              <h4 style={{ fontSize: 13, letterSpacing: "0.12em", textTransform: "uppercase", color: BRAND.teal, marginBottom: 20, display: "flex", alignItems: "center", gap: 8, fontWeight: 600 }}>
+                <Instagram size={16} /> From Mel's Instagram
+              </h4>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 20 }}>
+                {BLOG_IG_EMBEDS[post.slug].map((embed, i) => (
+                  <InstagramEmbed key={i} url={embed.url} caption={embed.caption} />
+                ))}
+              </div>
+            </div>
+          </Reveal>
+        )}
 
         {/* Author card */}
         <Reveal delay={0.4}>
