@@ -100,8 +100,8 @@ const FALLBACK_AGENT = {
   address: "95-1249 Meheula Parkway, #B-15B\nMililani, HI 96789",
   bio: "Born and raised on O'ahu, Mel knows these islands like the back of her hand. Before real estate, she managed properties across Honolulu — giving her an inside look at what makes a home truly livable, not just marketable.\n\nAt Dream Home Realty Hawai'i, Mel specializes in helping first-time buyers, growing families, and investors find their perfect fit. Whether you're searching for your forever home in Mililani, a rental investment in Kāne'ohe, or your first condo in town, Mel makes the process feel easy, personal, and — dare we say — fun. She treats every client like 'ohana because that's exactly what you become.",
   shortBio: "O'ahu born & raised. Helping you find your dream home in paradise.",
-  photo: "/images/mel-headshot.png",
-  photoUrl: "/images/mel-headshot.png",
+  photo: "/images/mel-headshot.jpg",
+  photoUrl: "/images/mel-headshot.jpg",
   specialties: ["First-Time Buyers", "Residential Sales", "Property Management", "Investment Properties", "Relocation Services"],
   serviceAreas: ["Mililani", "Waipahu", "Kāne'ohe", "Honolulu", "Kapolei", "Ewa Beach", "Pearl City"],
   areas: ["Mililani", "Waipahu", "Kāne'ohe", "Honolulu", "Kapolei", "Ewa Beach", "Pearl City"],
@@ -131,7 +131,7 @@ const FALLBACK_NEIGHBORHOODS = [
 ];
 
 const FALLBACK_TESTIMONIALS = [
-  { clientName: "First-Time Renter", quote: "This was the first time renting a house on my own so I was really skeptical on which company to go with. I put my trust in Tori and Mel and they made the entire process smooth and easy. Although it was my first-time renting, they made me feel safe and explained everything I needed to know. Anytime I've had a problem or concern they were able to get back to me right away! In the future I will put my trust back with them as I make my first home purchase!", rating: 5, transactionType: "bought", featured: true, clientPhoto: "/images/testimonial-sold.png" },
+  { clientName: "First-Time Renter", quote: "This was the first time renting a house on my own so I was really skeptical on which company to go with. I put my trust in Tori and Mel and they made the entire process smooth and easy. Although it was my first-time renting, they made me feel safe and explained everything I needed to know. Anytime I've had a problem or concern they were able to get back to me right away! In the future I will put my trust back with them as I make my first home purchase!", rating: 5, transactionType: "bought", featured: true, clientPhoto: "/images/testimonial-sold.jpg" },
   { clientName: "George C.", quote: "Mel guided us through selling our home on Wilhelmina Rise with extraordinary professionalism. After an extensive interview process, she stood out for her market knowledge and genuine care.", rating: 5, transactionType: "sold" },
   { clientName: "Jenely S.", quote: "I searched for nearly 3 years, unsure if I even wanted to buy. Mel stayed patient the entire time and ultimately helped me find my perfect home. She's honestly amazing.", rating: 5, transactionType: "bought" },
   { clientName: "Dan W.", quote: "As a first-time buyer, I had no idea what I was getting into. Mel assembled an incredible team and walked me through every step. I couldn't have done it without her.", rating: 5, transactionType: "bought" },
@@ -144,7 +144,7 @@ const FALLBACK_BLOG_POSTS = [
   { id: "1", slug: "why-oahu-buyers-are-winning-right-now", title: "Why O'ahu Buyers Are Winning Right Now (And Sellers Should Pay Attention)", excerpt: "For the first time in three years, buyers have real negotiating power on O'ahu. Inventory is up 22%, price reductions are climbing, and mortgage rate locks are getting creative. Here's how smart buyers are capitalizing — and what sellers need to do differently.", category: "Market Intelligence", date: "Mar 22, 2026", readTime: 7, images: [{url: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80", isPrimary: true}], featured: true },
   { id: "2", slug: "i-toured-50-open-houses-so-you-dont-have-to", title: "I Toured 50 Open Houses in 30 Days — Here's What Actually Sells", excerpt: "After walking through 50 properties across every neighborhood on O'ahu, patterns emerged. The homes that went under contract fast all shared 5 specific things. Spoiler: granite countertops aren't one of them.", category: "Behind The Scenes", date: "Mar 14, 2026", readTime: 9, images: [{url: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80", isPrimary: true}] },
   { id: "3", slug: "the-hidden-cost-of-waiting-to-sell", title: "The Hidden Cost of 'Waiting for the Right Time' to Sell Your Home", excerpt: "Every month you wait to list, you're not just losing potential equity — you're competing against an increasingly savvy buyer pool armed with better data than ever. I break down the real math behind the 'I'll wait' decision.", category: "Seller Reality Check", date: "Mar 5, 2026", readTime: 6, images: [{url: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80", isPrimary: true}] },
-  { id: "4", slug: "kaimuki-vs-kailua-the-real-comparison", title: "Kaimuki vs. Kailua: The Honest Comparison Nobody Else Will Give You", excerpt: "Two of O'ahu's most beloved neighborhoods, but wildly different lifestyles. I've sold homes in both for 15 years. Here's the unfiltered truth about schools, commutes, appreciation rates, and which one actually fits your life.", category: "Neighborhood Deep Dive", date: "Feb 24, 2026", readTime: 11, images: [{url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80", isPrimary: true}] },
+  { id: "4", slug: "kaimuki-vs-kailua-the-real-comparison", title: "Kaimuki vs. Kailua: The Honest Comparison Nobody Else Will Give You", excerpt: "Two of O'ahu's most beloved neighborhoods, but wildly different lifestyles. I've sold homes in both for years. Here's the unfiltered truth about schools, commutes, appreciation rates, and which one actually fits your life.", category: "Neighborhood Deep Dive", date: "Feb 24, 2026", readTime: 11, images: [{url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80", isPrimary: true}] },
   { id: "5", slug: "what-mainland-buyers-get-wrong-about-hawaii", title: "What Mainland Buyers Get Wrong About Buying in Hawai'i", excerpt: "After helping 60+ families relocate to the islands, I've seen the same mistakes repeated. From underestimating hurricane insurance to not understanding leasehold vs. fee simple, these are the traps — and how to avoid them.", category: "Relocation Intel", date: "Feb 15, 2026", readTime: 8, images: [{url: "https://images.unsplash.com/photo-1505228395891-9a51e7e86bf6?w=800&q=80", isPrimary: true}] },
   { id: "6", slug: "my-2026-prediction-for-hawaii-kai", title: "My Bold 2026 Prediction for Hawai'i Kai (And the Data Behind It)", excerpt: "I'm going on record: Hawai'i Kai is the most undervalued neighborhood on O'ahu right now. New marina renovations, school improvements, and the Costco effect are converging. Here's my full analysis.", category: "Investment Thesis", date: "Feb 6, 2026", readTime: 10, images: [{url: "https://images.unsplash.com/photo-1506929562872-bb421503ef21?w=800&q=80", isPrimary: true}] },
 ];
@@ -480,16 +480,11 @@ function HomePage({ setPage }) {
           position: "absolute", inset: 0, zIndex: 0,
           transform: `translateY(${scrollY * 0.15}px)`,
         }}>
-          <video
-            autoPlay
-            muted
-            loop
-            playsInline
-            poster="/images/hero-diamondhead.png"
-            style={{ width: "100%", height: "120%", objectFit: "cover", objectPosition: "center 40%" }}
-          >
-            <source src="https://videos.pexels.com/video-files/1093662/1093662-hd_1920_1080_30fps.mp4" type="video/mp4" />
-          </video>
+          <img 
+            src="/images/hero-diamondhead.jpg" 
+            alt="Diamond Head infinity pool overlooking the ocean" 
+            style={{ width: "100%", height: "120%", objectFit: "cover", objectPosition: "center 35%" }}
+          />
         </div>
         <div style={{ position: "absolute", inset: 0, background: `linear-gradient(to bottom, rgba(27,42,51,0.3) 0%, rgba(27,42,51,0.5) 50%, ${BRAND.bg}F0 100%)` }} />
         
@@ -639,7 +634,7 @@ function HomePage({ setPage }) {
             {(nResp?.neighborhoods || FALLBACK_NEIGHBORHOODS).slice(0, 4).map((n, i) => (
               <Reveal key={n.id} delay={i * 0.1}>
                 <div className="card-hover img-zoom" onClick={() => go("neighborhoods")} style={{ cursor: "pointer", position: "relative", overflow: "hidden", aspectRatio: "4/3" }}>
-                  <img src={n.coverImage || n.img} alt={n.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  <img src={n.coverImage || n.images?.[0]?.url || n.img} alt={n.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                   <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(10,10,10,0.9) 0%, transparent 60%)" }} />
                   <div style={{ position: "absolute", bottom: 0, left: 0, padding: 24 }}>
                     <h3 className="font-display" style={{ fontSize: 26, marginBottom: 4 }}>{n.name}</h3>
@@ -910,7 +905,7 @@ function AboutPage({ setPage }) {
             <div className="img-zoom" style={{ position: "relative" }}>
               <img src={agent.photoUrl || agent.photo || FALLBACK_AGENT.photo} alt="Mel" style={{ width: "100%", aspectRatio: "3/4", objectFit: "cover" }} />
               <div style={{ position: "absolute", bottom: -16, right: -16, background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, padding: "16px 24px" }}>
-                <div className="font-display gold-text" style={{ fontSize: 32 }}>{stats.yearsExperience || agent.yearsExperience || 15}+</div>
+                <div className="font-display gold-text" style={{ fontSize: 32 }}>{stats.yearsExperience || agent.yearsExperience || 8}+</div>
                 <div style={{ fontSize: 10, letterSpacing: "0.15em", textTransform: "uppercase", color: BRAND.textMuted }}>Years in Real Estate</div>
               </div>
             </div>
@@ -973,7 +968,7 @@ function NeighborhoodsPage() {
             <Reveal key={n.id} delay={i * 0.1} direction="up">
               <div className="card-hover" style={{ background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, overflow: "hidden" }}>
                 <div className="img-zoom" style={{ aspectRatio: "16/9" }}>
-                  <img src={n.coverImage || n.img} alt={n.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  <img src={n.coverImage || n.images?.[0]?.url || n.img} alt={n.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                 </div>
                 <div style={{ padding: 28 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
@@ -1112,7 +1107,7 @@ function BlogPage({ setPage }) {
               border: `1px solid ${BRAND.border}`,
             }}>
               <div className="img-zoom" style={{ aspectRatio: "21/9", position: "relative" }}>
-                <img src={featured.img} alt={featured.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                <img src={featured.images?.[0]?.url || featured.img} alt={featured.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                 <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to right, rgba(10,10,10,0.95) 0%, rgba(10,10,10,0.7) 40%, transparent 70%)" }} />
                 <div style={{ position: "absolute", top: 0, left: 0, bottom: 0, display: "flex", flexDirection: "column", justifyContent: "center", padding: "40px 48px", maxWidth: 560 }}>
                   <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 16 }}>
@@ -1147,7 +1142,7 @@ function BlogPage({ setPage }) {
             <Reveal key={post.id} delay={i * 0.08} direction="up">
               <div className="card-hover" onClick={() => goPost(post)} style={{ cursor: "pointer", background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, overflow: "hidden", height: "100%", display: "flex", flexDirection: "column" }}>
                 <div className="img-zoom" style={{ aspectRatio: "16/10", position: "relative" }}>
-                  <img src={post.img} alt={post.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  <img src={post.images?.[0]?.url || post.img} alt={post.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                   <div style={{ position: "absolute", top: 12, left: 12 }}>
                     <span style={{ background: `${BRAND.bg}DD`, backdropFilter: "blur(8px)", color: BRAND.teal, fontSize: 10, fontWeight: 600, padding: "5px 10px", letterSpacing: "0.1em", textTransform: "uppercase", border: `1px solid ${BRAND.border}` }}>{post.category}</span>
                   </div>
@@ -1292,7 +1287,7 @@ function BlogPostPage({ setPage }) {
 
         <Reveal delay={0.2}>
           <div className="img-zoom" style={{ margin: "40px 0", border: `1px solid ${BRAND.border}` }}>
-            <img src={post.img} alt={post.title} style={{ width: "100%", aspectRatio: "16/9", objectFit: "cover" }} />
+            <img src={post.images?.[0]?.url || post.img} alt={post.title} style={{ width: "100%", aspectRatio: "16/9", objectFit: "cover" }} />
           </div>
         </Reveal>
 
@@ -1426,46 +1421,59 @@ function ContactPage() {
 function BuyersPage({ setPage }) {
   const go = (p) => { setPage(p); window.scrollTo({ top: 0, behavior: "smooth" }); };
   const steps = [
-    { num: "01", title: "Discovery Call", desc: "We start with a conversation about your goals, timeline, budget, and lifestyle preferences to create a personalized search strategy." },
-    { num: "02", title: "Pre-Approval", desc: "Mel connects you with trusted lenders to secure pre-approval, giving you a competitive edge in Hawai'i's market." },
-    { num: "03", title: "Curated Showings", desc: "No scrolling through hundreds of listings. Mel hand-picks properties that match your criteria and arranges private showings." },
-    { num: "04", title: "Offer & Negotiation", desc: "When you find the one, Mel crafts a strategic offer and negotiates terms that protect your interests." },
-    { num: "05", title: "Close & Celebrate", desc: "From inspections to closing, Mel coordinates every detail so you can focus on planning your move to paradise." },
+    { num: "01", title: "Discovery Call", desc: "We start with a conversation about your goals, timeline, budget, and lifestyle preferences to create a personalized search strategy.", icon: "🤙" },
+    { num: "02", title: "Pre-Approval", desc: "Mel connects you with trusted lenders to secure pre-approval, giving you a competitive edge in Hawai'i's market.", icon: "💰" },
+    { num: "03", title: "Curated Showings", desc: "No scrolling through hundreds of listings. Mel hand-picks properties that match your criteria and arranges private showings.", icon: "🏡" },
+    { num: "04", title: "Offer & Negotiation", desc: "When you find the one, Mel crafts a strategic offer and negotiates terms that protect your interests.", icon: "📝" },
+    { num: "05", title: "Close & Celebrate", desc: "From inspections to closing, Mel coordinates every detail so you can focus on planning your move to paradise.", icon: "🎉" },
   ];
 
   return (
     <div style={{ paddingTop: 120 }}>
-      <section style={{ position: "relative", padding: "80px 24px 100px", textAlign: "center" }}>
-        <img src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=1600&q=80" alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", opacity: 0.15 }} />
-        <div style={{ position: "relative", zIndex: 1, maxWidth: 700, margin: "0 auto" }}>
+      {/* Cinematic Hero */}
+      <section style={{ position: "relative", padding: "100px 24px 120px", overflow: "hidden" }}>
+        <img src="/images/mel-showing.jpg" alt="Mel showing a home" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, rgba(27,42,51,0.85) 0%, rgba(26,138,125,0.6) 100%)" }} />
+        <div style={{ position: "relative", zIndex: 1, maxWidth: 700, margin: "0 auto", textAlign: "center" }}>
           <Reveal>
-            <div style={{ color: BRAND.teal, fontSize: 11, letterSpacing: "0.25em", textTransform: "uppercase", marginBottom: 12, fontWeight: 500 }}>Your Journey</div>
-            <h1 className="font-display" style={{ fontSize: "clamp(40px, 6vw, 64px)", marginBottom: 16 }}>Buyer's Experience</h1>
-            <p style={{ color: BRAND.textMuted, fontSize: 16, lineHeight: 1.7 }}>
-              Finding your dream home in Hawai'i should be exciting, not stressful. Mel's proven process makes it seamless from first call to keys in hand.
+            <div style={{ color: "#fff", fontSize: 11, letterSpacing: "0.35em", textTransform: "uppercase", marginBottom: 16, fontWeight: 500, opacity: 0.8 }}>Your Journey</div>
+            <h1 className="font-display" style={{ fontSize: "clamp(40px, 7vw, 68px)", marginBottom: 20, color: "#fff", lineHeight: 1.05 }}>
+              Finding Home<br/>Should Feel Like <span style={{ fontStyle: "italic", color: BRAND.goldLight }}>This</span>
+            </h1>
+            <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 17, lineHeight: 1.7, maxWidth: 520, margin: "0 auto" }}>
+              Not stressful. Not confusing. Just exciting — the way it's supposed to be. Here's how Mel makes it happen.
             </p>
           </Reveal>
         </div>
       </section>
 
+      {/* Steps as cards with numbers */}
       <div className="section-pad">
-        {steps.map((step, i) => (
-          <Reveal key={i} delay={i * 0.1}>
-            <div style={{
-              display: "grid", gridTemplateColumns: "80px 1fr", gap: 32, paddingBottom: 48, marginBottom: 48,
-              borderBottom: i < steps.length - 1 ? `1px solid ${BRAND.border}` : "none",
-            }}>
-              <div className="font-display gold-text" style={{ fontSize: 48, lineHeight: 1 }}>{step.num}</div>
-              <div>
-                <h3 className="font-display" style={{ fontSize: 26, marginBottom: 8 }}>{step.title}</h3>
-                <p style={{ color: BRAND.textMuted, fontSize: 15, lineHeight: 1.7 }}>{step.description || step.desc}</p>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 24, marginBottom: 56 }}>
+          {steps.map((step, i) => (
+            <Reveal key={i} delay={i * 0.1} direction="up">
+              <div className="card-hover" style={{ background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, padding: 32, height: "100%", borderRadius: 12, position: "relative", overflow: "hidden" }}>
+                <div style={{ position: "absolute", top: -12, right: -8, fontSize: 80, fontFamily: "'DM Serif Display', serif", color: BRAND.teal, opacity: 0.06, lineHeight: 1 }}>{step.num}</div>
+                <div style={{ fontSize: 32, marginBottom: 16 }}>{step.icon}</div>
+                <div style={{ color: BRAND.teal, fontSize: 11, letterSpacing: "0.15em", textTransform: "uppercase", fontWeight: 700, marginBottom: 8 }}>Step {step.num}</div>
+                <h3 className="font-display" style={{ fontSize: 24, marginBottom: 12 }}>{step.title}</h3>
+                <p style={{ color: BRAND.textMuted, fontSize: 14, lineHeight: 1.7 }}>{step.desc}</p>
               </div>
-            </div>
-          </Reveal>
-        ))}
-        <div style={{ textAlign: "center", marginTop: 32 }}>
-          <button className="btn-primary" onClick={() => go("contact")}>Start Your Buying Journey</button>
+            </Reveal>
+          ))}
         </div>
+
+        {/* CTA band */}
+        <Reveal>
+          <div style={{ background: `linear-gradient(135deg, ${BRAND.teal}, ${BRAND.tealDark})`, padding: "48px 40px", borderRadius: 16, textAlign: "center", color: "#fff" }}>
+            <h2 className="font-display" style={{ fontSize: 32, marginBottom: 12 }}>Ready to Start?</h2>
+            <p style={{ opacity: 0.8, fontSize: 15, marginBottom: 24, maxWidth: 480, margin: "0 auto 24px" }}>Every journey starts with a conversation. Mel's here to answer your questions — no pressure, no obligations.</p>
+            <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+              <button className="btn-primary" onClick={() => go("contact")} style={{ background: "#fff", color: BRAND.teal }}>Let's Talk</button>
+              <button className="btn-outline" onClick={() => go("mortgage")} style={{ borderColor: "rgba(255,255,255,0.4)", color: "#fff" }}>Mortgage Calculator</button>
+            </div>
+          </div>
+        </Reveal>
       </div>
     </div>
   );
@@ -1478,48 +1486,63 @@ function BuyersPage({ setPage }) {
 function SellersPage({ setPage }) {
   const go = (p) => { setPage(p); window.scrollTo({ top: 0, behavior: "smooth" }); };
   const steps = [
-    { num: "01", title: "Market Analysis", desc: "Mel provides a comprehensive comparative market analysis so you know your home's true value in today's market." },
-    { num: "02", title: "Strategic Pricing", desc: "Using data and market expertise, Mel positions your property to attract serious buyers while maximizing your return." },
-    { num: "03", title: "Luxury Marketing", desc: "Professional photography, videography, drone footage, staging, and targeted digital campaigns to showcase your property." },
-    { num: "04", title: "Showings & Offers", desc: "Mel handles all inquiries, conducts showings, and presents offers with clear analysis so you can make informed decisions." },
-    { num: "05", title: "Negotiation & Close", desc: "From offer acceptance through escrow, Mel negotiates fiercely on your behalf and manages every detail to closing." },
+    { num: "01", title: "Market Analysis", desc: "Mel provides a comprehensive comparative market analysis so you know your home's true value in today's market.", icon: "📊" },
+    { num: "02", title: "Strategic Pricing", desc: "Using data and market expertise, Mel positions your property to attract serious buyers while maximizing your return.", icon: "🎯" },
+    { num: "03", title: "Luxury Marketing", desc: "Professional photography, videography, drone footage, staging, and targeted digital campaigns to showcase your property.", icon: "📸" },
+    { num: "04", title: "Showings & Offers", desc: "Mel handles all inquiries, conducts showings, and presents offers with clear analysis so you can make informed decisions.", icon: "🔑" },
+    { num: "05", title: "Negotiation & Close", desc: "From offer acceptance through escrow, Mel negotiates fiercely on your behalf and manages every detail to closing.", icon: "🎉" },
   ];
 
   return (
     <div style={{ paddingTop: 120 }}>
-      <section style={{ position: "relative", padding: "80px 24px 100px", textAlign: "center" }}>
-        <img src="https://images.unsplash.com/photo-1600210491892-03d54c0aaf87?w=1600&q=80" alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", opacity: 0.15 }} />
-        <div style={{ position: "relative", zIndex: 1, maxWidth: 700, margin: "0 auto" }}>
+      {/* Hero */}
+      <section style={{ position: "relative", padding: "100px 24px 120px", overflow: "hidden" }}>
+        <img src="https://images.unsplash.com/photo-1600210491892-03d54c0aaf87?w=1600&q=80" alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, rgba(27,42,51,0.88) 0%, rgba(212,168,83,0.5) 100%)" }} />
+        <div style={{ position: "relative", zIndex: 1, maxWidth: 700, margin: "0 auto", textAlign: "center" }}>
           <Reveal>
-            <div style={{ color: BRAND.teal, fontSize: 11, letterSpacing: "0.25em", textTransform: "uppercase", marginBottom: 12, fontWeight: 500 }}>Your Journey</div>
-            <h1 className="font-display" style={{ fontSize: "clamp(40px, 6vw, 64px)", marginBottom: 16 }}>Seller's Experience</h1>
-            <p style={{ color: BRAND.textMuted, fontSize: 16, lineHeight: 1.7 }}>
-              Selling your home is one of the biggest financial decisions you'll make. Mel's strategic approach ensures you get the best possible outcome.
+            <div style={{ color: "#fff", fontSize: 11, letterSpacing: "0.35em", textTransform: "uppercase", marginBottom: 16, fontWeight: 500, opacity: 0.8 }}>Your Journey</div>
+            <h1 className="font-display" style={{ fontSize: "clamp(40px, 7vw, 68px)", marginBottom: 20, color: "#fff", lineHeight: 1.05 }}>
+              Sell Smart.<br/><span style={{ fontStyle: "italic", color: BRAND.goldLight }}>Sell for More.</span>
+            </h1>
+            <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 17, lineHeight: 1.7, maxWidth: 520, margin: "0 auto" }}>
+              Your home is your biggest asset. Mel's strategic approach means more money in your pocket and less stress on your shoulders.
             </p>
           </Reveal>
         </div>
       </section>
 
+      {/* Steps as visual timeline cards */}
       <div className="section-pad">
-        {steps.map((step, i) => (
-          <Reveal key={i} delay={i * 0.1}>
-            <div style={{
-              display: "grid", gridTemplateColumns: "80px 1fr", gap: 32, paddingBottom: 48, marginBottom: 48,
-              borderBottom: i < steps.length - 1 ? `1px solid ${BRAND.border}` : "none",
-            }}>
-              <div className="font-display gold-text" style={{ fontSize: 48, lineHeight: 1 }}>{step.num}</div>
-              <div>
-                <h3 className="font-display" style={{ fontSize: 26, marginBottom: 8 }}>{step.title}</h3>
-                <p style={{ color: BRAND.textMuted, fontSize: 15, lineHeight: 1.7 }}>{step.description || step.desc}</p>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 24, marginBottom: 56 }}>
+          {steps.map((step, i) => (
+            <Reveal key={i} delay={i * 0.1} direction="up">
+              <div className="card-hover" style={{ background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, padding: 32, height: "100%", borderRadius: 12, position: "relative", overflow: "hidden" }}>
+                <div style={{ position: "absolute", top: -12, right: -8, fontSize: 80, fontFamily: "'DM Serif Display', serif", color: BRAND.gold, opacity: 0.06, lineHeight: 1 }}>{step.num}</div>
+                <div style={{ fontSize: 32, marginBottom: 16 }}>{step.icon}</div>
+                <div style={{ color: BRAND.gold, fontSize: 11, letterSpacing: "0.15em", textTransform: "uppercase", fontWeight: 700, marginBottom: 8 }}>Step {step.num}</div>
+                <h3 className="font-display" style={{ fontSize: 24, marginBottom: 12 }}>{step.title}</h3>
+                <p style={{ color: BRAND.textMuted, fontSize: 14, lineHeight: 1.7 }}>{step.desc}</p>
               </div>
+            </Reveal>
+          ))}
+        </div>
+
+        {/* CTA band */}
+        <Reveal>
+          <div style={{ background: `linear-gradient(135deg, ${BRAND.gold}, ${BRAND.goldDark})`, padding: "48px 40px", borderRadius: 16, textAlign: "center", color: "#fff" }}>
+            <h2 className="font-display" style={{ fontSize: 32, marginBottom: 12 }}>What's Your Home Worth?</h2>
+            <p style={{ opacity: 0.85, fontSize: 15, marginBottom: 24, maxWidth: 480, margin: "0 auto 24px" }}>Get a free, no-obligation market analysis. Mel will tell you exactly what your home could sell for in today's market.</p>
+            <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+              <button className="btn-primary" onClick={() => go("valuation")} style={{ background: "#fff", color: BRAND.goldDark }}>Get My Valuation</button>
+              <button className="btn-outline" onClick={() => go("contact")} style={{ borderColor: "rgba(255,255,255,0.4)", color: "#fff" }}>Talk to Mel</button>
             </div>
-          </Reveal>
-        ))}
-        <div style={{ textAlign: "center", marginTop: 32 }}>
-          <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}>
-            <button className="btn-primary" onClick={() => go("valuation")}>Get Your Home Valuation</button>
-            <button className="btn-outline" onClick={() => go("contact")}>Talk to Mel</button>
           </div>
+        </Reveal>
+      </div>
+    </div>
+  );
+}
         </div>
       </div>
     </div>
@@ -1967,169 +1990,159 @@ function Footer({ setPage }) {
 }
 
 // ─────────────────────────────────────────────
-// AI CHAT WIDGET — Floating assistant powered by Cloudflare Workers AI
+// FLOATING ACTIONS — Contact CTA + AI Chat
 // ─────────────────────────────────────────────
 
-const CHAT_WORKER_URL = "https://mel-ai-chat.gorjessbbyx3.workers.dev"; // Update after deploying worker
-
-function AIChatWidget() {
-  const [open, setOpen] = useState(false);
+function FloatingActions({ setPage }) {
+  const [chatOpen, setChatOpen] = useState(false);
+  const [contactOpen, setContactOpen] = useState(false);
   const [messages, setMessages] = useState([
-    { role: "assistant", content: "Aloha! I'm Mel's AI assistant. Ask me anything about buying or selling a home in Hawai'i, neighborhoods on O'ahu, or how Mel can help you. 🌺" }
+    { role: "assistant", content: "Aloha! 🌺 I'm Mel's AI assistant. Ask me about buying or selling a home in Hawai'i, O'ahu neighborhoods, or anything real estate!" }
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const messagesEndRef = useRef(null);
+  const endRef = useRef(null);
   const inputRef = useRef(null);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-  useEffect(scrollToBottom, [messages]);
-  useEffect(() => { if (open && inputRef.current) inputRef.current.focus(); }, [open]);
+  useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
+  useEffect(() => { if (chatOpen && inputRef.current) inputRef.current.focus(); }, [chatOpen]);
+
+  const CHAT_URL = "https://mel-ai-chat.gorjessbbyx3.workers.dev";
 
   const sendMessage = async () => {
     if (!input.trim() || loading) return;
     const userMsg = { role: "user", content: input.trim() };
-    const newMessages = [...messages, userMsg];
-    setMessages(newMessages);
+    const newMsgs = [...messages, userMsg];
+    setMessages(newMsgs);
     setInput("");
     setLoading(true);
 
     try {
-      const res = await fetch(CHAT_WORKER_URL, {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 8000);
+      const res = await fetch(CHAT_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: newMessages.filter(m => m.role !== "system") }),
+        body: JSON.stringify({ messages: newMsgs.filter(m => m.role !== "system") }),
+        signal: controller.signal,
       });
+      clearTimeout(timeout);
       const data = await res.json();
-      setMessages(prev => [...prev, { role: "assistant", content: data.response || "I'm having trouble connecting. Reach Mel directly at (808) 285-8774!" }]);
-    } catch (err) {
-      setMessages(prev => [...prev, { role: "assistant", content: "Sorry, I couldn't connect right now. You can reach Mel directly at (808) 285-8774 or mel@homesweethomehawaii.com!" }]);
+      setMessages(prev => [...prev, { role: "assistant", content: data.response || "Hmm, let me try again. In the meantime, reach Mel at (808) 285-8774!" }]);
+    } catch {
+      // Fallback: simple local responses when worker isn't deployed yet
+      const q = input.trim().toLowerCase();
+      let reply = "Great question! For the most accurate answer, I'd recommend reaching out to Mel directly at (808) 285-8774 or mel@homesweethomehawaii.com. She knows O'ahu inside and out! 🤙";
+      if (q.includes("neighborhood") || q.includes("area") || q.includes("where")) {
+        reply = "O'ahu has amazing neighborhoods! Mililani is great for families, Kailua has world-class beaches, Kapolei is the growing 'second city,' and Kāne'ohe has stunning mountain views. Want specifics? Call Mel at (808) 285-8774 — she grew up here! 🏝️";
+      } else if (q.includes("buy") || q.includes("first time") || q.includes("afford")) {
+        reply = "Buying in Hawai'i is exciting! Median condo prices are around $500K, single-family homes around $1M on O'ahu. VA loans (0% down) are popular here due to military presence. Check out the mortgage calculator on this site, or call Mel at (808) 285-8774 for personalized guidance! 🏡";
+      } else if (q.includes("sell") || q.includes("worth") || q.includes("value")) {
+        reply = "Thinking about selling? The O'ahu market is active right now. Head to the Home Valuation page for a free analysis, or call Mel at (808) 285-8774 — she'll give you a real number based on recent comps in your area! 📊";
+      } else if (q.includes("mel") || q.includes("about") || q.includes("who")) {
+        reply = "Mel Castanares is an O'ahu-born REALTOR® at Dream Home Realty Hawai'i. She specializes in helping first-time buyers and families find their perfect home. She's known for making the process feel easy and personal. Reach her at (808) 285-8774! 🌺";
+      } else if (q.includes("down payment") || q.includes("mortgage") || q.includes("loan")) {
+        reply = "In Hawai'i, conventional loans typically need 3-20% down. VA loans offer 0% down (big here!), and FHA loans need 3.5%. Property taxes are super low (~0.35%). Try the mortgage calculator on this site for exact numbers! 💰";
+      }
+      setMessages(prev => [...prev, { role: "assistant", content: reply }]);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-  };
-
   return (
     <>
-      {/* Chat bubble styles */}
       <style>{`
-        .mel-chat-bubble { position: fixed; bottom: 24px; right: 24px; z-index: 1000; width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, ${BRAND.teal}, ${BRAND.tealLight}); color: #fff; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 32px ${BRAND.teal}44, 0 0 0 0 ${BRAND.teal}44; transition: all 0.3s; }
-        .mel-chat-bubble:hover { transform: scale(1.08); box-shadow: 0 12px 40px ${BRAND.teal}55; }
-        .mel-chat-bubble.open { transform: scale(0.9) rotate(90deg); }
-        .mel-chat-pulse { animation: chatPulse 2s ease-in-out infinite; }
-        @keyframes chatPulse { 0%,100% { box-shadow: 0 8px 32px ${BRAND.teal}44, 0 0 0 0 ${BRAND.teal}44; } 50% { box-shadow: 0 8px 32px ${BRAND.teal}44, 0 0 0 12px ${BRAND.teal}00; } }
-        .mel-chat-window { position: fixed; bottom: 100px; right: 24px; z-index: 999; width: 380px; max-width: calc(100vw - 48px); height: 520px; max-height: calc(100vh - 140px); background: ${BRAND.bgCard}; border: 1px solid ${BRAND.border}; border-radius: 16px; box-shadow: 0 24px 80px rgba(0,0,0,0.12), 0 0 0 1px ${BRAND.teal}11; display: flex; flex-direction: column; overflow: hidden; animation: chatSlideIn 0.35s cubic-bezier(0.22,1,0.36,1); }
+        .float-btn { position: fixed; right: 24px; z-index: 1000; width: 56px; height: 56px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s; box-shadow: 0 6px 24px rgba(0,0,0,0.15); }
+        .float-btn:hover { transform: scale(1.08); }
+        .float-contact { bottom: 96px; background: ${BRAND.gold}; color: #fff; }
+        .float-contact:hover { box-shadow: 0 8px 32px ${BRAND.gold}44; }
+        .float-chat { bottom: 24px; background: linear-gradient(135deg, ${BRAND.teal}, ${BRAND.tealLight}); color: #fff; }
+        .float-chat:hover { box-shadow: 0 8px 32px ${BRAND.teal}44; }
+        .float-chat.open { transform: rotate(90deg) scale(0.9); }
+        .float-pulse { animation: fPulse 2.5s ease-in-out infinite; }
+        @keyframes fPulse { 0%,100% { box-shadow: 0 6px 24px rgba(0,0,0,0.15); } 50% { box-shadow: 0 6px 24px rgba(0,0,0,0.15), 0 0 0 10px ${BRAND.teal}00; } }
+        .contact-popup { position: fixed; bottom: 160px; right: 24px; z-index: 999; background: ${BRAND.bgCard}; border: 1px solid ${BRAND.border}; border-radius: 16px; padding: 20px; width: 260px; box-shadow: 0 16px 48px rgba(0,0,0,0.1); animation: chatSlideIn 0.3s ease; }
+        .contact-popup a { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 10px; text-decoration: none; color: ${BRAND.text}; font-size: 14px; font-weight: 500; transition: background 0.2s; }
+        .contact-popup a:hover { background: ${BRAND.bgEl}; }
+        .chat-window { position: fixed; bottom: 92px; right: 24px; z-index: 999; width: 380px; max-width: calc(100vw - 48px); height: 520px; max-height: calc(100vh - 140px); background: ${BRAND.bgCard}; border: 1px solid ${BRAND.border}; border-radius: 16px; box-shadow: 0 24px 80px rgba(0,0,0,0.12); display: flex; flex-direction: column; overflow: hidden; animation: chatSlideIn 0.35s cubic-bezier(0.22,1,0.36,1); }
         @keyframes chatSlideIn { from { opacity: 0; transform: translateY(20px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        @keyframes chatDot { 0%,100% { transform: translateY(0); opacity: 0.4; } 50% { transform: translateY(-4px); opacity: 1; } }
       `}</style>
 
-      {/* Floating button */}
-      <button className={`mel-chat-bubble ${open ? "open" : "mel-chat-pulse"}`} onClick={() => setOpen(!open)} aria-label="Chat with Mel's AI assistant">
-        {open ? <X size={24} /> : <MessageCircle size={24} />}
+      {/* Contact Quick Actions */}
+      <button className="float-btn float-contact" onClick={() => { setContactOpen(!contactOpen); setChatOpen(false); }} aria-label="Contact Mel">
+        <Phone size={22} />
       </button>
 
-      {/* Chat window */}
-      {open && (
-        <div className="mel-chat-window">
-          {/* Header */}
-          <div style={{ padding: "16px 20px", background: `linear-gradient(135deg, ${BRAND.teal}, ${BRAND.tealDark})`, color: "#fff", display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
-            <img src="/images/mel-headshot.png" alt="Mel" style={{ width: 36, height: 36, borderRadius: "50%", objectFit: "cover", border: "2px solid rgba(255,255,255,0.3)" }} />
-            <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: 600, fontSize: 14 }}>Ask Mel's AI</div>
-              <div style={{ fontSize: 11, opacity: 0.75 }}>Hawai'i real estate assistant</div>
-            </div>
+      {contactOpen && (
+        <div className="contact-popup">
+          <div style={{ fontSize: 12, color: BRAND.textDim, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 8, paddingLeft: 16 }}>Quick Contact</div>
+          <a href="tel:8082858774">
+            <div style={{ width: 36, height: 36, borderRadius: 10, background: `${BRAND.teal}15`, display: "flex", alignItems: "center", justifyContent: "center" }}><Phone size={16} color={BRAND.teal} /></div>
+            <div><div style={{ fontWeight: 600 }}>Call Mel</div><div style={{ fontSize: 12, color: BRAND.textDim }}>(808) 285-8774</div></div>
+          </a>
+          <a href="mailto:mel@homesweethomehawaii.com">
+            <div style={{ width: 36, height: 36, borderRadius: 10, background: `${BRAND.gold}15`, display: "flex", alignItems: "center", justifyContent: "center" }}><Mail size={16} color={BRAND.gold} /></div>
+            <div><div style={{ fontWeight: 600 }}>Email Mel</div><div style={{ fontSize: 12, color: BRAND.textDim }}>mel@homesweethome...</div></div>
+          </a>
+          <a href="https://www.instagram.com/mel.castanares" target="_blank" rel="noopener noreferrer">
+            <div style={{ width: 36, height: 36, borderRadius: 10, background: `${BRAND.coral}15`, display: "flex", alignItems: "center", justifyContent: "center" }}><Instagram size={16} color={BRAND.coral} /></div>
+            <div><div style={{ fontWeight: 600 }}>Instagram</div><div style={{ fontSize: 12, color: BRAND.textDim }}>@mel.castanares</div></div>
+          </a>
+        </div>
+      )}
+
+      {/* AI Chat Button */}
+      <button className={`float-btn float-chat ${chatOpen ? "open" : "float-pulse"}`} onClick={() => { setChatOpen(!chatOpen); setContactOpen(false); }} aria-label="Chat with AI assistant">
+        {chatOpen ? <X size={22} /> : <MessageCircle size={22} />}
+      </button>
+
+      {/* Chat Window */}
+      {chatOpen && (
+        <div className="chat-window">
+          <div style={{ padding: "14px 18px", background: `linear-gradient(135deg, ${BRAND.teal}, ${BRAND.tealDark})`, color: "#fff", display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
+            <img src="/images/mel-headshot.jpg" alt="Mel" style={{ width: 34, height: 34, borderRadius: "50%", objectFit: "cover", border: "2px solid rgba(255,255,255,0.3)" }} />
+            <div style={{ flex: 1 }}><div style={{ fontWeight: 600, fontSize: 14 }}>Ask Mel's AI</div><div style={{ fontSize: 11, opacity: 0.7 }}>Hawai'i real estate assistant</div></div>
             <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#4ADE80" }} />
           </div>
 
-          {/* Messages */}
-          <div style={{ flex: 1, overflowY: "auto", padding: "16px 16px 8px", display: "flex", flexDirection: "column", gap: 12 }}>
+          <div style={{ flex: 1, overflowY: "auto", padding: "14px 14px 8px", display: "flex", flexDirection: "column", gap: 10 }}>
             {messages.map((msg, i) => (
               <div key={i} style={{ display: "flex", justifyContent: msg.role === "user" ? "flex-end" : "flex-start" }}>
                 <div style={{
                   maxWidth: "85%", padding: "10px 14px", borderRadius: 14,
-                  ...(msg.role === "user" 
-                    ? { background: BRAND.teal, color: "#fff", borderBottomRightRadius: 4 }
-                    : { background: BRAND.bgEl, color: BRAND.text, borderBottomLeftRadius: 4, border: `1px solid ${BRAND.border}` }
-                  ),
-                  fontSize: 13.5, lineHeight: 1.6, wordBreak: "break-word",
-                }}>
-                  {msg.content}
-                </div>
+                  ...(msg.role === "user" ? { background: BRAND.teal, color: "#fff", borderBottomRightRadius: 4 } : { background: BRAND.bgEl, color: BRAND.text, borderBottomLeftRadius: 4, border: `1px solid ${BRAND.border}` }),
+                  fontSize: 13, lineHeight: 1.6, wordBreak: "break-word",
+                }}>{msg.content}</div>
               </div>
             ))}
             {loading && (
-              <div style={{ display: "flex", justifyContent: "flex-start" }}>
-                <div style={{ padding: "12px 18px", background: BRAND.bgEl, borderRadius: 14, borderBottomLeftRadius: 4, border: `1px solid ${BRAND.border}` }}>
-                  <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
-                    {[0,1,2].map(i => (
-                      <div key={i} style={{ width: 7, height: 7, borderRadius: "50%", background: BRAND.teal, opacity: 0.5, animation: `chatDot 1.2s ease-in-out ${i * 0.2}s infinite` }} />
-                    ))}
-                  </div>
-                </div>
+              <div style={{ display: "flex", gap: 4, padding: "12px 18px", background: BRAND.bgEl, borderRadius: 14, borderBottomLeftRadius: 4, border: `1px solid ${BRAND.border}`, width: "fit-content" }}>
+                {[0,1,2].map(i => <div key={i} style={{ width: 7, height: 7, borderRadius: "50%", background: BRAND.teal, animation: `chatDot 1.2s ease-in-out ${i*0.2}s infinite` }} />)}
               </div>
             )}
-            <div ref={messagesEndRef} />
+            <div ref={endRef} />
           </div>
 
-          {/* Quick suggestions (shown when few messages) */}
           {messages.length <= 2 && (
-            <div style={{ padding: "0 16px 8px", display: "flex", gap: 6, flexWrap: "wrap" }}>
-              {["What neighborhoods should I look at?", "How much do I need for a down payment?", "Tell me about Mel"].map((q, i) => (
-                <button key={i} onClick={() => { setInput(q); }} style={{
-                  padding: "6px 12px", borderRadius: 20, border: `1px solid ${BRAND.border}`,
-                  background: "transparent", color: BRAND.teal, fontSize: 11, cursor: "pointer",
-                  fontFamily: "'DM Sans', sans-serif", transition: "all 0.2s",
-                }} onMouseEnter={e => { e.target.style.background = `${BRAND.teal}0A`; }}
-                   onMouseLeave={e => { e.target.style.background = "transparent"; }}>
-                  {q}
-                </button>
+            <div style={{ padding: "0 14px 6px", display: "flex", gap: 6, flexWrap: "wrap" }}>
+              {["What neighborhoods?", "Down payment?", "About Mel"].map((q, i) => (
+                <button key={i} onClick={() => setInput(q)} style={{ padding: "5px 10px", borderRadius: 16, border: `1px solid ${BRAND.border}`, background: "transparent", color: BRAND.teal, fontSize: 11, cursor: "pointer", fontFamily: "'DM Sans'" }}>{q}</button>
               ))}
             </div>
           )}
 
-          {/* Input */}
-          <div style={{ padding: "12px 16px", borderTop: `1px solid ${BRAND.border}`, display: "flex", gap: 8, alignItems: "flex-end", flexShrink: 0 }}>
-            <input
-              ref={inputRef}
-              value={input}
-              onChange={e => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Ask about Hawai'i real estate..."
-              style={{
-                flex: 1, padding: "10px 14px", borderRadius: 12, border: `1px solid ${BRAND.border}`,
-                background: BRAND.bgEl, color: BRAND.text, fontSize: 13.5, outline: "none",
-                fontFamily: "'DM Sans', sans-serif", transition: "border-color 0.3s",
-              }}
-              onFocus={e => e.target.style.borderColor = BRAND.teal}
-              onBlur={e => e.target.style.borderColor = BRAND.border}
-            />
-            <button onClick={sendMessage} disabled={loading || !input.trim()} style={{
-              width: 40, height: 40, borderRadius: 12, border: "none",
-              background: input.trim() ? BRAND.teal : BRAND.bgEl,
-              color: input.trim() ? "#fff" : BRAND.textDim,
-              cursor: input.trim() ? "pointer" : "default",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              transition: "all 0.3s", flexShrink: 0,
-            }}>
-              <Send size={16} />
+          <div style={{ padding: "10px 14px", borderTop: `1px solid ${BRAND.border}`, display: "flex", gap: 8, flexShrink: 0 }}>
+            <input ref={inputRef} value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
+              placeholder="Ask about Hawai'i real estate..." style={{ flex: 1, padding: "9px 12px", borderRadius: 10, border: `1px solid ${BRAND.border}`, background: BRAND.bgEl, color: BRAND.text, fontSize: 13, outline: "none", fontFamily: "'DM Sans'" }} />
+            <button onClick={sendMessage} disabled={loading || !input.trim()} style={{ width: 38, height: 38, borderRadius: 10, border: "none", background: input.trim() ? BRAND.teal : BRAND.bgEl, color: input.trim() ? "#fff" : BRAND.textDim, cursor: input.trim() ? "pointer" : "default", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <Send size={15} />
             </button>
           </div>
-
-          {/* Powered by badge */}
-          <div style={{ padding: "6px 16px 10px", textAlign: "center", fontSize: 10, color: BRAND.textDim }}>
-            Powered by AI · Not a substitute for professional advice
-          </div>
+          <div style={{ padding: "4px 14px 8px", textAlign: "center", fontSize: 10, color: BRAND.textDim }}>Powered by AI · Not a substitute for professional advice</div>
         </div>
       )}
-
-      <style>{`
-        @keyframes chatDot { 0%,100% { transform: translateY(0); opacity: 0.4; } 50% { transform: translateY(-4px); opacity: 1; } }
-      `}</style>
     </>
   );
 }
@@ -2171,7 +2184,9 @@ export default function App() {
         {renderPage()}
       </main>
       <Footer setPage={setPage} />
-      <AIChatWidget />
+      
+      {/* Floating Contact + Chat buttons */}
+      <FloatingActions setPage={setPage} />
     </div>
   );
 }
