@@ -1544,11 +1544,6 @@ function SellersPage({ setPage }) {
     </div>
   );
 }
-        </div>
-      </div>
-    </div>
-  );
-}
 
 // ─────────────────────────────────────────────
 // MORTGAGE CALCULATOR PAGE
