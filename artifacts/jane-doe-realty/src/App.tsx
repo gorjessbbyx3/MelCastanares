@@ -131,6 +131,7 @@ const FALLBACK_NEIGHBORHOODS = [
 ];
 
 const FALLBACK_TESTIMONIALS = [
+  { clientName: "First-Time Renter", quote: "This was the first time renting a house on my own so I was really skeptical on which company to go with. I put my trust in Tori and Mel and they made the entire process smooth and easy. Although it was my first-time renting, they made me feel safe and explained everything I needed to know. Anytime I've had a problem or concern they were able to get back to me right away! In the future I will put my trust back with them as I make my first home purchase!", rating: 5, transactionType: "bought", featured: true, clientPhoto: "/images/testimonial-sold.png" },
   { clientName: "George C.", quote: "Mel guided us through selling our home on Wilhelmina Rise with extraordinary professionalism. After an extensive interview process, she stood out for her market knowledge and genuine care.", rating: 5, transactionType: "sold" },
   { clientName: "Jenely S.", quote: "I searched for nearly 3 years, unsure if I even wanted to buy. Mel stayed patient the entire time and ultimately helped me find my perfect home. She's honestly amazing.", rating: 5, transactionType: "bought" },
   { clientName: "Dan W.", quote: "As a first-time buyer, I had no idea what I was getting into. Mel assembled an incredible team and walked me through every step. I couldn't have done it without her.", rating: 5, transactionType: "bought" },
@@ -711,12 +712,18 @@ function TestimonialCarousel({ testimonials = [] }) {
   useEffect(() => { const timer = setInterval(() => setIdx(i => (i + 1) % testimonials.length), 6000); return () => clearInterval(timer); }, [testimonials.length]);
 
   return (
-    <div style={{ maxWidth: 700, margin: "0 auto", textAlign: "center", position: "relative", minHeight: 280 }}>
+    <div style={{ maxWidth: 700, margin: "0 auto", textAlign: "center", position: "relative", minHeight: 300 }}>
       <div key={idx} style={{ animation: "fadeIn 0.6s ease" }}>
-        <div style={{ display: "flex", justifyContent: "center", gap: 4, marginBottom: 24 }}>
+        {/* Client photo if available */}
+        {t.clientPhoto && (
+          <div style={{ marginBottom: 24 }}>
+            <img src={t.clientPhoto} alt={t.clientName} style={{ width: 120, height: 120, borderRadius: "50%", objectFit: "cover", border: `3px solid ${BRAND.teal}33`, boxShadow: `0 8px 24px ${BRAND.teal}15`, margin: "0 auto" }} />
+          </div>
+        )}
+        <div style={{ display: "flex", justifyContent: "center", gap: 4, marginBottom: 20 }}>
           {[...Array(t.rating)].map((_, i) => <Star key={i} size={18} fill={BRAND.teal} color={BRAND.teal} />)}
         </div>
-        <p className="font-display" style={{ fontSize: "clamp(20px, 3vw, 28px)", fontStyle: "italic", lineHeight: 1.6, marginBottom: 28, color: BRAND.text }}>
+        <p className="font-display" style={{ fontSize: "clamp(18px, 2.5vw, 26px)", fontStyle: "italic", lineHeight: 1.6, marginBottom: 24, color: BRAND.text }}>
           "{t.quote || t.text}"
         </p>
         <div style={{ color: BRAND.teal, fontSize: 12, letterSpacing: "0.15em", textTransform: "uppercase", fontWeight: 600 }}>{t.clientName || t.name}</div>
@@ -1837,13 +1844,19 @@ function TestimonialsPage() {
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: 24 }}>
           {(testiResp?.testimonials || FALLBACK_TESTIMONIALS).map((t, i) => (
             <Reveal key={i} delay={i * 0.08} direction="up">
-              <div className="shimmer" style={{ background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, padding: 32 }}>
-                <div style={{ display: "flex", gap: 4, marginBottom: 16 }}>
+              <div className="shimmer" style={{ background: BRAND.bgCard, border: `1px solid ${t.featured ? BRAND.teal + '44' : BRAND.border}`, padding: 32, borderRadius: t.featured ? 12 : 0, position: "relative", overflow: "hidden" }}>
+                {t.featured && <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${BRAND.teal}, ${BRAND.gold})` }} />}
+                {t.clientPhoto && (
+                  <div style={{ marginBottom: 20, textAlign: "center" }}>
+                    <img src={t.clientPhoto} alt={t.clientName} style={{ width: 80, height: 80, borderRadius: "50%", objectFit: "cover", border: `2px solid ${BRAND.teal}33` }} />
+                  </div>
+                )}
+                <div style={{ display: "flex", gap: 4, marginBottom: 16, justifyContent: t.clientPhoto ? "center" : "flex-start" }}>
                   {[...Array(t.rating)].map((_, j) => <Star key={j} size={16} fill={BRAND.teal} color={BRAND.teal} />)}
                 </div>
-                <p className="font-display" style={{ fontSize: 17, fontStyle: "italic", lineHeight: 1.6, marginBottom: 20 }}>"{t.quote || t.text}"</p>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 16, borderTop: `1px solid ${BRAND.border}` }}>
-                  <div>
+                <p className="font-display" style={{ fontSize: 17, fontStyle: "italic", lineHeight: 1.6, marginBottom: 20, textAlign: t.clientPhoto ? "center" : "left" }}>"{t.quote || t.text}"</p>
+                <div style={{ display: "flex", justifyContent: t.clientPhoto ? "center" : "space-between", alignItems: "center", paddingTop: 16, borderTop: `1px solid ${BRAND.border}` }}>
+                  <div style={{ textAlign: t.clientPhoto ? "center" : "left" }}>
                     <div style={{ color: BRAND.teal, fontSize: 13, fontWeight: 600 }}>{t.clientName || t.name}</div>
                     <div style={{ color: BRAND.textDim, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.1em" }}>{t.transactionType || t.type}</div>
                   </div>
