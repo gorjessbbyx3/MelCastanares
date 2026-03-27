@@ -485,8 +485,8 @@ function HomePage({ setPage }) {
             muted
             loop
             playsInline
-            poster="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=2000&q=90"
-            style={{ width: "100%", height: "120%", objectFit: "cover", objectPosition: "center 30%" }}
+            poster="/images/hero-diamondhead.png"
+            style={{ width: "100%", height: "120%", objectFit: "cover", objectPosition: "center 40%" }}
           >
             <source src="https://videos.pexels.com/video-files/1093662/1093662-hd_1920_1080_30fps.mp4" type="video/mp4" />
           </video>
