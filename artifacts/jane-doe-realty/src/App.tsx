@@ -151,6 +151,18 @@ const FALLBACK_BLOG_POSTS = [
   { id: "4", slug: "kaimuki-vs-kailua-the-real-comparison", title: "Kaimuki vs. Kailua: The Honest Comparison Nobody Else Will Give You", excerpt: "Two of O'ahu's most beloved neighborhoods, but wildly different lifestyles. I've sold homes in both for years. Here's the unfiltered truth about schools, commutes, appreciation rates, and which one actually fits your life.", category: "Neighborhood Deep Dive", date: "Feb 24, 2026", readTime: 11, images: [{url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80", isPrimary: true}] },
   { id: "5", slug: "what-mainland-buyers-get-wrong-about-hawaii", title: "What Mainland Buyers Get Wrong About Buying in Hawai'i", excerpt: "After helping 60+ families relocate to the islands, I've seen the same mistakes repeated. From underestimating hurricane insurance to not understanding leasehold vs. fee simple, these are the traps — and how to avoid them.", category: "Relocation Intel", date: "Feb 15, 2026", readTime: 8, images: [{url: "https://images.unsplash.com/photo-1505228395891-9a51e7e86bf6?w=800&q=80", isPrimary: true}] },
   { id: "6", slug: "my-2026-prediction-for-hawaii-kai", title: "My Bold 2026 Prediction for Hawai'i Kai (And the Data Behind It)", excerpt: "I'm going on record: Hawai'i Kai is the most undervalued neighborhood on O'ahu right now. New marina renovations, school improvements, and the Costco effect are converging. Here's my full analysis.", category: "Investment Thesis", date: "Feb 6, 2026", readTime: 10, images: [{url: "https://images.unsplash.com/photo-1506929562872-bb421503ef21?w=800&q=80", isPrimary: true}] },
+  { id: "7", slug: "first-time-homebuyer-checklist-oahu-families", title: "First-Time Homebuyer Checklist for O'ahu Families", excerpt: "Buying your first home in Hawai'i is one of the most exciting — and complicated — things you'll ever do. From VA loans to leasehold land, association dues to termite inspections, here's the complete checklist I walk every first-time buyer through before they make an offer.", category: "First-Time Buyers", date: "Mar 18, 2026", readTime: 8, images: [{url: "https://images.unsplash.com/photo-1572120360610-d971b9d7767c?w=800&q=80", isPrimary: true}], featured: false,
+    content: `Buying your first home in Hawai'i is different from anywhere else in the country — and in the best possible way. But it comes with its own unique set of hurdles. After helping dozens of first-time buyers find their footing on O'ahu, here's the checklist I use with every single client.\n\n**1. Get Pre-Approved (Not Just Pre-Qualified)**\nPre-qualification is a five-minute phone call. Pre-approval is what actually gets your offer accepted. Sellers on O'ahu — especially in competitive markets like Mililani and Ewa Beach — won't even look at your offer without a solid pre-approval letter from a reputable lender.\n\n**2. Understand Fee Simple vs. Leasehold**\nThis trips up almost every mainland buyer. Fee simple means you own the land. Leasehold means you're renting the land from someone else, often the state or a trust. Leasehold properties are cheaper upfront — but the lease expiration can make financing nearly impossible and resale value unpredictable.\n\n**3. Budget for Closing Costs (They're Higher Here)**\nExpect 2–4% of your purchase price in closing costs on top of your down payment. Hawaii has additional fees including conveyance taxes and title insurance that aren't common on the mainland.\n\n**4. Don't Skip the Termite Inspection**\nIn Hawai'i, termites aren't an "if" — they're a "when." Get a full termite and pest inspection, and factor treatment costs into your offer negotiations.\n\n**5. Know Your School Zones**\nIf you have kids (or plan to), school district boundaries are sacred in Hawai'i. Mililani, Kailua, and Kāne'ohe have some of the state's highest-ranked schools — and homes in their zones carry a premium. I can map out exact boundary lines for you.\n\n**6. Factor in HOA Dues**\nMany O'ahu condos and planned communities (like Mililani) have monthly HOA dues that range from $200 to $1,200+. These affect your debt-to-income ratio and your monthly budget.\n\nReady to start? [Contact Mel](/contact) for a free first-time buyer consultation — no pressure, just clarity.`
+  },
+  { id: "8", slug: "mililani-vs-kailua-schools-beaches-lifestyle", title: "Mililani vs. Kailua: Real Talk on Schools, Beaches, and Lifestyle", excerpt: "Two of O'ahu's best neighborhoods for families — but they couldn't be more different. One is a master-planned inland community with unbeatable schools. The other is a beach town with a charming local vibe and world-class surf. Which one's right for your family?", category: "Neighborhood Deep Dive", date: "Mar 10, 2026", readTime: 10, images: [{url: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&q=80", isPrimary: true}], featured: false,
+    content: `When families ask me where to plant roots on O'ahu, Mililani and Kailua come up almost every single time. Both are incredible. Both are competitive. And they attract completely different types of buyers.\n\n**MILILANI: The Planned Community Champion**\n- Median home price: ~$820K (single-family) | ~$550K (townhome)\n- Top schools: Mililani High (#1 in state multiple years), Mililani Uka Elementary, Mililani Middle\n- Parks: 23 community parks, 7 rec centers, aquatic complex\n- Commute to Honolulu: 30–40 min via H-2/H-1\n- Vibe: Safe, walkable, master-planned, family-first\n- Best for: Families prioritizing schools, community, and value\n\n**KAILUA: The Beach Town Dream**\n- Median home price: ~$1.4M\n- Top schools: Kailua High, Lanikai Elementary (strong DOE ratings)\n- Beaches: Kailua Beach (top 5 in the US), Lanikai, Kalama Beach Park\n- Commute to Honolulu: 30–40 min over the Pali (or longer in traffic)\n- Vibe: Active, beachy, independent shops, local dining culture\n- Best for: Buyers prioritizing beach lifestyle, walkability, and long-term appreciation\n\n**The Honest Verdict**\nIf your family has school-age kids and you're watching your budget, Mililani gives you more home for your money and arguably the best public school system on island. If you can stretch the budget and want your weekends to feel like a vacation, Kailua is worth every penny.\n\nI've helped families buy in both — and I'll give you the unfiltered truth about which one fits your life. [Let's talk.](/contact)`
+  },
+  { id: "9", slug: "oahu-market-update-march-2026", title: "What's Really Happening in the O'ahu Market Right Now (March 2026 Update)", excerpt: "Inventory is climbing. Days on market are stretching. And buyers who were priced out two years ago are quietly writing offers again. Here's my honest read on where the O'ahu market stands right now — with actual data, no spin.", category: "Market Intelligence", date: "Mar 27, 2026", readTime: 7, images: [{url: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80", isPrimary: true}], featured: false,
+    content: `Every agent you talk to will tell you it's a great time to buy or sell. I'll tell you what's actually happening.\n\n**The Numbers (March 2026)**\n- Median single-family home price: $1.07M (+2.1% year-over-year)\n- Active listings: up 22% vs. March 2025\n- Median days on market: 22 days (up from 18 last year)\n- Price reductions: 31% of listings had at least one reduction\n- Mortgage rate environment: 30-year fixed hovering 6.4–6.9%\n\n**What This Means for Buyers**\nFor the first time in several years, you have actual leverage. More inventory means more choices. More days on market means sellers are negotiating. Price reductions mean the "list at anything and see what sticks" era is over. If you're pre-approved and patient, right now is genuinely one of the better entry windows O'ahu has seen since 2020.\n\n**What This Means for Sellers**\nThe days of listing on Thursday and going under contract by Sunday at $80K over ask? Mostly over (with some exceptions in hot micro-markets like Mililani and Kailua). The sellers winning right now are pricing accurately from day one, investing in professional photography, and doing strategic staging. Overpriced listings are sitting — and price reductions signal weakness to savvy buyers.\n\n**My Neighborhood-by-Neighborhood Read**\n- **Mililani**: Still a seller's market. Inventory tight, demand from families relentless.\n- **Ewa Beach/Kapolei**: Slight buyer advantage emerging. New builds adding supply.\n- **Kailua**: Premium holds. Anything under $1.2M moves fast.\n- **Kaimuki**: Appreciating steadily. Food-and-lifestyle buyers creating consistent demand.\n- **Hawai'i Kai**: Watch this one. Still underpriced relative to its amenities.\n\nHave questions about your specific situation? [Let's talk.](/contact)`
+  },
+  { id: "10", slug: "hidden-costs-buying-hawaii-most-people-miss", title: "Hidden Costs of Buying in Hawaii Most People Miss", excerpt: "The sticker price of your O'ahu home is just the beginning. Between closing costs, hurricane insurance, special assessments, and the true cost of island living, most buyers are surprised by how much more cash they need at the table. I break it all down.", category: "Buyer Reality Check", date: "Mar 3, 2026", readTime: 9, images: [{url: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&q=80", isPrimary: true}], featured: false,
+    content: `I've sat across the table from dozens of buyers who came to O'ahu with their down payment ready — and then got blindsided by costs they didn't see coming. Here's the full honest breakdown.\n\n**1. Closing Costs: Budget 2–4%**\nOn a $800K home, that's $16,000–$32,000 in addition to your down payment. Hawai'i's conveyance tax (excise tax on real estate transfers) alone can add $2,000–$5,000 depending on the purchase price.\n\n**2. Hurricane Insurance (Yes, It's Separate)**\nStandard homeowner's insurance in Hawai'i does NOT cover hurricane damage. You need a separate hurricane policy, which typically costs $800–$2,500/year depending on your home, location, and construction type. It's not optional — your lender will require it.\n\n**3. HOA and Maintenance Fees**\nCondos in Honolulu can carry monthly maintenance fees from $300 to $1,500+. These cover building upkeep, amenities, and reserves — but "special assessments" (unexpected major repair costs) can hit without warning and cost thousands more.\n\n**4. Pest Control and Termite Warranties**\nAnnual contracts run $300–$600/year. If a property needs treatment, budget $1,000–$5,000 for fumigation. In Hawai'i, this is just cost of ownership.\n\n**5. The Leasehold Trap**\nLeasehold properties look like a bargain — until you realize you don't own the land, the lease could expire, and banks often won't finance them. Always check leasehold vs. fee simple before falling in love with a listing.\n\n**6. Island Shipping Premiums**\nEverything costs more here — from groceries to contractor labor. Budget 15–25% more for any home improvement project than you would on the mainland.\n\nWant a full cost breakdown personalized for your target neighborhood and price range? [Reach out](/contact) — I do this walkthrough for free with every buyer I work with.`
+  },
 ];
 
 const FALLBACK_MARKET_DATA = [
@@ -486,19 +498,22 @@ function Nav({ page, setPage }) {
 
   const navItems = [
     { label: "Home", page: "home" },
-    { label: "Portfolio", page: "properties" },
+    { label: "Meet Mel", page: "about" },
+    { label: "Listings", page: "properties" },
     {
-      label: "Your Experience", children: [
-        { label: "Buyer's Experience", page: "buyers" },
-        { label: "Seller's Experience", page: "sellers" },
+      label: "Tools", children: [
+        { label: "Home Valuation", page: "valuation" },
         { label: "Mortgage Calculator", page: "mortgage" },
+        { label: "Buyer's Guide", page: "buyers" },
+        { label: "Seller's Guide", page: "sellers" },
         { label: "Relocation Guide", page: "relocation" },
       ]
     },
     { label: "Neighborhoods", page: "neighborhoods" },
-    { label: "Market", page: "market" },
-    { label: "News", page: "blog" },
-    { label: "About", page: "about" },
+    { label: "Market Insights", page: "market" },
+    { label: "Resources", page: "blog" },
+    { label: "Testimonials", page: "testimonials" },
+    { label: "Contact", page: "contact" },
   ];
 
   const go = (p) => { setPage(p); setMobileOpen(false); setDropdown(null); window.scrollTo({ top: 0, behavior: "smooth" }); };
@@ -2428,16 +2443,150 @@ function FloatingActions({ setPage }) {
 }
 
 // ─────────────────────────────────────────────
-// APP — ROUTER
+// APP — ROUTER WITH REAL URLS FOR SEO
 // ─────────────────────────────────────────────
 
-export default function App() {
-  const [page, setPage] = useState("home");
+// Map page keys → URL paths (real URLs for Google indexing)
+const PAGE_ROUTES: Record<string, string> = {
+  home: "/",
+  about: "/about",
+  properties: "/listings",
+  "property-detail": "/listings/detail",
+  neighborhoods: "/neighborhoods",
+  market: "/market-insights",
+  blog: "/resources",
+  "blog-post": "/resources/article",
+  contact: "/contact",
+  buyers: "/buyers",
+  sellers: "/sellers",
+  valuation: "/home-valuation",
+  mortgage: "/mortgage-calculator",
+  relocation: "/relocation",
+  testimonials: "/testimonials",
+};
 
-  // Scroll to top instantly on every page change
+const ROUTE_PAGES: Record<string, string> = Object.fromEntries(
+  Object.entries(PAGE_ROUTES).map(([k, v]) => [v, k])
+);
+
+const PAGE_META: Record<string, { title: string; description: string }> = {
+  home: {
+    title: "Mel Castanares | O'ahu REALTOR® | Mililani & Central Oahu Real Estate",
+    description: "Mel Castanares (RS-84753) is an O'ahu-born REALTOR® at Dream Home Realty Hawai'i. Specializing in Mililani, Waipahu, Kapolei, and Central Oahu. Call (808) 285-8774.",
+  },
+  about: {
+    title: "About Mel Castanares | O'ahu Mama REALTOR® | License RS-84753",
+    description: "Meet Mel Castanares — O'ahu-born REALTOR®, property management expert, and mama who guides families through buying, selling, and investing in Hawai'i real estate.",
+  },
+  properties: {
+    title: "O'ahu Homes for Sale & Rent | Listings | Mel Castanares Real Estate",
+    description: "Browse active homes for sale and rent across O'ahu. From Mililani family homes to Kāne'ohe rentals. Contact Mel Castanares at (808) 285-8774.",
+  },
+  neighborhoods: {
+    title: "O'ahu Neighborhoods Guide | Mililani, Kailua, Ewa Beach & More | Mel Castanares",
+    description: "Explore O'ahu neighborhoods with local insights on schools, parks, commutes, and home prices. Mel's specialty: Central & West O'ahu — Mililani, Kapolei, Pearl City.",
+  },
+  market: {
+    title: "O'ahu Real Estate Market Trends 2026 | Mel Castanares",
+    description: "Current O'ahu real estate market data: median prices, inventory levels, days on market, and Mel's honest analysis of what it means for buyers and sellers.",
+  },
+  blog: {
+    title: "Hawai'i Real Estate Resources & Blog | Mel Castanares",
+    description: "Honest real estate advice for O'ahu buyers, sellers, and investors. Market updates, first-time buyer guides, neighborhood comparisons, and more.",
+  },
+  contact: {
+    title: "Contact Mel Castanares | O'ahu REALTOR® | (808) 285-8774",
+    description: "Get in touch with Mel Castanares, REALTOR® RS-84753 at Dream Home Realty Hawai'i. Phone: (808) 285-8774. Office: 95-1249 Meheula Parkway, Mililani, HI.",
+  },
+  buyers: {
+    title: "Buyer's Guide | Buying a Home in O'ahu | Mel Castanares",
+    description: "Your step-by-step guide to buying a home in Hawai'i with Mel Castanares. From pre-approval to closing — honest, family-focused guidance.",
+  },
+  sellers: {
+    title: "Seller's Guide | Sell Your O'ahu Home | Mel Castanares",
+    description: "Strategic home selling on O'ahu with Mel Castanares. Professional marketing, accurate pricing, and fierce negotiation to maximize your return.",
+  },
+  valuation: {
+    title: "Free Home Valuation | What's Your O'ahu Home Worth? | Mel Castanares",
+    description: "Get a free, no-obligation home valuation from Mel Castanares. Accurate O'ahu home values based on real comparable sales and current market conditions.",
+  },
+  mortgage: {
+    title: "O'ahu Mortgage Calculator | Estimate Your Payment | Mel Castanares",
+    description: "Calculate your monthly mortgage payment for an O'ahu home. Includes principal, interest, property tax, insurance, and HOA — plus Mel's lender recommendations.",
+  },
+  relocation: {
+    title: "Relocating to Hawai'i | O'ahu Relocation Guide | Mel Castanares",
+    description: "Everything you need to know about moving to O'ahu. Cost of living, schools, logistics, and local tips from Mel Castanares who has helped dozens of families relocate.",
+  },
+  testimonials: {
+    title: "Client Reviews | What Mel's Clients Say | Mel Castanares REALTOR®",
+    description: "Read real client reviews and testimonials for Mel Castanares, O'ahu REALTOR®. From first-time buyers to seasoned investors — 100% client satisfaction.",
+  },
+};
+
+export default function App() {
+  const [page, setPage] = useState(() => {
+    // Initialize from URL on first load
+    const path = window.location.pathname;
+    return ROUTE_PAGES[path] || "home";
+  });
+
+  // Sync URL ↔ page state
   useEffect(() => {
+    const path = PAGE_ROUTES[page] || "/";
+    const meta = PAGE_META[page] || PAGE_META.home;
+
+    // Push URL to browser history
+    if (window.location.pathname !== path) {
+      window.history.pushState({ page }, "", path);
+    }
+
+    // Update page title and meta description for SEO
+    document.title = meta.title;
+    let descEl = document.querySelector('meta[name="description"]') as HTMLMetaElement | null;
+    if (!descEl) {
+      descEl = document.createElement("meta");
+      descEl.name = "description";
+      document.head.appendChild(descEl);
+    }
+    descEl.content = meta.description;
+
+    // og:title + og:description
+    ["og:title", "twitter:title"].forEach(prop => {
+      let el = document.querySelector(`meta[property="${prop}"]`) as HTMLMetaElement | null;
+      if (!el) { el = document.createElement("meta"); el.setAttribute("property", prop); document.head.appendChild(el); }
+      el.content = meta.title;
+    });
+    ["og:description", "twitter:description"].forEach(prop => {
+      let el = document.querySelector(`meta[property="${prop}"]`) as HTMLMetaElement | null;
+      if (!el) { el = document.createElement("meta"); el.setAttribute("property", prop); document.head.appendChild(el); }
+      el.content = meta.description;
+    });
+
+    // og:url
+    let urlEl = document.querySelector('meta[property="og:url"]') as HTMLMetaElement | null;
+    if (!urlEl) { urlEl = document.createElement("meta"); urlEl.setAttribute("property", "og:url"); document.head.appendChild(urlEl); }
+    urlEl.content = `https://melcastanares.techsavvyhawaii.com${path}`;
+
+    // Canonical link
+    let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
+    if (!canonical) { canonical = document.createElement("link"); canonical.rel = "canonical"; document.head.appendChild(canonical); }
+    canonical.href = `https://melcastanares.techsavvyhawaii.com${path}`;
+
+    // Scroll to top
     window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
   }, [page]);
+
+  // Handle browser back/forward navigation
+  useEffect(() => {
+    const handlePop = (e: PopStateEvent) => {
+      const path = window.location.pathname;
+      const p = ROUTE_PAGES[path] || "home";
+      setPage(p);
+    };
+    window.addEventListener("popstate", handlePop);
+    return () => window.removeEventListener("popstate", handlePop);
+  }, []);
 
   const renderPage = () => {
     switch (page) {
