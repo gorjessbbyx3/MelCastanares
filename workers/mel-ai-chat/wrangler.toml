@@ -1,0 +1,8 @@
+name = "mel-ai-chat"
+main = "src/index.js"
+compatibility_date = "2024-12-01"
+
+# Workers AI binding — gives access to LLMs on Cloudflare's edge
+# Free tier: 10,000 neurons/day (enough for ~100-200 chat messages)
+[ai]
+binding = "AI"

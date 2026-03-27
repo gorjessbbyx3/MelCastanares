@@ -4,7 +4,7 @@ import {
   ArrowRight, ArrowLeft, Star, Bed, Bath, Square, Calendar, Clock, User,
   TrendingUp, TrendingDown, DollarSign, Building, Heart, Share2,
   CheckCircle, Award, Shield, Compass, BookOpen, FileText, BarChart3,
-  Instagram, Facebook, Linkedin, Youtube, Send, Play, Pause, Volume2, VolumeX
+  Instagram, Facebook, Linkedin, Youtube, Send, Play, Pause, Volume2, VolumeX, MessageCircle
 } from "lucide-react";
 import * as recharts from "recharts";
 
@@ -1967,6 +1967,174 @@ function Footer({ setPage }) {
 }
 
 // ─────────────────────────────────────────────
+// AI CHAT WIDGET — Floating assistant powered by Cloudflare Workers AI
+// ─────────────────────────────────────────────
+
+const CHAT_WORKER_URL = "https://mel-ai-chat.gorjessbbyx3.workers.dev"; // Update after deploying worker
+
+function AIChatWidget() {
+  const [open, setOpen] = useState(false);
+  const [messages, setMessages] = useState([
+    { role: "assistant", content: "Aloha! I'm Mel's AI assistant. Ask me anything about buying or selling a home in Hawai'i, neighborhoods on O'ahu, or how Mel can help you. 🌺" }
+  ]);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const messagesEndRef = useRef(null);
+  const inputRef = useRef(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+  useEffect(scrollToBottom, [messages]);
+  useEffect(() => { if (open && inputRef.current) inputRef.current.focus(); }, [open]);
+
+  const sendMessage = async () => {
+    if (!input.trim() || loading) return;
+    const userMsg = { role: "user", content: input.trim() };
+    const newMessages = [...messages, userMsg];
+    setMessages(newMessages);
+    setInput("");
+    setLoading(true);
+
+    try {
+      const res = await fetch(CHAT_WORKER_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: newMessages.filter(m => m.role !== "system") }),
+      });
+      const data = await res.json();
+      setMessages(prev => [...prev, { role: "assistant", content: data.response || "I'm having trouble connecting. Reach Mel directly at (808) 285-8774!" }]);
+    } catch (err) {
+      setMessages(prev => [...prev, { role: "assistant", content: "Sorry, I couldn't connect right now. You can reach Mel directly at (808) 285-8774 or mel@homesweethomehawaii.com!" }]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  };
+
+  return (
+    <>
+      {/* Chat bubble styles */}
+      <style>{`
+        .mel-chat-bubble { position: fixed; bottom: 24px; right: 24px; z-index: 1000; width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, ${BRAND.teal}, ${BRAND.tealLight}); color: #fff; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 32px ${BRAND.teal}44, 0 0 0 0 ${BRAND.teal}44; transition: all 0.3s; }
+        .mel-chat-bubble:hover { transform: scale(1.08); box-shadow: 0 12px 40px ${BRAND.teal}55; }
+        .mel-chat-bubble.open { transform: scale(0.9) rotate(90deg); }
+        .mel-chat-pulse { animation: chatPulse 2s ease-in-out infinite; }
+        @keyframes chatPulse { 0%,100% { box-shadow: 0 8px 32px ${BRAND.teal}44, 0 0 0 0 ${BRAND.teal}44; } 50% { box-shadow: 0 8px 32px ${BRAND.teal}44, 0 0 0 12px ${BRAND.teal}00; } }
+        .mel-chat-window { position: fixed; bottom: 100px; right: 24px; z-index: 999; width: 380px; max-width: calc(100vw - 48px); height: 520px; max-height: calc(100vh - 140px); background: ${BRAND.bgCard}; border: 1px solid ${BRAND.border}; border-radius: 16px; box-shadow: 0 24px 80px rgba(0,0,0,0.12), 0 0 0 1px ${BRAND.teal}11; display: flex; flex-direction: column; overflow: hidden; animation: chatSlideIn 0.35s cubic-bezier(0.22,1,0.36,1); }
+        @keyframes chatSlideIn { from { opacity: 0; transform: translateY(20px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+      `}</style>
+
+      {/* Floating button */}
+      <button className={`mel-chat-bubble ${open ? "open" : "mel-chat-pulse"}`} onClick={() => setOpen(!open)} aria-label="Chat with Mel's AI assistant">
+        {open ? <X size={24} /> : <MessageCircle size={24} />}
+      </button>
+
+      {/* Chat window */}
+      {open && (
+        <div className="mel-chat-window">
+          {/* Header */}
+          <div style={{ padding: "16px 20px", background: `linear-gradient(135deg, ${BRAND.teal}, ${BRAND.tealDark})`, color: "#fff", display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
+            <img src="/images/mel-headshot.png" alt="Mel" style={{ width: 36, height: 36, borderRadius: "50%", objectFit: "cover", border: "2px solid rgba(255,255,255,0.3)" }} />
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 600, fontSize: 14 }}>Ask Mel's AI</div>
+              <div style={{ fontSize: 11, opacity: 0.75 }}>Hawai'i real estate assistant</div>
+            </div>
+            <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#4ADE80" }} />
+          </div>
+
+          {/* Messages */}
+          <div style={{ flex: 1, overflowY: "auto", padding: "16px 16px 8px", display: "flex", flexDirection: "column", gap: 12 }}>
+            {messages.map((msg, i) => (
+              <div key={i} style={{ display: "flex", justifyContent: msg.role === "user" ? "flex-end" : "flex-start" }}>
+                <div style={{
+                  maxWidth: "85%", padding: "10px 14px", borderRadius: 14,
+                  ...(msg.role === "user" 
+                    ? { background: BRAND.teal, color: "#fff", borderBottomRightRadius: 4 }
+                    : { background: BRAND.bgEl, color: BRAND.text, borderBottomLeftRadius: 4, border: `1px solid ${BRAND.border}` }
+                  ),
+                  fontSize: 13.5, lineHeight: 1.6, wordBreak: "break-word",
+                }}>
+                  {msg.content}
+                </div>
+              </div>
+            ))}
+            {loading && (
+              <div style={{ display: "flex", justifyContent: "flex-start" }}>
+                <div style={{ padding: "12px 18px", background: BRAND.bgEl, borderRadius: 14, borderBottomLeftRadius: 4, border: `1px solid ${BRAND.border}` }}>
+                  <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+                    {[0,1,2].map(i => (
+                      <div key={i} style={{ width: 7, height: 7, borderRadius: "50%", background: BRAND.teal, opacity: 0.5, animation: `chatDot 1.2s ease-in-out ${i * 0.2}s infinite` }} />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* Quick suggestions (shown when few messages) */}
+          {messages.length <= 2 && (
+            <div style={{ padding: "0 16px 8px", display: "flex", gap: 6, flexWrap: "wrap" }}>
+              {["What neighborhoods should I look at?", "How much do I need for a down payment?", "Tell me about Mel"].map((q, i) => (
+                <button key={i} onClick={() => { setInput(q); }} style={{
+                  padding: "6px 12px", borderRadius: 20, border: `1px solid ${BRAND.border}`,
+                  background: "transparent", color: BRAND.teal, fontSize: 11, cursor: "pointer",
+                  fontFamily: "'DM Sans', sans-serif", transition: "all 0.2s",
+                }} onMouseEnter={e => { e.target.style.background = `${BRAND.teal}0A`; }}
+                   onMouseLeave={e => { e.target.style.background = "transparent"; }}>
+                  {q}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Input */}
+          <div style={{ padding: "12px 16px", borderTop: `1px solid ${BRAND.border}`, display: "flex", gap: 8, alignItems: "flex-end", flexShrink: 0 }}>
+            <input
+              ref={inputRef}
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Ask about Hawai'i real estate..."
+              style={{
+                flex: 1, padding: "10px 14px", borderRadius: 12, border: `1px solid ${BRAND.border}`,
+                background: BRAND.bgEl, color: BRAND.text, fontSize: 13.5, outline: "none",
+                fontFamily: "'DM Sans', sans-serif", transition: "border-color 0.3s",
+              }}
+              onFocus={e => e.target.style.borderColor = BRAND.teal}
+              onBlur={e => e.target.style.borderColor = BRAND.border}
+            />
+            <button onClick={sendMessage} disabled={loading || !input.trim()} style={{
+              width: 40, height: 40, borderRadius: 12, border: "none",
+              background: input.trim() ? BRAND.teal : BRAND.bgEl,
+              color: input.trim() ? "#fff" : BRAND.textDim,
+              cursor: input.trim() ? "pointer" : "default",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              transition: "all 0.3s", flexShrink: 0,
+            }}>
+              <Send size={16} />
+            </button>
+          </div>
+
+          {/* Powered by badge */}
+          <div style={{ padding: "6px 16px 10px", textAlign: "center", fontSize: 10, color: BRAND.textDim }}>
+            Powered by AI · Not a substitute for professional advice
+          </div>
+        </div>
+      )}
+
+      <style>{`
+        @keyframes chatDot { 0%,100% { transform: translateY(0); opacity: 0.4; } 50% { transform: translateY(-4px); opacity: 1; } }
+      `}</style>
+    </>
+  );
+}
+
+// ─────────────────────────────────────────────
 // APP — ROUTER
 // ─────────────────────────────────────────────
 
@@ -2003,6 +2171,7 @@ export default function App() {
         {renderPage()}
       </main>
       <Footer setPage={setPage} />
+      <AIChatWidget />
     </div>
   );
 }
