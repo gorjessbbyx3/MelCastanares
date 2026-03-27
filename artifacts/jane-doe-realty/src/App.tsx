@@ -38,6 +38,7 @@ const api = {
   getStats:         ()           => apiFetch('/stats'),
   getProperties:    (params={})  => apiFetch('/properties' + qs(params)),
   getProperty:      (id)         => apiFetch('/properties/' + id),
+  getRentals:       ()           => apiFetch('/rentals'),
   getTestimonials:  ()           => apiFetch('/testimonials'),
   getNeighborhoods: ()           => apiFetch('/neighborhoods'),
   getNeighborhood:  (slug)       => apiFetch('/neighborhoods/' + slug),
@@ -114,14 +115,10 @@ const FALLBACK_AGENT = {
   stats: { years: 8, sold: 120, volume: "$75M+", satisfaction: "100%" },
 };
 
-const FALLBACK_PROPERTIES = [
-  { id: "rent-1", title: "Lulani Ocean Duplex", address: "Kahalu'u, Lulani Ocean Area", city: "Kāne'ohe", state: "HI", zip: "96744", price: 2550, bedrooms: 1, bathrooms: 1, sqft: 650, status: "active", type: "rental", featured: false, images: [{url: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80", isPrimary: true}], description: "Charming 1-bedroom, 1-bath attached duplex in the quiet Lulani Ocean area. Ground-level unit with ceramic and vinyl flooring, split AC, dishwasher, solar water heater, in-unit laundry, assigned parking, and private yard access. Rent includes pest control, internet, trash, and yard maintenance. Peaceful residential neighborhood close to Kāne'ohe town and Windward beaches.", amenities: ["Split AC", "In-Unit Laundry", "Private Yard", "Assigned Parking", "Internet Included"], priceLabel: "/mo" },
-  { id: "rent-2", title: "Kukui Plaza Downtown", address: "Kukui Plaza, Downtown", city: "Honolulu", state: "HI", zip: "96817", price: 1900, bedrooms: 1, bathrooms: 1, sqft: 580, status: "active", type: "rental", featured: false, images: [{url: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&q=80", isPrimary: true}], description: "Downtown living at its finest — Kukui Plaza offers comfort, security, and unparalleled convenience. 1 bedroom, 1 bathroom with covered parking. Walking distance to dining, shops, and entertainment. Amenities include swimming pool, BBQ grills, picnic area, and landscaped gardens.", amenities: ["Covered Parking", "Pool", "BBQ Area", "Landscaped Gardens", "Downtown Location"], priceLabel: "/mo" },
-  { id: "sale-1", title: "Wahiawa Heights Corner Lot", address: "Marigold Acres, Wahiawa Heights", city: "Wahiawa", state: "HI", zip: "96786", price: 350000, bedrooms: 0, bathrooms: 0, sqft: 8459, status: "active", type: "land", featured: true, images: [{url: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800&q=80", isPrimary: true}], description: "Design opportunity for visionaries! Corner lot spanning 8,459 sq ft in the beloved Marigold Acres neighborhood. R-7.5 zoning with level topography — perfect for a custom new build, multigenerational residence, or modern duplex with ADU potential. The true value lies in the land and its desirable corner-lot location.", amenities: ["Corner Lot", "R-7.5 Zoning", "ADU Potential", "Level Topography", "8,459 Sq Ft Lot"] },
-  { id: "sale-2", title: "Pearl 2 Condo — Fully Renovated", address: "Pearl 2 Condo", city: "Aiea", state: "HI", zip: "96701", price: 420000, bedrooms: 2, bathrooms: 1, sqft: 800, status: "active", type: "condo", featured: false, images: [{url: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80", isPrimary: true}], description: "Fully renovated 2-bedroom, 1-bathroom condo in beautiful Aiea. Fresh paint, luxury vinyl plank flooring throughout, stainless steel appliances, and window AC. Modern and sophisticated — move-in ready.", amenities: ["Renovated", "Luxury Vinyl Plank", "Stainless Appliances", "Window AC"] },
-  { id: "sale-3", title: "Mililani Family Home", address: "Mililani Town", city: "Mililani", state: "HI", zip: "96789", price: 875000, bedrooms: 3, bathrooms: 2, sqft: 1450, status: "active", type: "single_family", featured: false, images: [{url: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&q=80", isPrimary: true}], description: "Family-friendly Mililani Town home with 3 bedrooms and 2 bathrooms. Great schools, community parks, and easy freeway access. Well-maintained with a private backyard perfect for entertaining.", amenities: ["Private Backyard", "Top Schools", "Community Parks", "Near Freeway"] },
-  { id: "sale-4", title: "Kapolei Townhome", address: "Kapolei", city: "Kapolei", state: "HI", zip: "96707", price: 650000, bedrooms: 3, bathrooms: 2, sqft: 1200, status: "pending", type: "townhouse", featured: false, images: [{url: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80", isPrimary: true}], description: "Modern townhome in growing Kapolei. Open floor plan, two-car garage, and lanai. Close to shopping, restaurants, and the new rail transit. Perfect for families or investors.", amenities: ["Two-Car Garage", "Lanai", "Near Rail Transit", "Open Floor Plan"] },
-];
+// No hardcoded properties — all listing data loads live from real sources.
+// Rentals: Cloudflare Worker proxies AppFolio (dreamhomerlty.appfolio.com/listings/)
+// For Sale: Dream Home Realty Hawaii MLS search (dreamhomerealtyhawaii.com/property-search)
+const FALLBACK_PROPERTIES: any[] = [];
 
 const FALLBACK_NEIGHBORHOODS = [
   { id: "mililani", name: "Mililani", tagline: "Mel's home turf · Best schools on O'ahu", description: "Central O'ahu's crown jewel — Mililani is a master-planned community built for families. Top-ranked schools (Mililani High, Mililani Uka Elementary), 23 parks, 7 recreation centers, and HOA-maintained common areas make it one of the most livable communities in the state. Easy H-2 freeway access puts downtown Honolulu 30 minutes away. Mel grew up in Central O'ahu and knows every street, school district, and neighborhood park here. Median prices range from $600K (townhomes) to $900K+ (single-family). A perennial seller's market due to limited inventory and strong demand from families.", coverImage: "https://www.wilkow.com/wp-content/uploads/2024/10/HI-Town-Center-of-Mililani-main_0-copy.webp", images: [{url: "https://www.wilkow.com/wp-content/uploads/2024/10/HI-Town-Center-of-Mililani-main_0-copy.webp", isPrimary: true}, {url: "https://locationsimages.s3.us-west-1.amazonaws.com/blog/Mililani001.jpg?w=800", isPrimary: false}, {url: "https://www.chronogolf.com/_next/image?url=https%3A%2F%2Fcdn2.chronogolf.com%2F5mfwz6srouco3icuvcgkll11dp8w&w=3840&q=75", isPrimary: false}], medianHomePrice: "$820K", growth: "+4.8%", highlights: ["Top-Rated Schools", "23 Parks", "Family-Friendly", "Master-Planned"] },
@@ -659,7 +656,7 @@ function HomePage({ setPage }) {
   // API calls with fallback data
   const { data: agent } = useApi(() => api.getAgent(), FALLBACK_AGENT);
   const { data: stats } = useApi(() => api.getStats(), { homesSold: 120, totalSalesVolume: 75000000, yearsExperience: 8, clientSatisfactionRate: 100 });
-  const { data: propsResp } = useApi(() => api.getProperties({ featured: true, limit: 3 }), { properties: FALLBACK_PROPERTIES.filter(p => p.featured) });
+  const { data: propsResp } = useApi(() => api.getProperties({ featured: true, limit: 3 }), { properties: [] });
   const { data: testiResp } = useApi(() => api.getTestimonials(), { testimonials: FALLBACK_TESTIMONIALS });
   const { data: nResp } = useApi(() => api.getNeighborhoods(), { neighborhoods: FALLBACK_NEIGHBORHOODS });
 
@@ -845,26 +842,58 @@ function HomePage({ setPage }) {
       </section>
 
 
-      {/* FEATURED PROPERTIES */}
+      {/* FEATURED PROPERTIES / LISTING PORTALS */}
       <section className="section-pad">
         <Reveal>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 48, flexWrap: "wrap", gap: 16 }}>
             <div>
-              <div style={{ color: BRAND.teal, fontSize: 11, letterSpacing: "0.25em", textTransform: "uppercase", marginBottom: 12, fontWeight: 500 }}>Curated Collection</div>
-              <h2 className="font-display" style={{ fontSize: "clamp(32px, 4vw, 48px)" }}>Featured Properties</h2>
+              <div style={{ color: BRAND.teal, fontSize: 11, letterSpacing: "0.25em", textTransform: "uppercase", marginBottom: 12, fontWeight: 500 }}>Live MLS + AppFolio</div>
+              <h2 className="font-display" style={{ fontSize: "clamp(32px, 4vw, 48px)" }}>Current Listings</h2>
             </div>
             <button className="btn-outline" onClick={() => go("properties")} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              View All <ArrowRight size={14} />
+              Browse All <ArrowRight size={14} />
             </button>
           </div>
         </Reveal>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: 24 }}>
-          {(propsResp?.properties || []).filter(p => p.featured && p.type !== "rental" && p.price >= 10000).map((p, i) => (
-            <Reveal key={p.id} delay={i * 0.15} direction="up">
-              <PropertyCard property={p} onClick={() => { setPage("property-detail"); window.__selectedProperty = p; window.scrollTo({ top: 0, behavior: "smooth" }); }} />
-            </Reveal>
-          ))}
-        </div>
+
+        {/* If API returns featured listings, show them; otherwise show portal cards */}
+        {(propsResp?.properties || []).filter(p => p.featured && p.type !== "rental" && p.price >= 10000).length > 0 ? (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: 24 }}>
+            {(propsResp?.properties || []).filter(p => p.featured && p.type !== "rental" && p.price >= 10000).map((p, i) => (
+              <Reveal key={p.id} delay={i * 0.15} direction="up">
+                <PropertyCard property={p} onClick={() => { setPage("property-detail"); window.__selectedProperty = p; window.scrollTo({ top: 0, behavior: "smooth" }); }} />
+              </Reveal>
+            ))}
+          </div>
+        ) : (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 16 }}>
+            {[
+              { label: "Search All MLS Listings", sub: "Dream Home Realty Hawaii", url: "https://www.dreamhomerealtyhawaii.com/property-search", accent: BRAND.teal },
+              { label: "Featured Listing", sub: "OneHome portal", url: "https://portal.onehome.com/en-US/share/1039187l44771", accent: BRAND.gold },
+              { label: "New Apts & Townhomes", sub: "Newly listed", url: "https://tr.ee/TD4XEaS8fj", accent: BRAND.teal },
+              { label: "New Single Family Homes", sub: "Newly listed", url: "https://tr.ee/genAf8Ucfz", accent: BRAND.gold },
+              { label: "Available Rentals", sub: "AppFolio listings", url: "https://dreamhomerlty.appfolio.com/listings/", accent: BRAND.teal },
+              { label: "Open Houses", sub: "HiCentral schedule", url: "https://propertysearch.hicentral.com/HBR/OpenHouses/?/Results/HotSheet/d///", accent: BRAND.gold },
+            ].map((item, i) => (
+              <Reveal key={item.label} delay={i * 0.07} direction="up">
+                <a href={item.url} target="_blank" rel="noopener noreferrer" style={{
+                  display: "flex", flexDirection: "column", gap: 8, padding: "24px 20px",
+                  background: BRAND.bgCard, border: `1px solid ${BRAND.border}`,
+                  textDecoration: "none", transition: "box-shadow 0.2s, border-color 0.2s", height: "100%",
+                }}
+                onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = item.accent; (e.currentTarget as HTMLAnchorElement).style.boxShadow = `0 6px 24px rgba(0,0,0,0.08)`; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = BRAND.border; (e.currentTarget as HTMLAnchorElement).style.boxShadow = "none"; }}>
+                  <div style={{ width: 32, height: 3, background: item.accent, marginBottom: 4 }} />
+                  <div style={{ fontSize: 15, fontWeight: 700, color: BRAND.text, lineHeight: 1.3 }}>{item.label}</div>
+                  <div style={{ fontSize: 12, color: BRAND.textDim, flex: 1 }}>{item.sub}</div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 4, color: item.accent, fontSize: 11, fontWeight: 600, marginTop: 4 }}>
+                    View ↗
+                  </div>
+                </a>
+              </Reveal>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* NEIGHBORHOODS — interactive showcase */}
@@ -1123,11 +1152,33 @@ function PropertyCard({ property: p, onClick }) {
 // ─────────────────────────────────────────────
 
 function PropertiesPage({ setPage }) {
-  const [tab, setTab] = useState<"sale"|"rental">("sale");
-  const isRentalProp = (p) => p.type === "rental" || (p.priceLabel && p.priceLabel.includes("/mo")) || p.price < 10000;
-  const forSale = FALLBACK_PROPERTIES.filter(p => !isRentalProp(p));
-  const rentals = FALLBACK_PROPERTIES.filter(p => isRentalProp(p));
-  const shown = tab === "sale" ? forSale : rentals;
+  const [tab, setTab] = useState<"sale" | "rental">("sale");
+  const [rentals, setRentals] = useState<any[]>([]);
+  const [rentalsLoading, setRentalsLoading] = useState(true);
+  const [rentalsError, setRentalsError] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Fetch live rentals via Cloudflare Pages Function proxy → AppFolio
+    api.getRentals()
+      .then((data: any) => {
+        if (!data) throw new Error("No response");
+        if (data.error && !data.properties?.length) {
+          setRentalsError(data.error);
+        } else {
+          setRentals(data.properties || []);
+        }
+      })
+      .catch((e: any) => setRentalsError(e?.message || "Failed to load listings"))
+      .finally(() => setRentalsLoading(false));
+  }, []);
+
+  const SALE_PORTALS = [
+    { label: "Search All MLS Listings", url: "https://www.dreamhomerealtyhawaii.com/property-search", primary: true, icon: <Search size={14} /> },
+    { label: "Featured Listing", url: "https://portal.onehome.com/en-US/share/1039187l44771", icon: <Star size={14} /> },
+    { label: "New Apts & Townhomes", url: "https://tr.ee/TD4XEaS8fj", icon: <Building size={14} /> },
+    { label: "New Single Family Homes", url: "https://tr.ee/genAf8Ucfz", icon: <HomeIcon size={14} /> },
+    { label: "Open Houses This Week", url: "https://propertysearch.hicentral.com/HBR/OpenHouses/?/Results/HotSheet/d///", icon: <Calendar size={14} /> },
+  ];
 
   return (
     <div style={{ paddingTop: 120 }}>
@@ -1137,21 +1188,13 @@ function PropertiesPage({ setPage }) {
           <p style={{ color: BRAND.textMuted, fontSize: 16, maxWidth: 600, marginBottom: 32 }}>
             Homes for sale and rentals across O'ahu — curated by Mel.
           </p>
-          <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 40 }}>
-            <a href="https://portal.onehome.com/en-US/share/1039187l44771" target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ textDecoration: "none", fontSize: 11, padding: "10px 24px" }}>
-              View Featured Listing ↗
-            </a>
-            <a href="https://propertysearch.hicentral.com/HBR/OpenHouses/?/Results/HotSheet/d///" target="_blank" rel="noopener noreferrer" className="btn-outline" style={{ textDecoration: "none", fontSize: 11, padding: "10px 24px" }}>
-              Open Houses This Week ↗
-            </a>
-          </div>
         </Reveal>
 
         {/* Tab switcher */}
         <div style={{ display: "flex", borderBottom: `2px solid ${BRAND.border}`, marginBottom: 40 }}>
           {([
-            { key: "sale", label: "For Sale & Land", count: forSale.length },
-            { key: "rental", label: "Rentals", count: rentals.length },
+            { key: "sale", label: "For Sale", badge: "MLS" },
+            { key: "rental", label: "Rentals", badge: rentalsLoading ? "..." : String(rentals.length || "Live") },
           ] as const).map(t => (
             <button key={t.key} onClick={() => setTab(t.key)} style={{
               background: "none", border: "none", cursor: "pointer",
@@ -1165,31 +1208,124 @@ function PropertiesPage({ setPage }) {
               <span style={{
                 fontSize: 10, padding: "2px 8px", borderRadius: 20,
                 background: tab === t.key ? BRAND.gold : BRAND.bgElevated,
-                color: tab === t.key ? "#fff" : BRAND.textDim,
-                fontWeight: 700,
-              }}>{t.count}</span>
+                color: tab === t.key ? "#fff" : BRAND.textDim, fontWeight: 700,
+              }}>{t.badge}</span>
             </button>
           ))}
         </div>
 
-        {tab === "rental" && (
-          <div style={{ background: `${BRAND.teal}10`, border: `1px solid ${BRAND.teal}30`, padding: "14px 20px", marginBottom: 32, display: "flex", alignItems: "center", gap: 10 }}>
-            <Home size={16} color={BRAND.teal} />
-            <span style={{ fontSize: 13, color: BRAND.teal, fontWeight: 500 }}>Rental prices are monthly. Contact Mel to schedule a showing or apply.</span>
+        {/* FOR SALE — MLS portals */}
+        {tab === "sale" && (
+          <div>
+            <Reveal>
+              <div style={{ background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, padding: "48px 40px", textAlign: "center", marginBottom: 40, position: "relative", overflow: "hidden" }}>
+                <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${BRAND.teal}, ${BRAND.gold})` }} />
+                <div style={{ color: BRAND.teal, fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 12, fontWeight: 600 }}>Live MLS Data</div>
+                <h2 className="font-display" style={{ fontSize: "clamp(26px, 4vw, 38px)", marginBottom: 14 }}>Browse O'ahu Listings in Real Time</h2>
+                <p style={{ color: BRAND.textMuted, fontSize: 15, lineHeight: 1.7, marginBottom: 28, maxWidth: 520, margin: "0 auto 28px" }}>
+                  Mel's curated listings pull directly from the O'ahu MLS — updated the moment a property changes status. Search by neighborhood, price, and type.
+                </p>
+                <a href="https://www.dreamhomerealtyhawaii.com/property-search" target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ textDecoration: "none", fontSize: 13, padding: "14px 36px", display: "inline-flex", alignItems: "center", gap: 8 }}>
+                  <Search size={15} /> Search All Listings ↗
+                </a>
+              </div>
+            </Reveal>
+
+            <Reveal delay={0.1}>
+              <div style={{ color: BRAND.textDim, fontSize: 11, letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 16, fontWeight: 600 }}>Quick Access</div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(210px, 1fr))", gap: 12 }}>
+                {SALE_PORTALS.slice(1).map(p => (
+                  <a key={p.label} href={p.url} target="_blank" rel="noopener noreferrer" style={{
+                    display: "flex", alignItems: "center", gap: 12, padding: "16px 20px",
+                    background: BRAND.bgCard, border: `1px solid ${BRAND.border}`,
+                    textDecoration: "none", color: BRAND.text, fontSize: 13, fontWeight: 500,
+                    transition: "border-color 0.2s, box-shadow 0.2s",
+                  }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = BRAND.gold; (e.currentTarget as HTMLAnchorElement).style.boxShadow = `0 4px 16px rgba(0,0,0,0.08)`; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = BRAND.border; (e.currentTarget as HTMLAnchorElement).style.boxShadow = "none"; }}>
+                    <span style={{ color: BRAND.teal }}>{p.icon}</span>
+                    <span style={{ flex: 1 }}>{p.label}</span>
+                    <ArrowRight size={12} color={BRAND.textDim} />
+                  </a>
+                ))}
+              </div>
+            </Reveal>
           </div>
         )}
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: 24 }}>
-          {shown.map((p, i) => (
-            <Reveal key={p.id} delay={i * 0.08} direction="up">
-              <PropertyCard property={p} onClick={() => { setPage("property-detail"); window.__selectedProperty = p; window.scrollTo({ top: 0, behavior: "smooth" }); }} />
-            </Reveal>
-          ))}
-        </div>
-        {shown.length === 0 && (
-          <div style={{ textAlign: "center", padding: 80, border: `1px dashed ${BRAND.border}` }}>
-            <p className="font-display" style={{ fontSize: 24, marginBottom: 8 }}>No listings right now</p>
-            <p style={{ color: BRAND.textMuted }}>Check back soon or contact Mel directly.</p>
+        {/* RENTALS — live from AppFolio */}
+        {tab === "rental" && (
+          <div>
+            {/* Loading */}
+            {rentalsLoading && (
+              <div style={{ textAlign: "center", padding: "60px 0" }}>
+                <div style={{ maxWidth: 360, margin: "0 auto 20px", background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, borderRadius: 4, height: 6, overflow: "hidden" }}>
+                  <div className="ai-loading-bar" style={{ height: "100%", background: `linear-gradient(90deg, ${BRAND.teal}, ${BRAND.gold})`, borderRadius: 4 }} />
+                </div>
+                <p style={{ color: BRAND.textMuted, fontSize: 14 }}>Loading live rentals from AppFolio...</p>
+              </div>
+            )}
+
+            {/* Error */}
+            {!rentalsLoading && rentalsError && (
+              <Reveal>
+                <div style={{ background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, padding: "52px 40px", textAlign: "center" }}>
+                  <div style={{ color: BRAND.textDim, fontSize: 11, letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 12 }}>Live Feed Unavailable</div>
+                  <h3 className="font-display" style={{ fontSize: 26, marginBottom: 12 }}>Rental Listings</h3>
+                  <p style={{ color: BRAND.textMuted, fontSize: 14, lineHeight: 1.7, marginBottom: 28, maxWidth: 420, margin: "0 auto 28px" }}>
+                    Our live rental feed is temporarily unavailable. Browse all current rentals directly on AppFolio — managed by Dream Home Realty Hawaii.
+                  </p>
+                  <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+                    <a href="https://dreamhomerlty.appfolio.com/listings/" target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8 }}>
+                      <HomeIcon size={14} /> View Rentals on AppFolio ↗
+                    </a>
+                    <a href="tel:+18082858774" className="btn-outline" style={{ textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8, fontSize: 11, padding: "12px 24px" }}>
+                      <Phone size={14} /> Call Mel · (808) 285-8774
+                    </a>
+                  </div>
+                </div>
+              </Reveal>
+            )}
+
+            {/* Empty */}
+            {!rentalsLoading && !rentalsError && rentals.length === 0 && (
+              <Reveal>
+                <div style={{ background: BRAND.bgCard, border: `1px dashed ${BRAND.border}`, padding: "60px 40px", textAlign: "center" }}>
+                  <h3 className="font-display" style={{ fontSize: 26, marginBottom: 10 }}>No Rentals Available Right Now</h3>
+                  <p style={{ color: BRAND.textMuted, fontSize: 14, marginBottom: 24 }}>
+                    New properties are added regularly. Check AppFolio for the latest or reach out to Mel.
+                  </p>
+                  <a href="https://dreamhomerlty.appfolio.com/listings/" target="_blank" rel="noopener noreferrer" className="btn-outline" style={{ textDecoration: "none", fontSize: 11, display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 24px" }}>
+                    Check AppFolio ↗
+                  </a>
+                </div>
+              </Reveal>
+            )}
+
+            {/* Live listings */}
+            {!rentalsLoading && !rentalsError && rentals.length > 0 && (
+              <>
+                <div style={{ background: `${BRAND.teal}0F`, border: `1px solid ${BRAND.teal}30`, padding: "12px 18px", marginBottom: 28, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <div style={{ width: 8, height: 8, borderRadius: "50%", background: BRAND.teal }} />
+                    <span style={{ fontSize: 13, color: BRAND.teal, fontWeight: 600 }}>Live from AppFolio · {rentals.length} propert{rentals.length === 1 ? "y" : "ies"} available</span>
+                  </div>
+                  <a href="https://dreamhomerlty.appfolio.com/listings/" target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, color: BRAND.teal, fontWeight: 600, textDecoration: "none", display: "flex", alignItems: "center", gap: 4 }}>
+                    Apply on AppFolio <ArrowRight size={11} />
+                  </a>
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: 24 }}>
+                  {rentals.map((p, i) => (
+                    <Reveal key={p.id} delay={i * 0.08} direction="up">
+                      <PropertyCard
+                        property={p}
+                        onClick={() => { window.open(p.listingUrl || "https://dreamhomerlty.appfolio.com/listings/", "_blank"); }}
+                      />
+                    </Reveal>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
         )}
       </div>
