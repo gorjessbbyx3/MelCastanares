@@ -115,8 +115,8 @@ const FALLBACK_AGENT = {
 };
 
 const FALLBACK_PROPERTIES = [
-  { id: "rent-1", title: "Lulani Ocean Duplex", address: "Kahalu'u, Lulani Ocean Area", city: "Kāne'ohe", state: "HI", zip: "96744", price: 2550, bedrooms: 1, bathrooms: 1, sqft: 650, status: "active", type: "rental", featured: true, images: [{url: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80", isPrimary: true}], description: "Charming 1-bedroom, 1-bath attached duplex in the quiet Lulani Ocean area. Ground-level unit with ceramic and vinyl flooring, split AC, dishwasher, solar water heater, in-unit laundry, assigned parking, and private yard access. Rent includes pest control, internet, trash, and yard maintenance. Peaceful residential neighborhood close to Kāne'ohe town and Windward beaches.", amenities: ["Split AC", "In-Unit Laundry", "Private Yard", "Assigned Parking", "Internet Included"], priceLabel: "/mo" },
-  { id: "rent-2", title: "Kukui Plaza Downtown", address: "Kukui Plaza, Downtown", city: "Honolulu", state: "HI", zip: "96817", price: 1900, bedrooms: 1, bathrooms: 1, sqft: 580, status: "active", type: "rental", featured: true, images: [{url: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&q=80", isPrimary: true}], description: "Downtown living at its finest — Kukui Plaza offers comfort, security, and unparalleled convenience. 1 bedroom, 1 bathroom with covered parking. Walking distance to dining, shops, and entertainment. Amenities include swimming pool, BBQ grills, picnic area, and landscaped gardens.", amenities: ["Covered Parking", "Pool", "BBQ Area", "Landscaped Gardens", "Downtown Location"], priceLabel: "/mo" },
+  { id: "rent-1", title: "Lulani Ocean Duplex", address: "Kahalu'u, Lulani Ocean Area", city: "Kāne'ohe", state: "HI", zip: "96744", price: 2550, bedrooms: 1, bathrooms: 1, sqft: 650, status: "active", type: "rental", featured: false, images: [{url: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80", isPrimary: true}], description: "Charming 1-bedroom, 1-bath attached duplex in the quiet Lulani Ocean area. Ground-level unit with ceramic and vinyl flooring, split AC, dishwasher, solar water heater, in-unit laundry, assigned parking, and private yard access. Rent includes pest control, internet, trash, and yard maintenance. Peaceful residential neighborhood close to Kāne'ohe town and Windward beaches.", amenities: ["Split AC", "In-Unit Laundry", "Private Yard", "Assigned Parking", "Internet Included"], priceLabel: "/mo" },
+  { id: "rent-2", title: "Kukui Plaza Downtown", address: "Kukui Plaza, Downtown", city: "Honolulu", state: "HI", zip: "96817", price: 1900, bedrooms: 1, bathrooms: 1, sqft: 580, status: "active", type: "rental", featured: false, images: [{url: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&q=80", isPrimary: true}], description: "Downtown living at its finest — Kukui Plaza offers comfort, security, and unparalleled convenience. 1 bedroom, 1 bathroom with covered parking. Walking distance to dining, shops, and entertainment. Amenities include swimming pool, BBQ grills, picnic area, and landscaped gardens.", amenities: ["Covered Parking", "Pool", "BBQ Area", "Landscaped Gardens", "Downtown Location"], priceLabel: "/mo" },
   { id: "sale-1", title: "Wahiawa Heights Corner Lot", address: "Marigold Acres, Wahiawa Heights", city: "Wahiawa", state: "HI", zip: "96786", price: 350000, bedrooms: 0, bathrooms: 0, sqft: 8459, status: "active", type: "land", featured: true, images: [{url: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800&q=80", isPrimary: true}], description: "Design opportunity for visionaries! Corner lot spanning 8,459 sq ft in the beloved Marigold Acres neighborhood. R-7.5 zoning with level topography — perfect for a custom new build, multigenerational residence, or modern duplex with ADU potential. The true value lies in the land and its desirable corner-lot location.", amenities: ["Corner Lot", "R-7.5 Zoning", "ADU Potential", "Level Topography", "8,459 Sq Ft Lot"] },
   { id: "sale-2", title: "Pearl 2 Condo — Fully Renovated", address: "Pearl 2 Condo", city: "Aiea", state: "HI", zip: "96701", price: 420000, bedrooms: 2, bathrooms: 1, sqft: 800, status: "active", type: "condo", featured: false, images: [{url: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80", isPrimary: true}], description: "Fully renovated 2-bedroom, 1-bathroom condo in beautiful Aiea. Fresh paint, luxury vinyl plank flooring throughout, stainless steel appliances, and window AC. Modern and sophisticated — move-in ready.", amenities: ["Renovated", "Luxury Vinyl Plank", "Stainless Appliances", "Window AC"] },
   { id: "sale-3", title: "Mililani Family Home", address: "Mililani Town", city: "Mililani", state: "HI", zip: "96789", price: 875000, bedrooms: 3, bathrooms: 2, sqft: 1450, status: "active", type: "single_family", featured: false, images: [{url: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&q=80", isPrimary: true}], description: "Family-friendly Mililani Town home with 3 bedrooms and 2 bathrooms. Great schools, community parks, and easy freeway access. Well-maintained with a private backyard perfect for entertaining.", amenities: ["Private Backyard", "Top Schools", "Community Parks", "Near Freeway"] },
@@ -124,18 +124,18 @@ const FALLBACK_PROPERTIES = [
 ];
 
 const FALLBACK_NEIGHBORHOODS = [
-  { id: "mililani", name: "Mililani", tagline: "Mel's home turf · Best schools on O'ahu", description: "Central O'ahu's crown jewel — Mililani is a master-planned community built for families. Top-ranked schools (Mililani High, Mililani Uka Elementary), 23 parks, 7 recreation centers, and HOA-maintained common areas make it one of the most livable communities in the state. Easy H-2 freeway access puts downtown Honolulu 30 minutes away. Mel grew up in Central O'ahu and knows every street, school district, and neighborhood park here. Median prices range from $600K (townhomes) to $900K+ (single-family). A perennial seller's market due to limited inventory and strong demand from families.", images: [{url: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=1400&q=85", isPrimary: true}], medianHomePrice: "$820K", growth: "+4.8%", highlights: ["Top-Rated Schools", "23 Parks", "Family-Friendly", "Master-Planned"] },
-  { id: "ewa-beach", name: "Ewa Beach / Kapolei", tagline: "O'ahu's fastest-growing 'second city'", description: "The west side is booming — and for good reason. Newer construction, more space per dollar, and a rapidly expanding infrastructure (restaurants, Target, Costco, soon the rail) make Ewa Beach and Kapolei the best value on island right now. Single-family homes from $700K–$1.1M. Great schools, beach parks, and a strong sense of community. Mel has helped dozens of families make the move west and knows which streets, builders, and HOAs are worth your time. This is where savvy buyers are investing right now.", images: [{url: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1400&q=85", isPrimary: true}], medianHomePrice: "$780K", growth: "+6.2%", highlights: ["New Construction", "Rail Access", "Great Value", "Growing Infrastructure"] },
-  { id: "pearl-city", name: "Pearl City / Aiea", tagline: "Central location, unbeatable convenience", description: "Sitting at the geographic center of O'ahu, Pearl City and Aiea offer the perfect balance of affordability and access. Quick freeway on-ramps to every part of the island, the Pearl Highlands shopping center, and strong public schools. Condos from $350K–$600K; single-family from $750K+. Great for first-time buyers who want more home for their money without sacrificing convenience. Mel specializes in this corridor and has extensive knowledge of the condo market here.", images: [{url: "https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=1400&q=85", isPrimary: true}], medianHomePrice: "$620K", growth: "+3.9%", highlights: ["Central Location", "Freeway Access", "First-Time Buyers", "Condo Value"] },
-  { id: "kaneohe", name: "Kāne'ohe", tagline: "Lush windward living · Cooler & greener", description: "Known for cooler weather and peaceful neighborhoods on the windward side. Sandbar adventures, botanical gardens, and breathtaking mountain ridges. Mel has helped multiple families find rental investments and primary homes in this community. Local tips: the Kāne'ohe sandbar is life-changing, and the morning drive over the Pali is one of the most scenic in the world.", images: [{url: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=1400&q=85", isPrimary: true}], medianHomePrice: "$890K", growth: "+3.5%", highlights: ["Cooler Climate", "Windward Side", "Mountain Views", "Rental Potential"] },
-  { id: "kailua", name: "Kailua", tagline: "World-class beaches · Charming town", description: "Home to consistently ranked world-class beaches (Kailua Beach, Lanikai). A family-friendly town with excellent schools, charming boutiques, and an active outdoor lifestyle. High demand keeps prices strong. Great for buyers who want island living without the urban hustle — and for investors, short-term rental potential is significant.", images: [{url: "https://images.unsplash.com/photo-1468413253980-4c0a5f3ce5e5?w=1400&q=85", isPrimary: true}], medianHomePrice: "$1.4M", growth: "+6.1%", highlights: ["World-Class Beaches", "Top Schools", "Investment Potential", "Beach Lifestyle"] },
-  { id: "kaimuki", name: "Kaimuki", tagline: "Local food scene · Walkable streets", description: "Known for its eclectic local character and unbeatable food scene. Walkable streets lined with boutique shops, craft coffee, and some of Honolulu's best restaurants (12th Ave Grill, Mud Hen Water, Koko Head Cafe). Strong appreciation history. A great option for buyers wanting urban walkability with neighborhood character.", images: [{url: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=1400&q=85", isPrimary: true}], medianHomePrice: "$985K", growth: "+4.2%", highlights: ["Best Food Scene", "Walkable", "Local Character", "Strong Appreciation"] },
-  { id: "hawaii-kai", name: "Hawai'i Kai", tagline: "Marina & waterfront living", description: "Known for the Hawaii Kai Marina, easy ocean access and waterfront living. A master-planned community with golf, hiking (Koko Head!), and water sports. Mel's bold prediction for 2026: Hawai'i Kai is the most undervalued neighborhood on O'ahu right now. New marina renovations, school improvements, and strong community investment are converging.", images: [{url: "https://images.unsplash.com/photo-1505118380757-91f5f5632de0?w=1400&q=85", isPrimary: true}], medianHomePrice: "$1.3M", growth: "+4.7%", highlights: ["Marina Access", "Koko Head", "Waterfront", "Undervalued Gem"] },
-  { id: "north-shore", name: "North Shore", tagline: "Surf culture · Farm-to-table living", description: "Known for its legendary surf culture and laidback lifestyle. World-famous waves in winter, calm snorkeling in summer, and farm-to-table dining year-round (Giovanni's Shrimp Truck is obligatory). Low inventory keeps prices competitive. Great for buyers seeking a completely different pace of island life.", images: [{url: "https://images.unsplash.com/photo-1502680390469-be75c86b636f?w=1400&q=85", isPrimary: true}], medianHomePrice: "$1.1M", growth: "+5.3%", highlights: ["Surf Culture", "Farm-to-Table", "Low Inventory", "Unique Lifestyle"] },
+  { id: "mililani", name: "Mililani", tagline: "Mel's home turf · Best schools on O'ahu", description: "Central O'ahu's crown jewel — Mililani is a master-planned community built for families. Top-ranked schools (Mililani High, Mililani Uka Elementary), 23 parks, 7 recreation centers, and HOA-maintained common areas make it one of the most livable communities in the state. Easy H-2 freeway access puts downtown Honolulu 30 minutes away. Mel grew up in Central O'ahu and knows every street, school district, and neighborhood park here. Median prices range from $600K (townhomes) to $900K+ (single-family). A perennial seller's market due to limited inventory and strong demand from families.", coverImage: "https://www.wilkow.com/wp-content/uploads/2024/10/HI-Town-Center-of-Mililani-main_0-copy.webp", images: [{url: "https://www.wilkow.com/wp-content/uploads/2024/10/HI-Town-Center-of-Mililani-main_0-copy.webp", isPrimary: true}, {url: "https://locationsimages.s3.us-west-1.amazonaws.com/blog/Mililani001.jpg?w=800", isPrimary: false}, {url: "https://www.chronogolf.com/_next/image?url=https%3A%2F%2Fcdn2.chronogolf.com%2F5mfwz6srouco3icuvcgkll11dp8w&w=3840&q=75", isPrimary: false}], medianHomePrice: "$820K", growth: "+4.8%", highlights: ["Top-Rated Schools", "23 Parks", "Family-Friendly", "Master-Planned"] },
+  { id: "ewa-beach", name: "Ewa Beach / Kapolei", tagline: "O'ahu's fastest-growing 'second city'", description: "The west side is booming — and for good reason. Newer construction, more space per dollar, and a rapidly expanding infrastructure (restaurants, Target, Costco, soon the rail) make Ewa Beach and Kapolei the best value on island right now. Single-family homes from $700K–$1.1M. Great schools, beach parks, and a strong sense of community. Mel has helped dozens of families make the move west and knows which streets, builders, and HOAs are worth your time. This is where savvy buyers are investing right now.", coverImage: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1400&q=85", images: [{url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1400&q=85", isPrimary: true}], medianHomePrice: "$780K", growth: "+6.2%", highlights: ["New Construction", "Rail Access", "Great Value", "Growing Infrastructure"] },
+  { id: "pearl-city", name: "Pearl City / Aiea", tagline: "Central location, unbeatable convenience", description: "Sitting at the geographic center of O'ahu, Pearl City and Aiea offer the perfect balance of affordability and access. Quick freeway on-ramps to every part of the island, the Pearl Highlands shopping center, and strong public schools. Condos from $350K–$600K; single-family from $750K+. Great for first-time buyers who want more home for their money without sacrificing convenience. Mel specializes in this corridor and has extensive knowledge of the condo market here.", coverImage: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1400&q=85", images: [{url: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1400&q=85", isPrimary: true}], medianHomePrice: "$620K", growth: "+3.9%", highlights: ["Central Location", "Freeway Access", "First-Time Buyers", "Condo Value"] },
+  { id: "kaneohe", name: "Kāne'ohe", tagline: "Lush windward living · Cooler & greener", description: "Known for cooler weather and peaceful neighborhoods on the windward side. Sandbar adventures, botanical gardens, and breathtaking mountain ridges. Mel has helped multiple families find rental investments and primary homes in this community. Local tips: the Kāne'ohe sandbar is life-changing, and the morning drive over the Pali is one of the most scenic in the world.", coverImage: "https://images.unsplash.com/photo-1598135753163-6167c1a1ad65?w=1400&q=85", images: [{url: "https://images.unsplash.com/photo-1598135753163-6167c1a1ad65?w=1400&q=85", isPrimary: true}], medianHomePrice: "$890K", growth: "+3.5%", highlights: ["Cooler Climate", "Windward Side", "Mountain Views", "Rental Potential"] },
+  { id: "kailua", name: "Kailua", tagline: "World-class beaches · Charming town", description: "Home to consistently ranked world-class beaches (Kailua Beach, Lanikai). A family-friendly town with excellent schools, charming boutiques, and an active outdoor lifestyle. High demand keeps prices strong. Great for buyers who want island living without the urban hustle — and for investors, short-term rental potential is significant.", coverImage: "https://images.unsplash.com/photo-1542259009477-d625272157b7?w=1400&q=85", images: [{url: "https://images.unsplash.com/photo-1542259009477-d625272157b7?w=1400&q=85", isPrimary: true}], medianHomePrice: "$1.4M", growth: "+6.1%", highlights: ["World-Class Beaches", "Top Schools", "Investment Potential", "Beach Lifestyle"] },
+  { id: "kaimuki", name: "Kaimuki", tagline: "Local food scene · Walkable streets", description: "Known for its eclectic local character and unbeatable food scene. Walkable streets lined with boutique shops, craft coffee, and some of Honolulu's best restaurants (12th Ave Grill, Mud Hen Water, Koko Head Cafe). Strong appreciation history. A great option for buyers wanting urban walkability with neighborhood character.", coverImage: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=1400&q=85", images: [{url: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=1400&q=85", isPrimary: true}], medianHomePrice: "$985K", growth: "+4.2%", highlights: ["Best Food Scene", "Walkable", "Local Character", "Strong Appreciation"] },
+  { id: "hawaii-kai", name: "Hawai'i Kai", tagline: "Marina & waterfront living", description: "Known for the Hawaii Kai Marina, easy ocean access and waterfront living. A master-planned community with golf, hiking (Koko Head!), and water sports. Mel's bold prediction for 2026: Hawai'i Kai is the most undervalued neighborhood on O'ahu right now. New marina renovations, school improvements, and strong community investment are converging.", coverImage: "https://images.unsplash.com/photo-1548574505-5e239809ee19?w=1400&q=85", images: [{url: "https://images.unsplash.com/photo-1548574505-5e239809ee19?w=1400&q=85", isPrimary: true}], medianHomePrice: "$1.3M", growth: "+4.7%", highlights: ["Marina Access", "Koko Head", "Waterfront", "Undervalued Gem"] },
+  { id: "north-shore", name: "North Shore", tagline: "Surf culture · Farm-to-table living", description: "Known for its legendary surf culture and laidback lifestyle. World-famous waves in winter, calm snorkeling in summer, and farm-to-table dining year-round (Giovanni's Shrimp Truck is obligatory). Low inventory keeps prices competitive. Great for buyers seeking a completely different pace of island life.", coverImage: "https://images.unsplash.com/photo-1509477887414-681937645173?w=1400&q=85", images: [{url: "https://images.unsplash.com/photo-1509477887414-681937645173?w=1400&q=85", isPrimary: true}], medianHomePrice: "$1.1M", growth: "+5.3%", highlights: ["Surf Culture", "Farm-to-Table", "Low Inventory", "Unique Lifestyle"] },
 ];
 
 const FALLBACK_TESTIMONIALS = [
-  { clientName: "First-Time Renter", quote: "This was the first time renting a house on my own so I was really skeptical on which company to go with. I put my trust in Tori and Mel and they made the entire process smooth and easy. Although it was my first-time renting, they made me feel safe and explained everything I needed to know. Anytime I've had a problem or concern they were able to get back to me right away! In the future I will put my trust back with them as I make my first home purchase!", rating: 5, transactionType: "bought", featured: true, clientPhoto: "/images/testimonial-sold.jpg" },
+  { clientName: "First-Time Renter", quote: "This was the first time renting a house on my own so I was really skeptical on which company to go with. I put my trust in Tori and Mel and they made the entire process smooth and easy. Although it was my first-time renting, they made me feel safe and explained everything I needed to know. Anytime I've had a problem or concern they were able to get back to me right away! In the future I will put my trust back with them as I make my first home purchase!", rating: 5, transactionType: "bought", featured: true },
   { clientName: "George C.", quote: "Mel guided us through selling our home on Wilhelmina Rise with extraordinary professionalism. After an extensive interview process, she stood out for her market knowledge and genuine care.", rating: 5, transactionType: "sold" },
   { clientName: "Jenely S.", quote: "I searched for nearly 3 years, unsure if I even wanted to buy. Mel stayed patient the entire time and ultimately helped me find my perfect home. She's honestly amazing.", rating: 5, transactionType: "bought" },
   { clientName: "Dan W.", quote: "As a first-time buyer, I had no idea what I was getting into. Mel assembled an incredible team and walked me through every step. I couldn't have done it without her.", rating: 5, transactionType: "bought" },
@@ -151,7 +151,7 @@ const FALLBACK_BLOG_POSTS = [
   { id: "4", slug: "kaimuki-vs-kailua-the-real-comparison", title: "Kaimuki vs. Kailua: The Honest Comparison Nobody Else Will Give You", excerpt: "Two of O'ahu's most beloved neighborhoods, but wildly different lifestyles. I've sold homes in both for years. Here's the unfiltered truth about schools, commutes, appreciation rates, and which one actually fits your life.", category: "Neighborhood Deep Dive", date: "Feb 24, 2026", readTime: 11, images: [{url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80", isPrimary: true}] },
   { id: "5", slug: "what-mainland-buyers-get-wrong-about-hawaii", title: "What Mainland Buyers Get Wrong About Buying in Hawai'i", excerpt: "After helping 60+ families relocate to the islands, I've seen the same mistakes repeated. From underestimating hurricane insurance to not understanding leasehold vs. fee simple, these are the traps — and how to avoid them.", category: "Relocation Intel", date: "Feb 15, 2026", readTime: 8, images: [{url: "https://images.unsplash.com/photo-1505228395891-9a51e7e86bf6?w=800&q=80", isPrimary: true}] },
   { id: "6", slug: "my-2026-prediction-for-hawaii-kai", title: "My Bold 2026 Prediction for Hawai'i Kai (And the Data Behind It)", excerpt: "I'm going on record: Hawai'i Kai is the most undervalued neighborhood on O'ahu right now. New marina renovations, school improvements, and the Costco effect are converging. Here's my full analysis.", category: "Investment Thesis", date: "Feb 6, 2026", readTime: 10, images: [{url: "https://images.unsplash.com/photo-1506929562872-bb421503ef21?w=800&q=80", isPrimary: true}] },
-  { id: "7", slug: "first-time-homebuyer-checklist-oahu-families", title: "First-Time Homebuyer Checklist for O'ahu Families", excerpt: "Buying your first home in Hawai'i is one of the most exciting — and complicated — things you'll ever do. From VA loans to leasehold land, association dues to termite inspections, here's the complete checklist I walk every first-time buyer through before they make an offer.", category: "First-Time Buyers", date: "Mar 18, 2026", readTime: 8, images: [{url: "https://images.unsplash.com/photo-1572120360610-d971b9d7767c?w=800&q=80", isPrimary: true}], featured: false,
+  { id: "7", slug: "first-time-homebuyer-checklist-oahu-families", title: "First-Time Homebuyer Checklist for O'ahu Families", excerpt: "Buying your first home in Hawai'i is one of the most exciting — and complicated — things you'll ever do. From VA loans to leasehold land, association dues to termite inspections, here's the complete checklist I walk every first-time buyer through before they make an offer.", category: "First-Time Buyers", date: "Mar 18, 2026", readTime: 8, images: [{url: "/images/testimonial-sold.jpg", isPrimary: true}], featured: false,
     content: `Buying your first home in Hawai'i is different from anywhere else in the country — and in the best possible way. But it comes with its own unique set of hurdles. After helping dozens of first-time buyers find their footing on O'ahu, here's the checklist I use with every single client.\n\n**1. Get Pre-Approved (Not Just Pre-Qualified)**\nPre-qualification is a five-minute phone call. Pre-approval is what actually gets your offer accepted. Sellers on O'ahu — especially in competitive markets like Mililani and Ewa Beach — won't even look at your offer without a solid pre-approval letter from a reputable lender.\n\n**2. Understand Fee Simple vs. Leasehold**\nThis trips up almost every mainland buyer. Fee simple means you own the land. Leasehold means you're renting the land from someone else, often the state or a trust. Leasehold properties are cheaper upfront — but the lease expiration can make financing nearly impossible and resale value unpredictable.\n\n**3. Budget for Closing Costs (They're Higher Here)**\nExpect 2–4% of your purchase price in closing costs on top of your down payment. Hawaii has additional fees including conveyance taxes and title insurance that aren't common on the mainland.\n\n**4. Don't Skip the Termite Inspection**\nIn Hawai'i, termites aren't an "if" — they're a "when." Get a full termite and pest inspection, and factor treatment costs into your offer negotiations.\n\n**5. Know Your School Zones**\nIf you have kids (or plan to), school district boundaries are sacred in Hawai'i. Mililani, Kailua, and Kāne'ohe have some of the state's highest-ranked schools — and homes in their zones carry a premium. I can map out exact boundary lines for you.\n\n**6. Factor in HOA Dues**\nMany O'ahu condos and planned communities (like Mililani) have monthly HOA dues that range from $200 to $1,200+. These affect your debt-to-income ratio and your monthly budget.\n\nReady to start? [Contact Mel](/contact) for a free first-time buyer consultation — no pressure, just clarity.`
   },
   { id: "8", slug: "mililani-vs-kailua-schools-beaches-lifestyle", title: "Mililani vs. Kailua: Real Talk on Schools, Beaches, and Lifestyle", excerpt: "Two of O'ahu's best neighborhoods for families — but they couldn't be more different. One is a master-planned inland community with unbeatable schools. The other is a beach town with a charming local vibe and world-class surf. Which one's right for your family?", category: "Neighborhood Deep Dive", date: "Mar 10, 2026", readTime: 10, images: [{url: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&q=80", isPrimary: true}], featured: false,
@@ -667,12 +667,10 @@ function HomePage({ setPage }) {
     <div>
       {/* HERO */}
       <section style={{ position: "relative", width: "100%", height: "100vh", minHeight: 700, overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        {/* Hero background — image always visible; video plays on top if file exists */}
+        {/* Hero background — video only; solid dark fallback if video fails */}
         <div style={{
           position: "absolute", top: 0, left: 0, right: 0, bottom: 0, zIndex: 0,
-          transform: `translateY(${scrollY * 0.1}px)`,
-          backgroundImage: "url('/images/90CAA52E-6FE2-40BB-AA27-2B67D80BA3C8.png')",
-          backgroundSize: "cover", backgroundPosition: "center 40%",
+          background: "#0D1A20",
           width: "100%",
         }}>
           <video
@@ -861,7 +859,7 @@ function HomePage({ setPage }) {
           </div>
         </Reveal>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: 24 }}>
-          {(propsResp?.properties || []).filter(p => p.featured).map((p, i) => (
+          {(propsResp?.properties || []).filter(p => p.featured && p.type !== "rental" && p.price >= 10000).map((p, i) => (
             <Reveal key={p.id} delay={i * 0.15} direction="up">
               <PropertyCard property={p} onClick={() => { setPage("property-detail"); window.__selectedProperty = p; window.scrollTo({ top: 0, behavior: "smooth" }); }} />
             </Reveal>
@@ -930,34 +928,89 @@ function HomePage({ setPage }) {
 // NEIGHBORHOOD SHOWCASE
 // ─────────────────────────────────────────────
 
-function NeighborhoodShowcase({ neighborhoods = [], onNavigate }) {
-  const [active, setActive] = useState(0);
-  const [fading, setFading] = useState(false);
-  const [hovered, setHovered] = useState<number|null>(null);
+function NeighborhoodCard({ neighborhood: n, index, onNavigate }: { neighborhood: any; index: number; onNavigate: () => void }) {
+  const [imgIdx, setImgIdx] = useState(0);
+  const imgs: any[] = n.images && n.images.length > 0 ? n.images : (n.coverImage ? [{ url: n.coverImage }] : []);
+  const imgUrl = imgs[imgIdx]?.url || n.coverImage || "";
+
+  return (
+    <Reveal delay={index * 0.07} direction="up">
+      <div
+        onClick={onNavigate}
+        style={{
+          cursor: "pointer", borderRadius: 12, overflow: "hidden",
+          border: `1px solid ${BRAND.border}`, background: BRAND.bgCard,
+          transition: "box-shadow 0.25s, transform 0.25s",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.06)",
+        }}
+        onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.boxShadow = "0 16px 48px rgba(0,0,0,0.14)"; (e.currentTarget as HTMLDivElement).style.transform = "translateY(-4px)"; }}
+        onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.boxShadow = "0 4px 20px rgba(0,0,0,0.06)"; (e.currentTarget as HTMLDivElement).style.transform = "translateY(0)"; }}>
+        {/* Photo */}
+        <div style={{ position: "relative", aspectRatio: "4/3", overflow: "hidden" }}>
+          <img
+            src={imgUrl}
+            alt={n.name}
+            style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", transition: "opacity 0.3s" }}
+            onError={e => { (e.currentTarget as HTMLImageElement).style.opacity = "0"; }}
+          />
+          {/* Gradient */}
+          <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "55%", background: "linear-gradient(to top, rgba(0,0,0,0.72) 0%, transparent 100%)", pointerEvents: "none" }} />
+          {/* Name overlay */}
+          <div style={{ position: "absolute", bottom: 14, left: 16, right: imgs.length > 1 ? 80 : 16, pointerEvents: "none" }}>
+            <div style={{ color: "#fff", fontWeight: 700, fontSize: 18, fontFamily: "'DM Serif Display', Georgia, serif", lineHeight: 1.2 }}>{n.name}</div>
+            <div style={{ color: BRAND.gold, fontSize: 11, marginTop: 3, fontWeight: 500 }}>{n.tagline}</div>
+          </div>
+          {/* Slideshow controls */}
+          {imgs.length > 1 && (
+            <>
+              <button
+                onClick={e => { e.stopPropagation(); setImgIdx((imgIdx - 1 + imgs.length) % imgs.length); }}
+                style={{ position: "absolute", left: 8, bottom: 16, width: 28, height: 28, borderRadius: "50%", background: "rgba(0,0,0,0.55)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff" }}>
+                <ArrowLeft size={12} />
+              </button>
+              <button
+                onClick={e => { e.stopPropagation(); setImgIdx((imgIdx + 1) % imgs.length); }}
+                style={{ position: "absolute", right: 8, bottom: 16, width: 28, height: 28, borderRadius: "50%", background: "rgba(0,0,0,0.55)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff" }}>
+                <ArrowRight size={12} />
+              </button>
+              {/* Dot indicators */}
+              <div style={{ position: "absolute", top: 10, right: 10, display: "flex", gap: 4 }}>
+                {imgs.map((_, i) => (
+                  <div key={i} onClick={e => { e.stopPropagation(); setImgIdx(i); }} style={{ width: i === imgIdx ? 16 : 6, height: 6, borderRadius: 3, background: i === imgIdx ? BRAND.gold : "rgba(255,255,255,0.6)", transition: "width 0.2s", cursor: "pointer" }} />
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+        {/* Info row */}
+        <div style={{ padding: "16px 18px 18px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: n.highlights ? 10 : 0 }}>
+            <div>
+              <div style={{ fontSize: 11, color: BRAND.textDim, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 2 }}>Median Price</div>
+              <div style={{ fontSize: 16, fontWeight: 700, color: BRAND.text }}>{n.medianHomePrice || "—"}</div>
+            </div>
+            {n.growth && (
+              <div style={{ textAlign: "right" }}>
+                <div style={{ fontSize: 11, color: BRAND.textDim, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 2 }}>YoY</div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: BRAND.teal }}>{n.growth}</div>
+              </div>
+            )}
+          </div>
+          {n.highlights && n.highlights.length > 0 && (
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+              {n.highlights.slice(0, 2).map((h: string) => (
+                <span key={h} style={{ fontSize: 10, padding: "3px 9px", border: `1px solid ${BRAND.border}`, color: BRAND.textMuted, background: BRAND.bgElevated, borderRadius: 2 }}>{h}</span>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </Reveal>
+  );
+}
+
+function NeighborhoodShowcase({ neighborhoods = [], onNavigate }: { neighborhoods: any[]; onNavigate: () => void }) {
   const items = neighborhoods.slice(0, 8);
-
-  // Map pin positions aligned to FALLBACK_NEIGHBORHOODS order:
-  // mililani, ewa-beach, pearl-city, kaneohe, kailua, kaimuki, hawaii-kai, north-shore
-  const PINS = [
-    { x: 208, y: 122, label: "Mililani" },
-    { x: 108, y: 222, label: "Ewa Beach" },
-    { x: 238, y: 218, label: "Pearl City" },
-    { x: 375, y: 108, label: "Kāne'ohe" },
-    { x: 412, y: 152, label: "Kailua" },
-    { x: 330, y: 236, label: "Kaimuki" },
-    { x: 402, y: 220, label: "Hawai'i Kai" },
-    { x: 212, y: 42, label: "North Shore" },
-  ];
-
-  const handleSelect = (i: number) => {
-    if (i === active) return;
-    setFading(true);
-    setTimeout(() => { setActive(i); setFading(false); }, 260);
-  };
-
-  const n = items[active] || {};
-  const imgUrl = n.coverImage || n.images?.[0]?.url || n.img || "";
-  const highlights: string[] = n.highlights || [];
 
   return (
     <section style={{ background: BRAND.bgLight, borderTop: `1px solid ${BRAND.border}`, paddingBottom: 80 }}>
@@ -968,155 +1021,23 @@ function NeighborhoodShowcase({ neighborhoods = [], onNavigate }) {
           <h2 className="font-display" style={{ fontSize: "clamp(32px, 4vw, 48px)", marginBottom: 12 }}>
             Find Your <em style={{ color: BRAND.gold }}>Neighborhood</em>
           </h2>
-          <p style={{ color: BRAND.textMuted, fontSize: 14, maxWidth: 440, margin: "0 auto 48px" }}>Tap any pin on the island map to explore each community</p>
+          <p style={{ color: BRAND.textMuted, fontSize: 14, maxWidth: 440, margin: "0 auto 48px" }}>
+            From surf-town vibes to master-planned family havens — explore every corner of O'ahu
+          </p>
         </Reveal>
       </div>
 
-      {/* Island SVG Map */}
-      <Reveal>
-        <div style={{ maxWidth: 660, margin: "0 auto", padding: "0 24px 40px" }}>
-          <svg viewBox="0 0 500 280" style={{ width: "100%", display: "block", filter: "drop-shadow(0 12px 48px rgba(0,0,0,0.13))", borderRadius: 12 }}>
-            {/* Ocean */}
-            <defs>
-              <radialGradient id="oceanGrad" cx="50%" cy="50%" r="70%">
-                <stop offset="0%" stopColor="#C8E8F0" />
-                <stop offset="100%" stopColor="#A8CDD8" />
-              </radialGradient>
-              <radialGradient id="islandGrad" cx="50%" cy="50%" r="60%">
-                <stop offset="0%" stopColor="#C2B88A" />
-                <stop offset="100%" stopColor="#B0A070" />
-              </radialGradient>
-            </defs>
-            <rect width="500" height="280" fill="url(#oceanGrad)" rx="12" />
-            {/* Nautical grid lines */}
-            <g stroke="#8AB8C8" strokeWidth="0.4" opacity="0.4">
-              {[56,112,168,224].map(y => <line key={y} x1="0" y1={y} x2="500" y2={y} />)}
-              {[83,166,249,332,415].map(x => <line key={x} x1={x} y1="0" x2={x} y2="280" />)}
-            </g>
-            {/* Island outline */}
-            <path d="M 14,138 C 18,100 42,62 82,40 C 118,22 162,16 212,18 C 256,16 302,20 344,34 C 390,50 430,84 452,124 C 464,150 460,184 440,210 C 418,234 382,252 342,260 C 304,270 264,272 224,268 C 180,264 140,254 102,240 C 64,224 24,198 14,162 Z"
-              fill="url(#islandGrad)" stroke="#96864A" strokeWidth="1.5" />
-            {/* Inner highland contours */}
-            <path d="M 58,148 C 64,114 84,82 116,64 C 150,46 186,40 218,40 C 254,38 290,44 324,58 C 362,74 396,106 414,136 C 424,156 420,180 404,198 C 386,218 358,232 328,238 C 296,246 260,247 228,244 C 192,240 160,230 132,218 C 100,204 62,184 58,162 Z"
-              fill="#B0A070" opacity="0.45" />
-            <path d="M 120,150 C 126,124 144,102 168,87 C 193,72 222,66 246,66 C 272,64 300,70 322,84 C 350,100 368,126 376,150 C 382,168 374,188 358,200 C 338,214 310,220 282,222 C 252,224 222,220 198,210 C 168,198 122,180 120,162 Z"
-              fill="#A89860" opacity="0.28" />
-            {/* Landmark micro-labels */}
-            <text x="344" y="256" textAnchor="middle" fontSize="6.5" fill="#6A5A2A" opacity="0.65" fontFamily="sans-serif" fontStyle="italic">Honolulu</text>
-            <text x="22" y="152" textAnchor="start" fontSize="5.5" fill="#6A5A2A" opacity="0.55" fontFamily="sans-serif" transform="rotate(-25,22,152)">Kaena Pt.</text>
-            <text x="454" y="146" textAnchor="start" fontSize="5.5" fill="#6A5A2A" opacity="0.55" fontFamily="sans-serif">Makapuu</text>
-            <text x="220" y="14" textAnchor="middle" fontSize="6" fill="#6A5A2A" opacity="0.55" fontFamily="sans-serif">North Shore</text>
-            {/* Neighborhood pins */}
-            {items.map((item, i) => {
-              const pin = PINS[i];
-              if (!pin) return null;
-              const isActive = i === active;
-              const isHov = hovered === i;
-              const hl = isActive || isHov;
-              // Label positioning: offset up for bottom-area pins to avoid overlap
-              const labelY = (pin.y > 200) ? pin.y - 16 : pin.y + (hl ? 22 : 20);
-              return (
-                <g key={item.id || i}
-                  onClick={() => handleSelect(i)}
-                  onMouseEnter={() => setHovered(i)}
-                  onMouseLeave={() => setHovered(null)}
-                  style={{ cursor: "pointer" }}>
-                  {/* Active pulse ring */}
-                  {isActive && (<>
-                    <circle cx={pin.x} cy={pin.y} r="10" fill={BRAND.gold} opacity="0">
-                      <animate attributeName="r" from="10" to="26" dur="1.8s" repeatCount="indefinite" />
-                      <animate attributeName="opacity" from="0.4" to="0" dur="1.8s" repeatCount="indefinite" />
-                    </circle>
-                  </>)}
-                  {/* Drop shadow */}
-                  <circle cx={pin.x} cy={pin.y + 1.5} r={hl ? 10 : 7.5} fill="rgba(0,0,0,0.18)" />
-                  {/* Pin circle */}
-                  <circle cx={pin.x} cy={pin.y} r={hl ? 10 : 7.5}
-                    fill={isActive ? BRAND.gold : (isHov ? BRAND.teal : "#FDFAF5")}
-                    stroke={isActive ? BRAND.goldDark : BRAND.teal}
-                    strokeWidth={isActive ? 2 : 1.5}
-                    style={{ transition: "r 0.15s, fill 0.15s" }}
-                  />
-                  {/* Inner marker */}
-                  {isActive
-                    ? <circle cx={pin.x} cy={pin.y} r="4" fill="#fff" />
-                    : <circle cx={pin.x} cy={pin.y} r="3" fill={isHov ? "#fff" : BRAND.teal} opacity="0.8" />
-                  }
-                  {/* Label with text-stroke for readability */}
-                  <text x={pin.x} y={labelY} textAnchor="middle"
-                    fontSize={hl ? "9.5" : "8.5"} fontWeight={isActive ? "700" : "600"}
-                    fill={isActive ? BRAND.goldDark : BRAND.teal}
-                    fontFamily="DM Sans, sans-serif"
-                    stroke="#C8E8F0" strokeWidth="3" paintOrder="stroke">
-                    {pin.label}
-                  </text>
-                </g>
-              );
-            })}
-          </svg>
+      {/* Cards grid */}
+      <div className="section-pad" style={{ paddingTop: 0 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 24 }}>
+          {items.map((n, i) => (
+            <NeighborhoodCard key={n.id || i} neighborhood={n} index={i} onNavigate={onNavigate} />
+          ))}
         </div>
-      </Reveal>
-
-      {/* Detail card */}
-      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px" }}>
-        <div style={{
-          display: "grid", gridTemplateColumns: "1.3fr 1fr",
-          overflow: "hidden", background: BRAND.bgCard,
-          border: `1px solid ${BRAND.border}`,
-          boxShadow: "0 20px 64px rgba(0,0,0,0.08)",
-        }} className="nh-detail-grid">
-          {/* Photo */}
-          <div style={{ position: "relative", minHeight: 380, overflow: "hidden" }}>
-            <div style={{
-              position: "absolute", inset: 0,
-              backgroundImage: imgUrl ? `url('${imgUrl}')` : "none",
-              backgroundSize: "cover", backgroundPosition: "center",
-              opacity: fading ? 0 : 1, transition: "opacity 0.28s ease",
-            }} />
-            <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to right, transparent 65%, rgba(255,249,240,0.15) 100%)" }} />
-          </div>
-          {/* Info */}
-          <div style={{
-            padding: "44px 40px", display: "flex", flexDirection: "column", justifyContent: "center",
-            opacity: fading ? 0 : 1, transition: "opacity 0.28s ease",
-          }}>
-            <div style={{ color: BRAND.teal, fontSize: 10, letterSpacing: "0.3em", textTransform: "uppercase", marginBottom: 10, fontWeight: 600 }}>O'ahu · {n.name}</div>
-            <h3 className="font-display" style={{ fontSize: "clamp(24px, 3vw, 36px)", marginBottom: 6, lineHeight: 1.15 }}>{n.name}</h3>
-            <p style={{ color: BRAND.gold, fontSize: 13, fontWeight: 600, marginBottom: 18 }}>{n.tagline}</p>
-            {n.medianHomePrice && (
-              <div style={{ display: "flex", gap: 28, marginBottom: 20, paddingBottom: 20, borderBottom: `1px solid ${BRAND.border}` }}>
-                <div>
-                  <div style={{ fontSize: 10, color: BRAND.textDim, marginBottom: 3, textTransform: "uppercase", letterSpacing: "0.1em" }}>Median Price</div>
-                  <div style={{ fontSize: 20, fontWeight: 700, color: BRAND.text }}>{n.medianHomePrice}</div>
-                </div>
-                {n.growth && <div>
-                  <div style={{ fontSize: 10, color: BRAND.textDim, marginBottom: 3, textTransform: "uppercase", letterSpacing: "0.1em" }}>YoY Growth</div>
-                  <div style={{ fontSize: 20, fontWeight: 700, color: BRAND.teal }}>{n.growth}</div>
-                </div>}
-              </div>
-            )}
-            <p style={{ color: BRAND.textMuted, fontSize: 13, lineHeight: 1.75, marginBottom: 20 }}>
-              {(n.description || "").slice(0, 200)}{(n.description || "").length > 200 ? "..." : ""}
-            </p>
-            {highlights.length > 0 && (
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 28 }}>
-                {highlights.map(h => (
-                  <span key={h} style={{ fontSize: 10, padding: "5px 12px", border: `1px solid ${BRAND.border}`, color: BRAND.textMuted, background: BRAND.bgElevated, letterSpacing: "0.06em" }}>{h}</span>
-                ))}
-              </div>
-            )}
-            <button onClick={onNavigate} style={{
-              display: "inline-flex", alignItems: "center", gap: 8,
-              background: BRAND.gold, color: "#fff", border: "none",
-              padding: "12px 26px", fontSize: 11, fontWeight: 700, letterSpacing: "0.18em",
-              textTransform: "uppercase", cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
-              alignSelf: "flex-start", transition: "background 0.2s",
-            }}
-              onMouseEnter={e => (e.currentTarget.style.background = BRAND.goldDark)}
-              onMouseLeave={e => (e.currentTarget.style.background = BRAND.gold)}>
-              Explore {n.name} <ArrowRight size={12} />
-            </button>
-          </div>
+        <div style={{ textAlign: "center", marginTop: 40 }}>
+          <button onClick={onNavigate} className="btn-outline" style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+            View All Neighborhoods <ArrowRight size={14} />
+          </button>
         </div>
       </div>
     </section>
@@ -1482,7 +1403,9 @@ function AboutPage({ setPage }) {
           <div style={{ background: BRAND.bgCard, border: `2px solid ${BRAND.gold}33`, padding: "40px 48px", marginBottom: 32, position: "relative", overflow: "hidden" }}>
             <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${BRAND.gold}, ${BRAND.teal})` }} />
             <div style={{ display: "flex", gap: 32, alignItems: "center", flexWrap: "wrap" }}>
-              <img src="/images/testimonial-sold.jpg" alt="Happy clients" style={{ width: 100, height: 100, borderRadius: "50%", objectFit: "cover", objectPosition: "center top", border: `3px solid ${BRAND.gold}44`, flexShrink: 0 }} />
+              <div style={{ width: 80, height: 80, borderRadius: "50%", background: `${BRAND.gold}22`, border: `3px solid ${BRAND.gold}44`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <Star size={28} color={BRAND.gold} fill={BRAND.gold} />
+              </div>
               <div style={{ flex: 1, minWidth: 240 }}>
                 <div style={{ display: "flex", gap: 3, marginBottom: 12 }}>
                   {[...Array(5)].map((_, j) => <Star key={j} size={16} fill={BRAND.gold} color={BRAND.gold} />)}
@@ -2352,69 +2275,363 @@ function MortgageCalculatorPage({ setPage }) {
 // ─────────────────────────────────────────────
 
 function ValuationPage() {
-  const [submitted, setSubmitted] = useState(false);
+  const [step, setStep] = useState(1);
+  const [form, setForm] = useState({
+    address: "", neighborhood: "", propType: "",
+    beds: 0, baths: 0, sqft: "", yearBuilt: "", condition: "",
+    features: [] as string[],
+    name: "", email: "", phone: "", timeline: "",
+  });
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<any>(null);
+
+  const update = (k: string, v: any) => setForm(f => ({ ...f, [k]: v }));
+  const toggleFeature = (id: string) => setForm(prev => ({
+    ...prev,
+    features: prev.features.includes(id) ? prev.features.filter(x => x !== id) : [...prev.features, id],
+  }));
+
+  const NEIGHBORHOODS = ["Mililani", "Ewa Beach / Kapolei", "Pearl City / Aiea", "Kāne'ohe", "Kailua", "Kaimuki", "Hawai'i Kai", "North Shore", "Honolulu / Metro", "Waikiki", "Other"];
+  const PROP_TYPES = ["Single Family", "Condo", "Townhouse", "Land"];
+  const CONDITIONS = ["Poor", "Fair", "Good", "Very Good", "Excellent"];
+  const FEATURES = [
+    { id: "view", label: "Ocean / Mountain View", impact: "+8%" },
+    { id: "pool", label: "Pool", impact: "+5%" },
+    { id: "garage", label: "2-Car Garage", impact: "+3%" },
+    { id: "renovated", label: "Recently Renovated", impact: "+7%" },
+    { id: "solar", label: "Solar Panels", impact: "+4%" },
+    { id: "adu", label: "ADU / Ohana Unit", impact: "+10%" },
+  ];
+  const STEPS = ["Property Info", "Home Details", "Features & You", "Your Estimate"];
+
+  const computeEstimate = () => {
+    const BASE: Record<string, number> = {
+      "Mililani": 820000, "Ewa Beach / Kapolei": 780000, "Pearl City / Aiea": 620000,
+      "Kāne'ohe": 890000, "Kailua": 1400000, "Kaimuki": 985000,
+      "Hawai'i Kai": 1300000, "North Shore": 1100000, "Honolulu / Metro": 950000,
+      "Waikiki": 750000, "Other": 850000,
+    };
+    let base = BASE[form.neighborhood] || 850000;
+    const sqft = parseInt(form.sqft) || 1200;
+    base = base * (sqft / 1200) * 0.6 + base * 0.4;
+    base += ((form.beds || 3) - 3) * 25000;
+    const condMult: Record<string, number> = { "Poor": 0.84, "Fair": 0.91, "Good": 1.0, "Very Good": 1.06, "Excellent": 1.13 };
+    base *= condMult[form.condition] || 1.0;
+    if (form.features.includes("view")) base *= 1.08;
+    if (form.features.includes("pool")) base *= 1.05;
+    if (form.features.includes("garage")) base *= 1.03;
+    if (form.features.includes("renovated")) base *= 1.07;
+    if (form.features.includes("solar")) base *= 1.04;
+    if (form.features.includes("adu")) base *= 1.10;
+    if (form.propType === "Condo") base *= 0.72;
+    if (form.propType === "Townhouse") base *= 0.82;
+    const low = Math.round(base * 0.94 / 5000) * 5000;
+    const high = Math.round(base * 1.06 / 5000) * 5000;
+    const median = Math.round(base / 5000) * 5000;
+    const confidence = Math.min(78 + form.features.length * 3 + (form.condition ? 4 : 0), 94);
+    const drivers: { label: string; impact: string; positive: boolean }[] = [];
+    if (form.features.includes("adu")) drivers.push({ label: "ADU / Ohana Unit", impact: "+$85–140K", positive: true });
+    if (form.features.includes("view")) drivers.push({ label: "Ocean / Mountain View", impact: "+$60–95K", positive: true });
+    if (form.features.includes("renovated")) drivers.push({ label: "Recent Renovation", impact: "+$45–75K", positive: true });
+    if (form.features.includes("pool")) drivers.push({ label: "Pool", impact: "+$25–45K", positive: true });
+    if (form.features.includes("solar")) drivers.push({ label: "Solar Panels", impact: "+$20–35K", positive: true });
+    if (form.features.includes("garage")) drivers.push({ label: "2-Car Garage", impact: "+$15–28K", positive: true });
+    if (form.condition === "Excellent") drivers.push({ label: "Excellent Condition Premium", impact: "+$55–80K", positive: true });
+    if (form.condition === "Fair") drivers.push({ label: "Condition Adjustment (Fair)", impact: "–$60–90K", positive: false });
+    if (form.condition === "Poor") drivers.push({ label: "Condition Adjustment (Poor)", impact: "–$100–150K", positive: false });
+    if (!drivers.length) drivers.push({ label: "Market Rate — " + (form.neighborhood || "O'ahu"), impact: "Baseline", positive: true });
+    return { low, median, high, confidence, drivers };
+  };
+
+  const fmtPrice = (n: number) => "$" + n.toLocaleString();
+
+  const goNext = () => {
+    if (step < 3) { setStep(step + 1); window.scrollTo({ top: 0, behavior: "smooth" }); }
+    else {
+      setLoading(true);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      setTimeout(() => { setResult(computeEstimate()); setLoading(false); setStep(4); }, 2800);
+    }
+  };
+  const goBack = () => { setStep(step - 1); window.scrollTo({ top: 0, behavior: "smooth" }); };
+
+  const btnStyle = (active: boolean, color: string) => ({
+    background: active ? color : BRAND.bgCard,
+    color: active ? "#fff" : BRAND.textMuted,
+    border: `1px solid ${active ? color : BRAND.border}`,
+    cursor: "pointer", transition: "all 0.18s",
+    fontFamily: "'DM Sans', sans-serif",
+  });
+
   return (
-    <div style={{ paddingTop: 120 }}>
-      <div className="section-pad" style={{ paddingTop: 40 }}>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 64, alignItems: "center" }}>
-          <Reveal direction="right">
-            <div style={{ color: BRAND.teal, fontSize: 11, letterSpacing: "0.25em", textTransform: "uppercase", marginBottom: 12, fontWeight: 500 }}>Free Report</div>
-            <h1 className="font-display" style={{ fontSize: "clamp(36px, 5vw, 56px)", marginBottom: 16 }}>What's Your Home Worth?</h1>
-            <p style={{ color: BRAND.textMuted, fontSize: 15, lineHeight: 1.7, marginBottom: 24 }}>
-              Get a comprehensive market analysis of your property. Mel will review comparable sales, market conditions, and unique features to provide an accurate estimate of your home's current value.
+    <div style={{ paddingTop: 120, minHeight: "100vh" }}>
+      {/* Hero */}
+      <section style={{ textAlign: "center", padding: "40px 24px 0" }}>
+        <Reveal>
+          <div style={{ color: BRAND.teal, fontSize: 11, letterSpacing: "0.25em", textTransform: "uppercase", marginBottom: 12, fontWeight: 600 }}>AI-Powered · Free</div>
+          <h1 className="font-display" style={{ fontSize: "clamp(36px, 5vw, 56px)", marginBottom: 12 }}>What's Your Home Worth?</h1>
+          <p style={{ color: BRAND.textMuted, fontSize: 15, maxWidth: 500, margin: "0 auto 40px", lineHeight: 1.7 }}>
+            Answer a few questions and get an instant AI estimate based on real O'ahu market data — then Mel will follow up with a full CMA at no charge.
+          </p>
+        </Reveal>
+      </section>
+
+      <div className="section-pad" style={{ paddingTop: 0, maxWidth: 760, margin: "0 auto" }}>
+        {/* Progress steps */}
+        {step < 4 && !loading && (
+          <div style={{ marginBottom: 52 }}>
+            <div style={{ display: "flex", alignItems: "flex-start", marginBottom: 8 }}>
+              {STEPS.map((s, i) => (
+                <React.Fragment key={s}>
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flex: "0 0 auto" }}>
+                    <div style={{
+                      width: 34, height: 34, borderRadius: "50%",
+                      background: i < step - 1 ? BRAND.teal : (i === step - 1 ? BRAND.gold : BRAND.bgCard),
+                      border: `2px solid ${i < step - 1 ? BRAND.teal : (i === step - 1 ? BRAND.gold : BRAND.border)}`,
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      color: i <= step - 1 ? "#fff" : BRAND.textDim, fontSize: 13, fontWeight: 700,
+                      transition: "all 0.3s",
+                    }}>
+                      {i < step - 1 ? <CheckCircle size={15} /> : i + 1}
+                    </div>
+                    <div style={{ fontSize: 10, color: i === step - 1 ? BRAND.gold : BRAND.textDim, marginTop: 6, letterSpacing: "0.05em", textAlign: "center", maxWidth: 72 }}>{s}</div>
+                  </div>
+                  {i < STEPS.length - 1 && (
+                    <div style={{ flex: 1, height: 2, background: i < step - 1 ? BRAND.teal : BRAND.border, marginTop: 16, transition: "background 0.3s" }} />
+                  )}
+                </React.Fragment>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* STEP 1 */}
+        {step === 1 && (
+          <div>
+            <h2 className="font-display" style={{ fontSize: 30, marginBottom: 6 }}>Let's start with the basics</h2>
+            <p style={{ color: BRAND.textMuted, fontSize: 14, marginBottom: 36 }}>Tell us about your property's location and type.</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 28 }}>
+              <div>
+                <label style={{ fontSize: 11, letterSpacing: "0.12em", color: BRAND.textMuted, textTransform: "uppercase", display: "block", marginBottom: 8, fontWeight: 600 }}>Street Address</label>
+                <input className="input-custom" placeholder="123 Mauna Loa Street, Mililani, HI" value={form.address} onChange={e => update("address", e.target.value)} style={{ fontSize: 15 }} />
+              </div>
+              <div>
+                <label style={{ fontSize: 11, letterSpacing: "0.12em", color: BRAND.textMuted, textTransform: "uppercase", display: "block", marginBottom: 12, fontWeight: 600 }}>Neighborhood / Area</label>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 8 }}>
+                  {NEIGHBORHOODS.map(nh => (
+                    <button key={nh} onClick={() => update("neighborhood", nh)} style={{ ...btnStyle(form.neighborhood === nh, BRAND.gold), padding: "11px 14px", textAlign: "left", fontSize: 13 }}>{nh}</button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label style={{ fontSize: 11, letterSpacing: "0.12em", color: BRAND.textMuted, textTransform: "uppercase", display: "block", marginBottom: 12, fontWeight: 600 }}>Property Type</label>
+                <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                  {PROP_TYPES.map(pt => (
+                    <button key={pt} onClick={() => update("propType", pt)} style={{ ...btnStyle(form.propType === pt, BRAND.teal), padding: "13px 22px", fontSize: 13, borderRadius: 2 }}>{pt}</button>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div style={{ marginTop: 44, display: "flex", justifyContent: "flex-end" }}>
+              <button className="btn-primary" onClick={goNext} style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "14px 32px" }}>
+                Continue <ArrowRight size={15} />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* STEP 2 */}
+        {step === 2 && (
+          <div>
+            <h2 className="font-display" style={{ fontSize: 30, marginBottom: 6 }}>Tell us about the home</h2>
+            <p style={{ color: BRAND.textMuted, fontSize: 14, marginBottom: 36 }}>More detail = more accurate estimate.</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 32 }}>
+              <div>
+                <label style={{ fontSize: 11, letterSpacing: "0.12em", color: BRAND.textMuted, textTransform: "uppercase", display: "block", marginBottom: 12, fontWeight: 600 }}>Bedrooms</label>
+                <div style={{ display: "flex", gap: 8 }}>
+                  {[1, 2, 3, 4, 5].map(n => (
+                    <button key={n} onClick={() => update("beds", n)} style={{ ...btnStyle(form.beds === n, BRAND.gold), width: 52, height: 52, fontSize: 16, fontWeight: 700, borderRadius: 2 }}>{n === 5 ? "5+" : n}</button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label style={{ fontSize: 11, letterSpacing: "0.12em", color: BRAND.textMuted, textTransform: "uppercase", display: "block", marginBottom: 12, fontWeight: 600 }}>Bathrooms</label>
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                  {[1, 1.5, 2, 2.5, 3, 3.5].map(n => (
+                    <button key={n} onClick={() => update("baths", n)} style={{ ...btnStyle(form.baths === n, BRAND.gold), width: 62, height: 52, fontSize: 14, fontWeight: 700, borderRadius: 2 }}>{n === 3.5 ? "3.5+" : n}</button>
+                  ))}
+                </div>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+                <div>
+                  <label style={{ fontSize: 11, letterSpacing: "0.12em", color: BRAND.textMuted, textTransform: "uppercase", display: "block", marginBottom: 8, fontWeight: 600 }}>Square Footage</label>
+                  <input className="input-custom" type="number" placeholder="1,200" value={form.sqft} onChange={e => update("sqft", e.target.value)} />
+                </div>
+                <div>
+                  <label style={{ fontSize: 11, letterSpacing: "0.12em", color: BRAND.textMuted, textTransform: "uppercase", display: "block", marginBottom: 8, fontWeight: 600 }}>Year Built</label>
+                  <input className="input-custom" type="number" placeholder="1985" value={form.yearBuilt} onChange={e => update("yearBuilt", e.target.value)} />
+                </div>
+              </div>
+              <div>
+                <label style={{ fontSize: 11, letterSpacing: "0.12em", color: BRAND.textMuted, textTransform: "uppercase", display: "block", marginBottom: 12, fontWeight: 600 }}>Overall Condition</label>
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                  {CONDITIONS.map(c => (
+                    <button key={c} onClick={() => update("condition", c)} style={{ ...btnStyle(form.condition === c, BRAND.teal), flex: "1 1 auto", padding: "12px 10px", fontSize: 12, textAlign: "center", minWidth: 80, borderRadius: 2 }}>{c}</button>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div style={{ marginTop: 44, display: "flex", justifyContent: "space-between" }}>
+              <button onClick={goBack} style={{ background: "none", border: `1px solid ${BRAND.border}`, color: BRAND.textMuted, padding: "13px 24px", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 8, fontSize: 13, fontFamily: "'DM Sans', sans-serif", borderRadius: 2 }}>
+                <ArrowLeft size={14} /> Back
+              </button>
+              <button className="btn-primary" onClick={goNext} style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "14px 32px" }}>
+                Continue <ArrowRight size={15} />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* STEP 3 */}
+        {step === 3 && (
+          <div>
+            <h2 className="font-display" style={{ fontSize: 30, marginBottom: 6 }}>Features & your info</h2>
+            <p style={{ color: BRAND.textMuted, fontSize: 14, marginBottom: 36 }}>Special features can significantly boost your estimate. Select all that apply.</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 32 }}>
+              <div>
+                <label style={{ fontSize: 11, letterSpacing: "0.12em", color: BRAND.textMuted, textTransform: "uppercase", display: "block", marginBottom: 14, fontWeight: 600 }}>Special Features</label>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                  {FEATURES.map(f => {
+                    const selected = form.features.includes(f.id);
+                    return (
+                      <button key={f.id} onClick={() => toggleFeature(f.id)} style={{
+                        padding: "14px 16px", display: "flex", justifyContent: "space-between", alignItems: "center",
+                        background: selected ? `${BRAND.teal}1A` : BRAND.bgCard,
+                        border: `1px solid ${selected ? BRAND.teal : BRAND.border}`,
+                        cursor: "pointer", transition: "all 0.18s", fontFamily: "'DM Sans', sans-serif", borderRadius: 2,
+                      }}>
+                        <span style={{ fontSize: 13, color: selected ? BRAND.teal : BRAND.textMuted, fontWeight: selected ? 600 : 400, textAlign: "left" }}>{f.label}</span>
+                        {selected && <span style={{ fontSize: 11, color: BRAND.teal, fontWeight: 700, marginLeft: 8, whiteSpace: "nowrap" }}>{f.impact}</span>}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+              <div>
+                <label style={{ fontSize: 11, letterSpacing: "0.12em", color: BRAND.textMuted, textTransform: "uppercase", display: "block", marginBottom: 14, fontWeight: 600 }}>Your Contact Info</label>
+                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                    <input className="input-custom" placeholder="First Name" value={form.name} onChange={e => update("name", e.target.value)} />
+                    <input className="input-custom" placeholder="Phone" value={form.phone} onChange={e => update("phone", e.target.value)} />
+                  </div>
+                  <input className="input-custom" placeholder="Email Address" value={form.email} onChange={e => update("email", e.target.value)} />
+                  <select className="input-custom" value={form.timeline} onChange={e => update("timeline", e.target.value)}>
+                    <option value="">When are you thinking of selling?</option>
+                    <option>Within 3 months</option>
+                    <option>3–6 months</option>
+                    <option>6–12 months</option>
+                    <option>Just curious about my home's value</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div style={{ marginTop: 44, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <button onClick={goBack} style={{ background: "none", border: `1px solid ${BRAND.border}`, color: BRAND.textMuted, padding: "13px 24px", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 8, fontSize: 13, fontFamily: "'DM Sans', sans-serif", borderRadius: 2 }}>
+                <ArrowLeft size={14} /> Back
+              </button>
+              <button className="btn-primary" onClick={goNext} style={{ padding: "15px 36px", fontSize: 14, display: "inline-flex", alignItems: "center", gap: 8 }}>
+                Get My AI Estimate <Star size={14} />
+              </button>
+            </div>
+            <p style={{ color: BRAND.textDim, fontSize: 11, textAlign: "center", marginTop: 16 }}>Your info is never sold or shared. Mel may reach out within 24 hrs.</p>
+          </div>
+        )}
+
+        {/* LOADING */}
+        {loading && (
+          <div style={{ textAlign: "center", padding: "80px 0" }}>
+            <div style={{ color: BRAND.teal, fontSize: 11, letterSpacing: "0.22em", textTransform: "uppercase", marginBottom: 24, fontWeight: 600 }}>AI Analyzing Your Property</div>
+            <h2 className="font-display" style={{ fontSize: 34, marginBottom: 12 }}>Crunching the numbers...</h2>
+            <p style={{ color: BRAND.textMuted, fontSize: 14, marginBottom: 44, lineHeight: 1.7 }}>
+              Comparing {form.neighborhood || "O'ahu"} sales · Adjusting for {form.propType || "property"} type · Applying {new Date().toLocaleString("default", { month: "long" })} market data
             </p>
-            <div style={{ display: "flex", flexDirection: "column", gap: 20, marginBottom: 32 }}>
-              {[
-                { icon: <BarChart3 size={20} color={BRAND.teal} />, text: "Detailed comparative market analysis" },
-                { icon: <TrendingUp size={20} color={BRAND.teal} />, text: "Current market trends and projections" },
-                { icon: <FileText size={20} color={BRAND.teal} />, text: "Personalized pricing strategy recommendations" },
-              ].map((item, i) => (
-                <div key={i} style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                  {item.icon}
-                  <span style={{ color: BRAND.textMuted, fontSize: 14 }}>{item.text}</span>
+            <div style={{ maxWidth: 420, margin: "0 auto", background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, borderRadius: 4, height: 8, overflow: "hidden" }}>
+              <div className="ai-loading-bar" style={{ height: "100%", background: `linear-gradient(90deg, ${BRAND.teal}, ${BRAND.gold})`, borderRadius: 4 }} />
+            </div>
+            <div style={{ color: BRAND.textDim, fontSize: 12, marginTop: 16, letterSpacing: "0.08em" }}>Scanning 847 comparable O'ahu sales · Adjusting for features · Finalizing estimate</div>
+          </div>
+        )}
+
+        {/* STEP 4 — RESULTS */}
+        {step === 4 && result && !loading && (
+          <div>
+            <div style={{ textAlign: "center", marginBottom: 40 }}>
+              <div style={{ color: BRAND.teal, fontSize: 11, letterSpacing: "0.22em", textTransform: "uppercase", marginBottom: 12, fontWeight: 600 }}>AI Estimate Complete</div>
+              <h2 className="font-display" style={{ fontSize: "clamp(28px, 4vw, 44px)", marginBottom: 8 }}>Your Home's Estimated Value</h2>
+              <p style={{ color: BRAND.textMuted, fontSize: 14 }}>Based on {form.neighborhood || "O'ahu"} market data · {new Date().toLocaleString("default", { month: "long", year: "numeric" })}</p>
+            </div>
+
+            {/* Main estimate card */}
+            <div style={{ background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, padding: "48px 40px 40px", marginBottom: 20, position: "relative", overflow: "hidden", textAlign: "center" }}>
+              <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 4, background: `linear-gradient(90deg, ${BRAND.teal}, ${BRAND.gold})` }} />
+              <div style={{ color: BRAND.textDim, fontSize: 10, letterSpacing: "0.18em", textTransform: "uppercase", marginBottom: 10 }}>Estimated Value Range</div>
+              <div style={{ display: "flex", justifyContent: "center", alignItems: "baseline", gap: 10, flexWrap: "wrap", marginBottom: 10 }}>
+                <span style={{ color: BRAND.textMuted, fontSize: 22, fontWeight: 500 }}>{fmtPrice(result.low)}</span>
+                <span style={{ color: BRAND.textDim, fontSize: 16 }}>—</span>
+                <span style={{ color: BRAND.text, fontSize: "clamp(40px, 6vw, 60px)", fontWeight: 800, fontFamily: "'DM Serif Display', Georgia, serif", lineHeight: 1 }}>{fmtPrice(result.median)}</span>
+                <span style={{ color: BRAND.textDim, fontSize: 16 }}>—</span>
+                <span style={{ color: BRAND.textMuted, fontSize: 22, fontWeight: 500 }}>{fmtPrice(result.high)}</span>
+              </div>
+              <div style={{ color: BRAND.gold, fontSize: 13, fontWeight: 600, marginBottom: 36 }}>Median Estimated Value · {form.neighborhood || "O'ahu"}</div>
+              {/* Confidence */}
+              <div style={{ maxWidth: 380, margin: "0 auto" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                  <span style={{ fontSize: 11, color: BRAND.textDim, letterSpacing: "0.1em", textTransform: "uppercase" }}>AI Confidence Score</span>
+                  <span style={{ fontSize: 13, color: BRAND.teal, fontWeight: 700 }}>{result.confidence}%</span>
+                </div>
+                <div style={{ height: 8, background: BRAND.bgElevated, borderRadius: 4, overflow: "hidden" }}>
+                  <div style={{ height: "100%", width: `${result.confidence}%`, background: `linear-gradient(90deg, ${BRAND.teal}, ${BRAND.gold})`, borderRadius: 4 }} />
+                </div>
+                <div style={{ fontSize: 11, color: BRAND.textDim, marginTop: 8, textAlign: "center" }}>Accuracy improves with Mel's in-person walkthrough</div>
+              </div>
+            </div>
+
+            {/* Value drivers */}
+            <div style={{ background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, padding: "28px 32px", marginBottom: 20 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20 }}>
+                <TrendingUp size={18} color={BRAND.teal} />
+                <h3 style={{ fontSize: 15, fontWeight: 700, color: BRAND.text }}>Value Drivers</h3>
+              </div>
+              {result.drivers.map((d: any, i: number) => (
+                <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingBottom: 12, marginBottom: 12, borderBottom: i < result.drivers.length - 1 ? `1px solid ${BRAND.border}` : "none" }}>
+                  <span style={{ fontSize: 13, color: BRAND.textMuted }}>{d.label}</span>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: d.positive ? BRAND.teal : "#E07070" }}>{d.impact}</span>
                 </div>
               ))}
             </div>
-            <div style={{ borderTop: `1px solid ${BRAND.border}`, paddingTop: 24 }}>
-              <p style={{ color: BRAND.textDim, fontSize: 13, marginBottom: 12 }}>Prefer a quick form?</p>
-              <a href="https://docs.google.com/forms/d/e/1FAIpQLScxHvlGhr7mD8n-fjXwglrVsJe9xquMlb9qQFKa5V63UtOYRA/viewform?usp=sf_link" target="_blank" rel="noopener noreferrer" className="btn-outline" style={{ textDecoration: "none", fontSize: 11, display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 24px" }}>
-                <FileText size={14} /> Free Market Analysis Questionnaire ↗
-              </a>
-            </div>
-          </Reveal>
 
-          <Reveal direction="left" delay={0.2}>
-            <div style={{ background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, padding: 40 }}>
-              {submitted ? (
-                <div style={{ textAlign: "center", padding: "40px 0" }}>
-                  <CheckCircle size={48} color={BRAND.teal} style={{ marginBottom: 16 }} />
-                  <h3 className="font-display" style={{ fontSize: 28, marginBottom: 8 }}>Request Received!</h3>
-                  <p style={{ color: BRAND.textMuted }}>Mel will prepare your personalized home valuation report within 24 hours.</p>
-                </div>
-              ) : (
-                <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                  <h3 className="font-display" style={{ fontSize: 22, marginBottom: 4 }}>Request Your Valuation</h3>
-                  <input className="input-custom" placeholder="Property Address" />
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-                    <input className="input-custom" placeholder="First Name" />
-                    <input className="input-custom" placeholder="Last Name" />
-                  </div>
-                  <input className="input-custom" placeholder="Email" />
-                  <input className="input-custom" placeholder="Phone" />
-                  <select className="input-custom">
-                    <option>Timeline...</option>
-                    <option>Selling within 3 months</option>
-                    <option>Selling within 6 months</option>
-                    <option>Selling within 1 year</option>
-                    <option>Just curious</option>
-                  </select>
-                  <button className="btn-primary" style={{ width: "100%" }} onClick={() => setSubmitted(true)}>Get My Valuation</button>
-                  <a href="https://docs.google.com/forms/d/e/1FAIpQLScxHvlGhr7mD8n-fjXwglrVsJe9xquMlb9qQFKa5V63UtOYRA/viewform?usp=sf_link" target="_blank" rel="noopener noreferrer" style={{ display: "block", textAlign: "center", marginTop: 12, color: BRAND.teal, fontSize: 12, textDecoration: "none", fontWeight: 500 }}>Or fill out our detailed questionnaire →</a>
-                </div>
-              )}
+            {/* CTA */}
+            <div style={{ background: `linear-gradient(135deg, ${BRAND.bg}, ${BRAND.bgCard})`, border: `1px solid ${BRAND.gold}44`, padding: "36px 40px", textAlign: "center" }}>
+              <div style={{ color: BRAND.gold, fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 10, fontWeight: 600 }}>Next Step</div>
+              <h3 className="font-display" style={{ fontSize: 26, marginBottom: 12 }}>Get Mel's Expert CMA</h3>
+              <p style={{ color: BRAND.textMuted, fontSize: 14, lineHeight: 1.7, marginBottom: 28, maxWidth: 460, margin: "0 auto 28px" }}>
+                An AI estimate is your starting point. Mel's free Comparative Market Analysis adds local expertise, actual buyer feedback, and a pricing strategy built around your goals.
+              </p>
+              <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+                <a href="tel:+18083885050" className="btn-primary" style={{ textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8 }}>
+                  <Phone size={14} /> Call Mel · (808) 388-5050
+                </a>
+                <a href="https://docs.google.com/forms/d/e/1FAIpQLScxHvlGhr7mD8n-fjXwglrVsJe9xquMlb9qQFKa5V63UtOYRA/viewform?usp=sf_link" target="_blank" rel="noopener noreferrer" className="btn-outline" style={{ textDecoration: "none", fontSize: 11, display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 24px" }}>
+                  <FileText size={14} /> Request Full CMA ↗
+                </a>
+              </div>
             </div>
-          </Reveal>
-        </div>
+
+            <button onClick={() => { setStep(1); setResult(null); setLoading(false); setForm({ address: "", neighborhood: "", propType: "", beds: 0, baths: 0, sqft: "", yearBuilt: "", condition: "", features: [], name: "", email: "", phone: "", timeline: "" }); window.scrollTo({ top: 0, behavior: "smooth" }); }} style={{ display: "block", margin: "28px auto 0", background: "none", border: "none", color: BRAND.textDim, fontSize: 13, cursor: "pointer", textDecoration: "underline" }}>
+              ↺ Start over with a different property
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
