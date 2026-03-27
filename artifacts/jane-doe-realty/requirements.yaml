@@ -1,0 +1,19 @@
+packages:
+  "framer-motion": "Required for premium page transitions, scroll reveals, and cinematic animations"
+  "embla-carousel-react": "For smooth, elegant testimonial and property image carousels"
+  "clsx": "Utility for constructing tailwind class names conditionally"
+  "tailwind-merge": "Utility to merge tailwind classes safely"
+  "react-hook-form": "For form state management"
+  "@hookform/resolvers": "For zod schema validation with react-hook-form"
+
+images:
+  - path: "artifacts/jane-doe-realty/public/images/logo-mark.png"
+    description: "Minimalist, elegant geometric monogram logo 'JD' in metallic champagne gold on a transparent background, high-end luxury fashion brand aesthetic"
+    aspect_ratio: "1:1"
+  - path: "artifacts/jane-doe-realty/public/images/abstract-gold.png"
+    description: "Abstract, very dark charcoal and black background with extremely subtle, soft champagne gold light leaks and elegant silky flowing textures, 4k, cinematic, luxury"
+    aspect_ratio: "16:9"
+
+notes:
+  - Using API hooks from @workspace/api-client-react
+  - Dark mode luxury aesthetic applied globally

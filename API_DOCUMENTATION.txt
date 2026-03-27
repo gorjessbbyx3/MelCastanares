@@ -1,0 +1,561 @@
+═══════════════════════════════════════════════════════════════
+  AGENTJANE — API DOCUMENTATION
+  Backend Dashboard Integration Guide
+═══════════════════════════════════════════════════════════════
+
+BASE URL:  /api
+SPEC FILE: lib/api-spec/openapi.yaml (OpenAPI 3.1.0)
+
+All endpoints return JSON. POST/PUT bodies must be JSON with
+Content-Type: application/json. The frontend gracefully falls
+back to default data when the API is unreachable.
+
+
+───────────────────────────────────────────────────────────────
+1. HEALTH
+───────────────────────────────────────────────────────────────
+
+GET /api/healthz
+  → { "status": "ok" }
+
+
+───────────────────────────────────────────────────────────────
+2. AGENT PROFILE
+───────────────────────────────────────────────────────────────
+
+GET /api/agent
+  Returns the agent's full profile displayed across the site
+  (navbar, about page, footer, contact page).
+
+  Response:
+  {
+    "id": "1",
+    "name": "Mel Castanares",
+    "title": "Luxury Real Estate Advisor",
+    "bio": "Full biography text...",
+    "shortBio": "One-liner for footer/cards",
+    "phone": "(808) 555-0199",
+    "email": "jane@agentjane.com",
+    "photoUrl": "https://...",
+    "coverPhotoUrl": "https://...",
+    "brokerage": "Pacific Luxury Realty",
+    "brokerageAddress": "1347 Kapiolani Blvd., #300\nHonolulu, HI 96814",
+    "licenseNumber": "RS-12345",
+    "specialties": ["Luxury Residential", "Oceanfront Properties", ...],
+    "certifications": ["CRS", "ABR", ...],
+    "serviceAreas": ["Kailua", "Kaimuki", "Hawaii Kai", ...],
+    "awardsAndRecognition": ["Top Producer 2025", ...],
+    "yearsExperience": 15,
+    "instagram": "https://instagram.com/...",
+    "facebook": "https://facebook.com/...",
+    "linkedin": "https://linkedin.com/..."
+  }
+
+PUT /api/agent
+  Update any field of the agent profile from your dashboard.
+  Only send the fields you want to change.
+
+  Body (all fields optional):
+  {
+    "name": "Mel Castanares",
+    "title": "Senior Luxury Advisor",
+    "bio": "Updated biography...",
+    "phone": "(808) 555-1234",
+    ...any field from the GET response
+  }
+
+  → Returns the updated Agent object
+
+
+───────────────────────────────────────────────────────────────
+3. PROPERTIES
+───────────────────────────────────────────────────────────────
+
+GET /api/properties
+  Returns filtered/paginated property listings.
+
+  Query parameters:
+    status    = active | sold | pending | coming_soon
+    type      = single_family | condo | townhouse | multi_family | land | luxury
+    minPrice  = number
+    maxPrice  = number
+    minBeds   = integer
+    minBaths  = number
+    city      = string
+    featured  = true|false
+    limit     = integer (default: 12)
+    offset    = integer (default: 0)
+
+  Response:
+  {
+    "properties": [
+      {
+        "id": "uuid",
+        "mlsNumber": "MLS-12345",
+        "title": "Diamond Head Oceanfront Estate",
+        "description": "Full property description...",
+        "price": 4750000,
+        "status": "active",
+        "type": "luxury",
+        "featured": true,
+        "address": "3200 Diamond Head Rd",
+        "city": "Honolulu",
+        "state": "HI",
+        "zip": "96815",
+        "neighborhood": "Diamond Head",
+        "bedrooms": 5,
+        "bathrooms": 4,
+        "sqft": 4800,
+        "lotSize": 0.35,
+        "yearBuilt": 2018,
+        "garage": 2,
+        "images": [
+          { "url": "https://...", "caption": "Front view", "isPrimary": true },
+          { "url": "https://...", "caption": "Kitchen" }
+        ],
+        "amenities": ["Infinity Pool", "Ocean View", "Smart Home"],
+        "virtualTourUrl": "https://...",
+        "listingDate": "2026-01-15",
+        "latitude": 21.2580,
+        "longitude": -157.8050,
+        "crmId": "your-crm-id",
+        "createdAt": "2026-01-15T00:00:00Z",
+        "updatedAt": "2026-03-20T00:00:00Z"
+      }
+    ],
+    "total": 42,
+    "limit": 12,
+    "offset": 0
+  }
+
+GET /api/properties/:id
+  Returns a single property by ID.
+  → Property object (same shape as above)
+  → 404 if not found
+
+POST /api/properties/sync
+  Bulk sync properties from your CRM/dashboard.
+
+  Body:
+  {
+    "properties": [
+      {
+        "crmId": "your-unique-id",    ← REQUIRED: your CRM's ID
+        "title": "Property Name",      ← REQUIRED
+        "price": 4750000,              ← REQUIRED
+        "status": "active",            ← REQUIRED
+        "type": "luxury",              ← REQUIRED
+        "address": "123 Main St",      ← REQUIRED
+        "city": "Honolulu",            ← REQUIRED
+        "state": "HI",                 ← REQUIRED
+        "bedrooms": 5,                 ← REQUIRED
+        "bathrooms": 4,                ← REQUIRED
+        "sqft": 4800,                  ← REQUIRED
+        ...all other fields optional
+      }
+    ],
+    "deleteNotInList": false   ← if true, removes unlisted properties
+  }
+
+  Response:
+  {
+    "success": true,
+    "created": 2,
+    "updated": 5,
+    "deleted": 0,
+    "errors": []
+  }
+
+
+───────────────────────────────────────────────────────────────
+4. TESTIMONIALS
+───────────────────────────────────────────────────────────────
+
+GET /api/testimonials
+  Returns all testimonials (homepage carousel + testimonials page).
+
+  Response:
+  {
+    "testimonials": [
+      {
+        "id": "uuid",
+        "clientName": "George C.",
+        "clientPhoto": "https://...",
+        "rating": 5,
+        "quote": "Full testimonial text...",
+        "propertyAddress": "1234 Wilhelmina Rise",
+        "transactionType": "sold",    ← bought | sold | both
+        "date": "2025-08-15",
+        "featured": true,
+        "createdAt": "2025-08-20T00:00:00Z"
+      }
+    ],
+    "total": 16
+  }
+
+POST /api/testimonials
+  Add a new testimonial from your dashboard.
+
+  Body:
+  {
+    "clientName": "Jane Smith",       ← REQUIRED
+    "rating": 5,                      ← REQUIRED (1-5)
+    "quote": "Testimonial text...",   ← REQUIRED
+    "transactionType": "bought",      ← REQUIRED
+    "clientPhoto": "https://...",
+    "propertyAddress": "123 Main St",
+    "date": "2026-03-01",
+    "featured": false
+  }
+
+  → 201 with the created Testimonial object
+
+
+───────────────────────────────────────────────────────────────
+5. NEIGHBORHOODS
+───────────────────────────────────────────────────────────────
+
+GET /api/neighborhoods
+  Returns all neighborhood guides.
+
+  Response:
+  {
+    "neighborhoods": [
+      {
+        "id": "uuid",
+        "slug": "kaimuki",
+        "name": "Kaimuki",
+        "tagline": "Eclectic local character",
+        "description": "Short description...",
+        "longDescription": "Extended guide text...",
+        "coverImage": "https://...",
+        "galleryImages": ["https://...", "https://..."],
+        "highlights": ["Walkable streets", "Craft coffee scene"],
+        "diningAndShopping": "Guide to local restaurants...",
+        "thingsToDo": "Activities guide...",
+        "schools": "Education overview...",
+        "medianHomePrice": 985000,
+        "averageSqft": 1800,
+        "featured": true,
+        "sortOrder": 1
+      }
+    ],
+    "total": 6
+  }
+
+GET /api/neighborhoods/:slug
+  Returns a single neighborhood by slug.
+  → Neighborhood object
+  → 404 if not found
+
+POST /api/neighborhoods
+  Create or sync a neighborhood guide.
+
+  Body:
+  {
+    "slug": "kaimuki",            ← REQUIRED
+    "name": "Kaimuki",            ← REQUIRED
+    "description": "Short desc",  ← REQUIRED
+    "coverImage": "https://...",  ← REQUIRED
+    ...all other fields optional
+  }
+
+  → 201 with the created Neighborhood object
+
+
+───────────────────────────────────────────────────────────────
+6. BLOG / MARKET INSIGHTS
+───────────────────────────────────────────────────────────────
+
+GET /api/blog
+  Returns paginated blog posts for the News page.
+
+  Query parameters:
+    limit     = integer (default: 6)
+    offset    = integer (default: 0)
+    featured  = true|false
+
+  Response:
+  {
+    "posts": [
+      {
+        "id": "uuid",
+        "slug": "oahu-market-2026",
+        "title": "O'ahu Housing Market: What to Expect",
+        "excerpt": "Summary text...",
+        "content": "Full article body (supports markdown)...",
+        "author": "Mel Castanares",
+        "coverImage": "https://...",
+        "category": "Market Insights",
+        "tags": ["market", "oahu", "2026"],
+        "featured": true,
+        "publishedAt": "2026-03-15T00:00:00Z",
+        "readTime": 6,
+        "createdAt": "2026-03-14T00:00:00Z",
+        "updatedAt": "2026-03-15T00:00:00Z"
+      }
+    ],
+    "total": 12,
+    "limit": 6,
+    "offset": 0
+  }
+
+GET /api/blog/:slug
+  Returns a single blog post by slug.
+  → BlogPost object
+  → 404 if not found
+
+
+───────────────────────────────────────────────────────────────
+7. MARKET DATA
+───────────────────────────────────────────────────────────────
+
+GET /api/market
+  Returns market statistics and chart data for the Market page.
+
+  Query parameters:
+    months  = integer (default: 7) — how many months of history
+    area    = string — filter by neighborhood
+
+  Response:
+  {
+    "metrics": [
+      {
+        "label": "Median Home Price",
+        "value": "$1.068M",
+        "change": "+4.3%",
+        "changeDirection": "up"    ← up | down | flat
+      },
+      { "label": "Active Inventory", "value": "1,400", ... },
+      { "label": "Avg Days on Market", "value": "22", ... },
+      { "label": "List-to-Sale Ratio", "value": "98.2%", ... }
+    ],
+    "monthlyData": [
+      {
+        "month": "Sep",
+        "median": 985,            ← in thousands ($985K)
+        "inventory": 1420,
+        "daysOnMarket": 28,
+        "closedSales": 145,
+        "newListings": 210
+      },
+      ...more months
+    ],
+    "updatedAt": "2026-03-26T00:00:00Z"
+  }
+
+PUT /api/market
+  Update market data from your dashboard.
+
+  Body:
+  {
+    "metrics": [...],        ← same shape as GET response
+    "monthlyData": [...]     ← same shape as GET response
+  }
+
+  → Returns the updated MarketDataResponse
+
+
+───────────────────────────────────────────────────────────────
+8. AGENT STATISTICS
+───────────────────────────────────────────────────────────────
+
+GET /api/stats
+  Returns key performance stats (homepage stats bar).
+
+  Response:
+  {
+    "homesSold": 350,
+    "totalSalesVolume": 500000000,
+    "yearsExperience": 15,
+    "clientSatisfactionRate": 99,
+    "averageDaysOnMarket": 22,
+    "listToSaleRatio": 98.2,
+    "neighborhoodsServed": 7,
+    "awardsCount": 12,
+    "updatedAt": "2026-03-01T00:00:00Z"
+  }
+
+PUT /api/stats
+  Update stats from your dashboard.
+
+  Body (all fields optional):
+  {
+    "homesSold": 365,
+    "totalSalesVolume": 520000000,
+    "yearsExperience": 16,
+    ...
+  }
+
+  → Returns the updated Stats object
+
+
+───────────────────────────────────────────────────────────────
+9. PAGE CONTENT (Buyers / Sellers / Relocation)
+───────────────────────────────────────────────────────────────
+
+GET /api/pages/:slug
+  Returns editable content for process pages.
+  Slug must be: buyers | sellers | relocation
+
+  Response:
+  {
+    "slug": "buyers",
+    "title": "Buyer's Experience",
+    "subtitle": "Your Journey",
+    "heroDescription": "Finding your dream home...",
+    "heroImage": "https://...",
+    "steps": [                              ← for buyers/sellers
+      {
+        "number": "01",
+        "title": "Discovery Call",
+        "description": "We start with a conversation..."
+      },
+      ...more steps
+    ],
+    "sections": [                           ← for relocation
+      {
+        "icon": "Compass",                  ← Lucide icon name
+        "title": "Island Overview",
+        "description": "O'ahu is home to..."
+      },
+      ...more sections
+    ],
+    "ctaText": "Ready to start?",
+    "ctaButtonLabel": "Start Your Buying Journey",
+    "ctaButtonPage": "contact",
+    "updatedAt": "2026-03-01T00:00:00Z"
+  }
+
+PUT /api/pages/:slug
+  Update page content from your dashboard.
+
+  Body (all fields optional):
+  {
+    "title": "Updated Title",
+    "heroDescription": "Updated description...",
+    "steps": [...],
+    "sections": [...],
+    ...
+  }
+
+  → Returns the updated PageContent object
+
+
+───────────────────────────────────────────────────────────────
+10. CONTACT FORM
+───────────────────────────────────────────────────────────────
+
+POST /api/contact
+  Submits a contact inquiry (contact page + property inquiry).
+
+  Body:
+  {
+    "firstName": "John",           ← REQUIRED
+    "lastName": "Smith",           ← REQUIRED
+    "email": "john@example.com",   ← REQUIRED
+    "phone": "(808) 555-1234",
+    "message": "I'm interested...",← REQUIRED
+    "inquiryType": "buying",       ← REQUIRED: buying|selling|general|investment|relocation
+    "budget": "$1M-$2M",
+    "timeline": "3-6 months",
+    "propertyId": "uuid"           ← if inquiry is about a specific property
+  }
+
+  Response:
+  {
+    "success": true,
+    "message": "Inquiry received",
+    "inquiryId": "uuid"
+  }
+
+
+───────────────────────────────────────────────────────────────
+11. HOME VALUATION
+───────────────────────────────────────────────────────────────
+
+POST /api/home-valuation
+  Captures a home valuation lead (valuation page form).
+
+  Body:
+  {
+    "propertyAddress": "1234 Main St",  ← REQUIRED
+    "city": "Honolulu",
+    "state": "HI",
+    "zip": "96815",
+    "fullName": "John Smith",           ← REQUIRED
+    "email": "john@example.com",        ← REQUIRED
+    "phone": "(808) 555-1234",
+    "timeframe": "three_months"         ← now|three_months|twelve_months|just_curious
+  }
+
+  Response:
+  {
+    "success": true,
+    "message": "Valuation request received",
+    "leadId": "uuid"
+  }
+
+
+═══════════════════════════════════════════════════════════════
+FRONTEND → API MAPPING
+═══════════════════════════════════════════════════════════════
+
+Page                   API Calls Used
+─────────────────────  ──────────────────────────────
+Home                   GET /agent, /stats, /properties?featured=true, /testimonials, /neighborhoods
+Portfolio              GET /properties (with filter params)
+Property Detail        GET /properties/:id, POST /contact
+About                  GET /agent
+Neighborhoods          GET /neighborhoods
+Market                 GET /market
+News (Blog)            GET /blog
+Blog Post              GET /blog/:slug
+Contact                GET /agent, POST /contact
+Buyer's Experience     GET /pages/buyers
+Seller's Experience    GET /pages/sellers
+Relocation Guide       GET /pages/relocation
+Home Valuation         POST /home-valuation
+Testimonials           GET /testimonials
+Footer (every page)    GET /agent
+
+
+═══════════════════════════════════════════════════════════════
+DASHBOARD WRITE OPERATIONS
+═══════════════════════════════════════════════════════════════
+
+What you want to update        Endpoint
+──────────────────────────     ─────────────────
+Your name/bio/photo/contact    PUT /api/agent
+Your stats numbers             PUT /api/stats
+Add/sync properties            POST /api/properties/sync
+Add a testimonial              POST /api/testimonials
+Add a neighborhood guide       POST /api/neighborhoods
+Update market data/charts      PUT /api/market
+Edit buyer/seller/reloc pages  PUT /api/pages/:slug
+
+
+═══════════════════════════════════════════════════════════════
+NOTES
+═══════════════════════════════════════════════════════════════
+
+• The frontend uses a useApi() hook that fetches from the API
+  on component mount, with built-in fallback data. If the API
+  is unreachable, the site still renders with defaults.
+
+• All image URLs should be absolute (https://...). Use Cloudinary,
+  Unsplash, or your own CDN.
+
+• The OpenAPI spec at lib/api-spec/openapi.yaml is the source
+  of truth. Run `pnpm gen` to regenerate typed API clients from it.
+
+• Status enums: active, sold, pending, coming_soon
+• Type enums: single_family, condo, townhouse, multi_family, land, luxury
+• Inquiry types: buying, selling, general, investment, relocation
+• Timeframes: now, three_months, twelve_months, just_curious
+• Transaction types: bought, sold, both
+
+• The /properties/sync endpoint uses crmId as the unique key.
+  If a property with that crmId exists, it's updated. Otherwise
+  it's created. Set deleteNotInList: true to remove properties
+  not in the payload (useful for full CRM syncs).

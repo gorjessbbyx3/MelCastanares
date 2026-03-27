@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Jane Doe Realty"
+version = "1.0.0"
+id = "artifacts/jane-doe-realty"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 18189
+
+[services.development]
+run = "pnpm --filter @workspace/jane-doe-realty run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/jane-doe-realty", "run", "build" ]
+publicDir = "artifacts/jane-doe-realty/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "18189"
+BASE_PATH = "/"

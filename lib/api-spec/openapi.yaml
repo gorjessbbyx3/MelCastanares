@@ -1,0 +1,1406 @@
+openapi: 3.1.0
+info:
+  title: Api
+  version: 1.0.0
+  description: Jane Doe Realty API - Connect your CRM to auto-update the website
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: properties
+    description: Property listings management
+  - name: agent
+    description: Agent profile and bio
+  - name: testimonials
+    description: Client testimonials
+  - name: contact
+    description: Contact form and inquiries
+  - name: blog
+    description: Market insights and blog posts
+  - name: stats
+    description: Agent statistics and achievements
+  - name: neighborhoods
+    description: Neighborhood guides
+  - name: homeValuation
+    description: Home valuation lead capture
+  - name: market
+    description: Market data and trends
+  - name: pages
+    description: Editable page content (buyers, sellers, relocation)
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /properties:
+    get:
+      operationId: getProperties
+      tags: [properties]
+      summary: Get all property listings
+      description: Returns all active property listings. Sync from your CRM using the CRM integration endpoints.
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [active, sold, pending, coming_soon]
+          description: Filter by property status
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [single_family, condo, townhouse, multi_family, land, luxury]
+          description: Filter by property type
+        - name: minPrice
+          in: query
+          schema:
+            type: number
+          description: Minimum price filter
+        - name: maxPrice
+          in: query
+          schema:
+            type: number
+          description: Maximum price filter
+        - name: minBeds
+          in: query
+          schema:
+            type: integer
+          description: Minimum bedrooms filter
+        - name: minBaths
+          in: query
+          schema:
+            type: number
+          description: Minimum bathrooms filter
+        - name: city
+          in: query
+          schema:
+            type: string
+          description: Filter by city
+        - name: featured
+          in: query
+          schema:
+            type: boolean
+          description: Return only featured listings
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 12
+          description: Number of results to return
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+          description: Offset for pagination
+      responses:
+        "200":
+          description: List of properties
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PropertiesResponse"
+
+  /properties/{id}:
+    get:
+      operationId: getProperty
+      tags: [properties]
+      summary: Get a single property by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Property details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Property"
+        "404":
+          description: Property not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /properties/sync:
+    post:
+      operationId: syncProperties
+      tags: [properties]
+      summary: Sync properties from CRM
+      description: Push property data from your CRM to auto-update the website. Accepts an array of properties.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SyncPropertiesRequest"
+      responses:
+        "200":
+          description: Sync successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SyncResponse"
+        "400":
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /agent:
+    get:
+      operationId: getAgent
+      tags: [agent]
+      summary: Get agent profile
+      description: Returns Jane Doe's profile, bio, credentials, and contact info
+      responses:
+        "200":
+          description: Agent profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Agent"
+    put:
+      operationId: updateAgent
+      tags: [agent]
+      summary: Update agent profile
+      description: Update the agent's profile information from your CRM or admin panel
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AgentUpdate"
+      responses:
+        "200":
+          description: Agent profile updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Agent"
+
+  /testimonials:
+    get:
+      operationId: getTestimonials
+      tags: [testimonials]
+      summary: Get client testimonials
+      responses:
+        "200":
+          description: List of testimonials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TestimonialsResponse"
+    post:
+      operationId: createTestimonial
+      tags: [testimonials]
+      summary: Add a new testimonial
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TestimonialCreate"
+      responses:
+        "201":
+          description: Testimonial created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Testimonial"
+
+  /contact:
+    post:
+      operationId: submitContact
+      tags: [contact]
+      summary: Submit a contact inquiry
+      description: Submits a contact form. Integrates with your CRM to create a lead.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContactRequest"
+      responses:
+        "200":
+          description: Inquiry submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContactResponse"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /blog:
+    get:
+      operationId: getBlogPosts
+      tags: [blog]
+      summary: Get blog/market insights posts
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 6
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: featured
+          in: query
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: List of blog posts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BlogPostsResponse"
+
+  /blog/{slug}:
+    get:
+      operationId: getBlogPost
+      tags: [blog]
+      summary: Get a single blog post by slug
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Blog post
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BlogPost"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /neighborhoods:
+    get:
+      operationId: getNeighborhoods
+      tags: [neighborhoods]
+      summary: Get all neighborhood guides
+      responses:
+        "200":
+          description: List of neighborhoods
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NeighborhoodsResponse"
+    post:
+      operationId: createNeighborhood
+      tags: [neighborhoods]
+      summary: Create or sync a neighborhood guide
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NeighborhoodCreate"
+      responses:
+        "201":
+          description: Neighborhood created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Neighborhood"
+
+  /neighborhoods/{slug}:
+    get:
+      operationId: getNeighborhood
+      tags: [neighborhoods]
+      summary: Get a single neighborhood guide by slug
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Neighborhood guide
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Neighborhood"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /home-valuation:
+    post:
+      operationId: submitHomeValuation
+      tags: [homeValuation]
+      summary: Submit a home valuation request
+      description: Captures lead info for home valuation. Creates a lead in your CRM.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HomeValuationRequest"
+      responses:
+        "200":
+          description: Valuation request submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HomeValuationResponse"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /market:
+    get:
+      operationId: getMarketData
+      tags: [market]
+      summary: Get market data and trends
+      description: Returns current market statistics, historical price data, inventory levels, and trends for charts.
+      parameters:
+        - name: months
+          in: query
+          schema:
+            type: integer
+            default: 7
+          description: Number of months of historical data to return
+        - name: area
+          in: query
+          schema:
+            type: string
+          description: Filter by neighborhood or area
+      responses:
+        "200":
+          description: Market data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MarketDataResponse"
+    put:
+      operationId: updateMarketData
+      tags: [market]
+      summary: Update market data
+      description: Push monthly market data from your dashboard. Each entry represents one month of data.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MarketDataUpdate"
+      responses:
+        "200":
+          description: Market data updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MarketDataResponse"
+
+  /pages/{slug}:
+    get:
+      operationId: getPageContent
+      tags: [pages]
+      summary: Get editable page content
+      description: "Returns content for static-ish pages (buyers, sellers, relocation). Slug must be one of: buyers, sellers, relocation."
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [buyers, sellers, relocation]
+      responses:
+        "200":
+          description: Page content
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PageContent"
+        "404":
+          description: Page not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    put:
+      operationId: updatePageContent
+      tags: [pages]
+      summary: Update page content
+      description: Update the content for buyers, sellers, or relocation pages from your dashboard.
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [buyers, sellers, relocation]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PageContentUpdate"
+      responses:
+        "200":
+          description: Page updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PageContent"
+
+  /stats:
+    get:
+      operationId: getStats
+      tags: [stats]
+      summary: Get agent statistics
+      description: Returns key performance stats shown on the website (homes sold, years experience, etc.)
+      responses:
+        "200":
+          description: Agent statistics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Stats"
+    put:
+      operationId: updateStats
+      tags: [stats]
+      summary: Update agent statistics
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StatsUpdate"
+      responses:
+        "200":
+          description: Stats updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Stats"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+      required:
+        - error
+        - message
+
+    PropertyImage:
+      type: object
+      properties:
+        url:
+          type: string
+        caption:
+          type: string
+        isPrimary:
+          type: boolean
+      required:
+        - url
+
+    Property:
+      type: object
+      properties:
+        id:
+          type: string
+        mlsNumber:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+        status:
+          type: string
+          enum: [active, sold, pending, coming_soon]
+        type:
+          type: string
+          enum: [single_family, condo, townhouse, multi_family, land, luxury]
+        featured:
+          type: boolean
+        address:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        zip:
+          type: string
+        neighborhood:
+          type: string
+        bedrooms:
+          type: integer
+        bathrooms:
+          type: number
+        sqft:
+          type: integer
+        lotSize:
+          type: number
+        yearBuilt:
+          type: integer
+        garage:
+          type: integer
+        images:
+          type: array
+          items:
+            $ref: "#/components/schemas/PropertyImage"
+        amenities:
+          type: array
+          items:
+            type: string
+        virtualTourUrl:
+          type: string
+        listingDate:
+          type: string
+        soldDate:
+          type: string
+        soldPrice:
+          type: number
+        openHouseDate:
+          type: string
+        latitude:
+          type: number
+        longitude:
+          type: number
+        crmId:
+          type: string
+          description: Your CRM's internal property ID
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      required:
+        - id
+        - title
+        - price
+        - status
+        - type
+        - address
+        - city
+        - state
+        - bedrooms
+        - bathrooms
+        - sqft
+        - images
+
+    PropertiesResponse:
+      type: object
+      properties:
+        properties:
+          type: array
+          items:
+            $ref: "#/components/schemas/Property"
+        total:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+      required:
+        - properties
+        - total
+        - limit
+        - offset
+
+    SyncPropertiesRequest:
+      type: object
+      properties:
+        apiKey:
+          type: string
+          description: Your API key for authentication
+        properties:
+          type: array
+          items:
+            $ref: "#/components/schemas/PropertySyncItem"
+        deleteNotInList:
+          type: boolean
+          description: If true, removes properties not in this payload
+          default: false
+      required:
+        - properties
+
+    PropertySyncItem:
+      type: object
+      properties:
+        crmId:
+          type: string
+          description: Your CRM's unique ID for this property
+        mlsNumber:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+        status:
+          type: string
+          enum: [active, sold, pending, coming_soon]
+        type:
+          type: string
+          enum: [single_family, condo, townhouse, multi_family, land, luxury]
+        featured:
+          type: boolean
+        address:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        zip:
+          type: string
+        neighborhood:
+          type: string
+        bedrooms:
+          type: integer
+        bathrooms:
+          type: number
+        sqft:
+          type: integer
+        lotSize:
+          type: number
+        yearBuilt:
+          type: integer
+        garage:
+          type: integer
+        images:
+          type: array
+          items:
+            $ref: "#/components/schemas/PropertyImage"
+        amenities:
+          type: array
+          items:
+            type: string
+        virtualTourUrl:
+          type: string
+        listingDate:
+          type: string
+        soldDate:
+          type: string
+        soldPrice:
+          type: number
+        openHouseDate:
+          type: string
+        latitude:
+          type: number
+        longitude:
+          type: number
+      required:
+        - crmId
+        - title
+        - price
+        - status
+        - type
+        - address
+        - city
+        - state
+        - bedrooms
+        - bathrooms
+        - sqft
+
+    SyncResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        created:
+          type: integer
+        updated:
+          type: integer
+        deleted:
+          type: integer
+        errors:
+          type: array
+          items:
+            type: string
+      required:
+        - success
+        - created
+        - updated
+        - deleted
+
+    Agent:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        title:
+          type: string
+        bio:
+          type: string
+        shortBio:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        instagram:
+          type: string
+        facebook:
+          type: string
+        linkedin:
+          type: string
+        photoUrl:
+          type: string
+        coverPhotoUrl:
+          type: string
+        licenseNumber:
+          type: string
+        brokerage:
+          type: string
+        brokerageAddress:
+          type: string
+        specialties:
+          type: array
+          items:
+            type: string
+        certifications:
+          type: array
+          items:
+            type: string
+        serviceAreas:
+          type: array
+          items:
+            type: string
+        awardsAndRecognition:
+          type: array
+          items:
+            type: string
+        yearsExperience:
+          type: integer
+      required:
+        - id
+        - name
+        - title
+        - bio
+        - phone
+        - email
+
+    AgentUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        title:
+          type: string
+        bio:
+          type: string
+        shortBio:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        instagram:
+          type: string
+        facebook:
+          type: string
+        linkedin:
+          type: string
+        photoUrl:
+          type: string
+        coverPhotoUrl:
+          type: string
+        licenseNumber:
+          type: string
+        brokerage:
+          type: string
+        brokerageAddress:
+          type: string
+        specialties:
+          type: array
+          items:
+            type: string
+        certifications:
+          type: array
+          items:
+            type: string
+        serviceAreas:
+          type: array
+          items:
+            type: string
+        awardsAndRecognition:
+          type: array
+          items:
+            type: string
+        yearsExperience:
+          type: integer
+
+    Testimonial:
+      type: object
+      properties:
+        id:
+          type: string
+        clientName:
+          type: string
+        clientPhoto:
+          type: string
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        quote:
+          type: string
+        propertyAddress:
+          type: string
+        transactionType:
+          type: string
+          enum: [bought, sold, both]
+        date:
+          type: string
+        featured:
+          type: boolean
+        createdAt:
+          type: string
+      required:
+        - id
+        - clientName
+        - rating
+        - quote
+        - transactionType
+
+    TestimonialsResponse:
+      type: object
+      properties:
+        testimonials:
+          type: array
+          items:
+            $ref: "#/components/schemas/Testimonial"
+        total:
+          type: integer
+      required:
+        - testimonials
+        - total
+
+    TestimonialCreate:
+      type: object
+      properties:
+        clientName:
+          type: string
+        clientPhoto:
+          type: string
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        quote:
+          type: string
+        propertyAddress:
+          type: string
+        transactionType:
+          type: string
+          enum: [bought, sold, both]
+        date:
+          type: string
+        featured:
+          type: boolean
+      required:
+        - clientName
+        - rating
+        - quote
+        - transactionType
+
+    ContactRequest:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        message:
+          type: string
+        inquiryType:
+          type: string
+          enum: [buying, selling, general, investment, relocation]
+        budget:
+          type: string
+        timeline:
+          type: string
+        propertyId:
+          type: string
+          description: If inquiry is about a specific property
+      required:
+        - firstName
+        - lastName
+        - email
+        - message
+        - inquiryType
+
+    ContactResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        inquiryId:
+          type: string
+      required:
+        - success
+        - message
+        - inquiryId
+
+    BlogPost:
+      type: object
+      properties:
+        id:
+          type: string
+        slug:
+          type: string
+        title:
+          type: string
+        excerpt:
+          type: string
+        content:
+          type: string
+        author:
+          type: string
+        coverImage:
+          type: string
+        category:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        featured:
+          type: boolean
+        publishedAt:
+          type: string
+        readTime:
+          type: integer
+          description: Estimated read time in minutes
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      required:
+        - id
+        - slug
+        - title
+        - excerpt
+        - author
+        - publishedAt
+
+    BlogPostsResponse:
+      type: object
+      properties:
+        posts:
+          type: array
+          items:
+            $ref: "#/components/schemas/BlogPost"
+        total:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+      required:
+        - posts
+        - total
+        - limit
+        - offset
+
+    Stats:
+      type: object
+      properties:
+        homesSold:
+          type: integer
+        totalSalesVolume:
+          type: number
+        yearsExperience:
+          type: integer
+        clientSatisfactionRate:
+          type: number
+        averageDaysOnMarket:
+          type: integer
+        listToSaleRatio:
+          type: number
+          description: Percentage of list price received
+        neighborhoodsServed:
+          type: integer
+        awardsCount:
+          type: integer
+        updatedAt:
+          type: string
+      required:
+        - homesSold
+        - yearsExperience
+        - clientSatisfactionRate
+
+    StatsUpdate:
+      type: object
+      properties:
+        homesSold:
+          type: integer
+        totalSalesVolume:
+          type: number
+        yearsExperience:
+          type: integer
+        clientSatisfactionRate:
+          type: number
+        averageDaysOnMarket:
+          type: integer
+        listToSaleRatio:
+          type: number
+        neighborhoodsServed:
+          type: integer
+        awardsCount:
+          type: integer
+
+    Neighborhood:
+      type: object
+      properties:
+        id:
+          type: string
+        slug:
+          type: string
+        name:
+          type: string
+        tagline:
+          type: string
+        description:
+          type: string
+        longDescription:
+          type: string
+        coverImage:
+          type: string
+        galleryImages:
+          type: array
+          items:
+            type: string
+        highlights:
+          type: array
+          items:
+            type: string
+          description: Key features/selling points
+        diningAndShopping:
+          type: string
+        thingsToDo:
+          type: string
+        schools:
+          type: string
+        medianHomePrice:
+          type: number
+        averageSqft:
+          type: integer
+        featured:
+          type: boolean
+        sortOrder:
+          type: integer
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      required:
+        - id
+        - slug
+        - name
+        - description
+        - coverImage
+
+    NeighborhoodsResponse:
+      type: object
+      properties:
+        neighborhoods:
+          type: array
+          items:
+            $ref: "#/components/schemas/Neighborhood"
+        total:
+          type: integer
+      required:
+        - neighborhoods
+        - total
+
+    NeighborhoodCreate:
+      type: object
+      properties:
+        slug:
+          type: string
+        name:
+          type: string
+        tagline:
+          type: string
+        description:
+          type: string
+        longDescription:
+          type: string
+        coverImage:
+          type: string
+        galleryImages:
+          type: array
+          items:
+            type: string
+        highlights:
+          type: array
+          items:
+            type: string
+        diningAndShopping:
+          type: string
+        thingsToDo:
+          type: string
+        schools:
+          type: string
+        medianHomePrice:
+          type: number
+        averageSqft:
+          type: integer
+        featured:
+          type: boolean
+        sortOrder:
+          type: integer
+      required:
+        - slug
+        - name
+        - description
+        - coverImage
+
+    HomeValuationRequest:
+      type: object
+      properties:
+        propertyAddress:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        zip:
+          type: string
+        fullName:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        timeframe:
+          type: string
+          enum: [now, three_months, twelve_months, just_curious]
+      required:
+        - propertyAddress
+        - fullName
+        - email
+
+    HomeValuationResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        leadId:
+          type: string
+      required:
+        - success
+        - message
+        - leadId
+
+    MarketMetric:
+      type: object
+      properties:
+        label:
+          type: string
+        value:
+          type: string
+        change:
+          type: string
+        changeDirection:
+          type: string
+          enum: [up, down, flat]
+      required:
+        - label
+        - value
+
+    MarketMonthData:
+      type: object
+      properties:
+        month:
+          type: string
+        median:
+          type: number
+          description: Median home price in thousands
+        inventory:
+          type: integer
+        daysOnMarket:
+          type: integer
+        closedSales:
+          type: integer
+        newListings:
+          type: integer
+      required:
+        - month
+        - median
+
+    MarketDataResponse:
+      type: object
+      properties:
+        metrics:
+          type: array
+          items:
+            $ref: "#/components/schemas/MarketMetric"
+          description: Key headline metrics (median price, inventory, etc.)
+        monthlyData:
+          type: array
+          items:
+            $ref: "#/components/schemas/MarketMonthData"
+          description: Historical monthly data for charts
+        updatedAt:
+          type: string
+      required:
+        - metrics
+        - monthlyData
+
+    MarketDataUpdate:
+      type: object
+      properties:
+        metrics:
+          type: array
+          items:
+            $ref: "#/components/schemas/MarketMetric"
+        monthlyData:
+          type: array
+          items:
+            $ref: "#/components/schemas/MarketMonthData"
+
+    PageStep:
+      type: object
+      properties:
+        number:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+      required:
+        - number
+        - title
+        - description
+
+    PageSection:
+      type: object
+      properties:
+        icon:
+          type: string
+          description: Lucide icon name
+        title:
+          type: string
+        description:
+          type: string
+      required:
+        - title
+        - description
+
+    PageContent:
+      type: object
+      properties:
+        slug:
+          type: string
+        title:
+          type: string
+        subtitle:
+          type: string
+        heroDescription:
+          type: string
+        heroImage:
+          type: string
+        steps:
+          type: array
+          items:
+            $ref: "#/components/schemas/PageStep"
+          description: Step-by-step process (for buyers/sellers pages)
+        sections:
+          type: array
+          items:
+            $ref: "#/components/schemas/PageSection"
+          description: Content sections (for relocation page)
+        ctaText:
+          type: string
+        ctaButtonLabel:
+          type: string
+        ctaButtonPage:
+          type: string
+        updatedAt:
+          type: string
+      required:
+        - slug
+        - title
+
+    PageContentUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        subtitle:
+          type: string
+        heroDescription:
+          type: string
+        heroImage:
+          type: string
+        steps:
+          type: array
+          items:
+            $ref: "#/components/schemas/PageStep"
+        sections:
+          type: array
+          items:
+            $ref: "#/components/schemas/PageSection"
+        ctaText:
+          type: string
+        ctaButtonLabel:
+          type: string
+        ctaButtonPage:
+          type: string
