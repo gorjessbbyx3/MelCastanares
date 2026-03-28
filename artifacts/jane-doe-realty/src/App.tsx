@@ -651,6 +651,8 @@ function Nav({ page, setPage }) {
 function HomePage({ setPage }) {
   const go = (p) => { setPage(p); window.scrollTo({ top: 0, behavior: "smooth" }); };
   const scrollY = useScrollY();
+  const [melVideoMuted, setMelVideoMuted] = useState(true);
+  const melVideoRef = useRef<HTMLVideoElement>(null);
   
   // API calls with fallback data
   const { data: agent } = useApi(() => api.getAgent(), FALLBACK_AGENT);
@@ -789,11 +791,48 @@ function HomePage({ setPage }) {
                 boxShadow: `0 40px 100px rgba(0,0,0,0.22), 0 0 0 1px ${BRAND.gold}30`,
                 aspectRatio: "9/16", maxHeight: 680,
               }}>
-                <img
-                  src="/images/mel-headshot.jpg"
-                  alt="Mel Castanares"
+                <video
+                  ref={melVideoRef}
+                  src="/videos/mel-hero.mp4"
+                  autoPlay
+                  loop
+                  muted={melVideoMuted}
+                  playsInline
                   style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top", display: "block" }}
                 />
+                {/* Mute / Unmute toggle */}
+                <button
+                  onClick={() => {
+                    const newMuted = !melVideoMuted;
+                    setMelVideoMuted(newMuted);
+                    if (melVideoRef.current) melVideoRef.current.muted = newMuted;
+                  }}
+                  title={melVideoMuted ? "Turn on sound" : "Mute"}
+                  style={{
+                    position: "absolute", top: 16, right: 16,
+                    width: 40, height: 40, borderRadius: "50%",
+                    background: "rgba(10,10,10,0.65)", backdropFilter: "blur(10px)",
+                    border: "1px solid rgba(255,255,255,0.18)",
+                    color: "#fff", cursor: "pointer",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    transition: "background 0.2s",
+                    zIndex: 10,
+                  }}
+                  onMouseEnter={e => (e.currentTarget.style.background = "rgba(30,30,30,0.85)")}
+                  onMouseLeave={e => (e.currentTarget.style.background = "rgba(10,10,10,0.65)")}
+                >
+                  {melVideoMuted ? (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                      <line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/>
+                    </svg>
+                  ) : (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                      <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+                    </svg>
+                  )}
+                </button>
                 {/* Name tag overlay */}
                 <div style={{
                   position: "absolute", bottom: 24, left: 24, right: 24,
