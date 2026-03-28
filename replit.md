@@ -16,11 +16,17 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 - **API codegen**: Orval (from OpenAPI spec)
 - **Build**: esbuild (CJS bundle)
 
+## Workflows
+
+- **Mel Castanares Realty** — `PORT=18189 BASE_PATH=/ pnpm --filter @workspace/jane-doe-realty run dev` (port 18189, webview)
+- **API Server** — `PORT=8080 pnpm --filter @workspace/api-server run dev` (port 8080, console)
+
 ## Structure
 
 ```text
 artifacts-monorepo/
 ├── artifacts/              # Deployable applications
+│   ├── jane-doe-realty/    # React + Vite frontend (Mel Castanares real estate site)
 │   └── api-server/         # Express API server
 ├── lib/                    # Shared libraries
 │   ├── api-spec/           # OpenAPI spec + Orval codegen config
