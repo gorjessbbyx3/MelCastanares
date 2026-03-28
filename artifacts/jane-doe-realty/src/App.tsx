@@ -377,7 +377,30 @@ const GlobalStyles = () => (
     @media(max-width:640px) { .ql-bar { grid-template-columns: 1fr !important; } .ql-bar button { border-right: none !important; border-bottom: 1px solid var(--border); } }
 
     /* ── NEIGHBORHOOD SHOWCASE — mobile ── */
-    @media(max-width:768px) { .nh-split { flex-direction: column !important; } .nh-list { width: 100% !important; max-height: 180px; overflow-x: auto; overflow-y: hidden; display: flex !important; flex-direction: row !important; } .nh-list button { min-width: 140px !important; white-space: nowrap; border-bottom: none !important; border-right: 1px solid var(--border); border-left: none !important; border-bottom: 3px solid transparent !important; } .nh-list button[data-active="true"] { border-bottom: 3px solid ${BRAND.gold} !important; border-left: none !important; } .nh-img { min-height: 320px !important; } }
+    @media(max-width:768px) {
+      .nh-split { flex-direction: row !important; }
+      .nh-list {
+        width: 108px !important; min-width: 108px !important; max-width: 108px !important;
+        flex-shrink: 0 !important;
+        overflow-x: hidden !important; overflow-y: auto !important;
+        display: flex !important; flex-direction: column !important;
+        border-right: 1px solid var(--border);
+      }
+      .nh-list button {
+        padding: 14px 10px !important;
+        min-width: unset !important; white-space: normal !important;
+        border-right: none !important;
+        border-left: 3px solid transparent !important;
+        border-bottom: 1px solid var(--border) !important;
+        font-size: 12px !important;
+        text-align: left !important;
+      }
+      .nh-list button[data-active="true"] {
+        border-left: 3px solid ${BRAND.gold} !important;
+      }
+      .nh-tagline { display: none !important; }
+      .nh-img { min-height: 360px !important; }
+    }
 
     /* ── MEET MEL — mobile stacks ── */
     @media(max-width:768px) { .mel-split { grid-template-columns: 1fr !important; } }
@@ -1034,6 +1057,7 @@ function NeighborhoodShowcase({ neighborhoods = [], onNavigate }: { neighborhood
             <button
               key={item.id}
               onClick={() => handleSelect(i)}
+              data-active={i === active ? "true" : "false"}
               style={{
                 display: "block", width: "100%", textAlign: "left",
                 padding: "20px 28px", border: "none",
@@ -1050,7 +1074,7 @@ function NeighborhoodShowcase({ neighborhoods = [], onNavigate }: { neighborhood
                 color: i === active ? BRAND.gold : BRAND.text,
                 marginBottom: 3, transition: "color 0.2s",
               }}>{item.name}</div>
-              <div style={{ fontSize: 11, color: BRAND.textMuted, lineHeight: 1.4 }}>{item.tagline}</div>
+              <div className="nh-tagline" style={{ fontSize: 11, color: BRAND.textMuted, lineHeight: 1.4 }}>{item.tagline}</div>
             </button>
           ))}
         </div>
