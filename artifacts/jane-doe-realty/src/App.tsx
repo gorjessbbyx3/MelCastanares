@@ -777,27 +777,53 @@ function PropertiesPage({ setPage }) {
 
   return (
     <div style={{ paddingTop: 120 }}>
+      {/* Hero */}
+      <section style={{ position: "relative", padding: "80px 24px 100px", overflow: "hidden", textAlign: "center" }}>
+        <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1600&q=80" alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, rgba(27,42,51,0.85) 0%, rgba(26,138,125,0.5) 100%)" }} />
+        <div style={{ position: "relative", zIndex: 1, maxWidth: 700, margin: "0 auto" }}>
+          <Reveal>
+            <div style={{ color: "#fff", fontSize: 11, letterSpacing: "0.35em", textTransform: "uppercase", marginBottom: 16, opacity: 0.8 }}>Dream Home Realty</div>
+            <h1 className="font-display" style={{ fontSize: "clamp(40px, 7vw, 68px)", color: "#fff", marginBottom: 16, lineHeight: 1.05 }}>
+              Current <span style={{ fontStyle: "italic", color: BRAND.goldLight }}>Listings</span>
+            </h1>
+            <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 16 }}>
+              Browse Mel's active rentals, homes for sale, and land opportunities across O'ahu.
+            </p>
+          </Reveal>
+        </div>
+      </section>
+
       <div className="section-pad" style={{ paddingTop: 40 }}>
-        <Reveal>
-          <h1 className="font-display" style={{ fontSize: "clamp(40px, 6vw, 64px)", marginBottom: 12 }}>Portfolio</h1>
-          <p style={{ color: BRAND.textMuted, fontSize: 16, maxWidth: 600, marginBottom: 40 }}>
-            Discover our curated selection of extraordinary properties across O'ahu.
-          </p>
-        </Reveal>
         <Reveal delay={0.1}>
-          <div style={{ display: "flex", gap: 16, marginBottom: 48, flexWrap: "wrap", padding: 24, background: BRAND.bgCard, border: `1px solid ${BRAND.border}` }}>
-            <select className="input-custom" style={{ maxWidth: 200 }} value={filter.status} onChange={e => setFilter(f => ({ ...f, status: e.target.value }))}>
-              <option value="">All Statuses</option>
-              <option value="Active">Active</option>
-              <option value="Pending">Pending</option>
-              <option value="Sold">Sold</option>
-            </select>
-            <select className="input-custom" style={{ maxWidth: 200 }} value={filter.type} onChange={e => setFilter(f => ({ ...f, type: e.target.value }))}>
-              <option value="">All Types</option>
-              <option value="Luxury">Luxury</option>
-              <option value="Single Family">Single Family</option>
-              <option value="Condo">Condo</option>
-            </select>
+          <div style={{ display: "flex", gap: 16, marginBottom: 48, flexWrap: "wrap", padding: 24, background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, borderRadius: 12, alignItems: "flex-end" }}>
+            <div>
+              <label style={{ fontSize: 11, color: BRAND.textDim, letterSpacing: "0.1em", textTransform: "uppercase", display: "block", marginBottom: 6 }}>Status</label>
+              <select className="input-custom" style={{ maxWidth: 180 }} value={filter.status} onChange={e => setFilter(f => ({ ...f, status: e.target.value }))}>
+                <option value="">All</option>
+                <option value="active">Active</option>
+                <option value="pending">Pending</option>
+              </select>
+            </div>
+            <div>
+              <label style={{ fontSize: 11, color: BRAND.textDim, letterSpacing: "0.1em", textTransform: "uppercase", display: "block", marginBottom: 6 }}>Type</label>
+              <select className="input-custom" style={{ maxWidth: 180 }} value={filter.type} onChange={e => setFilter(f => ({ ...f, type: e.target.value }))}>
+                <option value="">All Types</option>
+                <option value="rental">Rentals</option>
+                <option value="single_family">Single Family</option>
+                <option value="condo">Condo</option>
+                <option value="townhouse">Townhouse</option>
+                <option value="land">Land</option>
+              </select>
+            </div>
+            <div style={{ display: "flex", gap: 10, alignItems: "flex-end", flexWrap: "wrap", marginLeft: "auto" }}>
+              <a href="https://propertysearch.hicentral.com/HBR/OpenHouses/?/Results/HotSheet/d///" target="_blank" rel="noopener noreferrer" className="btn-outline" style={{ padding: "10px 16px", textDecoration: "none", fontSize: 11, display: "inline-flex", alignItems: "center", gap: 6, borderRadius: 8 }}>
+                <Calendar size={13} /> Open Houses
+              </a>
+              <a href="https://portal.onehome.com/en-US/share/1039187l44771" target="_blank" rel="noopener noreferrer" className="btn-outline" style={{ padding: "10px 16px", textDecoration: "none", fontSize: 11, display: "inline-flex", alignItems: "center", gap: 6, borderRadius: 8 }}>
+                <Search size={13} /> Full MLS Search
+              </a>
+            </div>
           </div>
         </Reveal>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: 24 }}>
@@ -952,45 +978,133 @@ function AboutPage({ setPage }) {
 // NEIGHBORHOODS PAGE
 // ─────────────────────────────────────────────
 
-function NeighborhoodsPage() {
+function NeighborhoodsPage({ setPage }) {
   const { data: nResp } = useApi(() => api.getNeighborhoods(), { neighborhoods: FALLBACK_NEIGHBORHOODS });
   const neighborhoods = nResp?.neighborhoods || FALLBACK_NEIGHBORHOODS;
+  const goDetail = (n) => { window.__selectedNeighborhood = n; setPage("neighborhood-detail"); window.scrollTo({ top: 0, behavior: "smooth" }); };
+
   return (
     <div style={{ paddingTop: 120 }}>
-      <div className="section-pad" style={{ paddingTop: 40 }}>
-        <Reveal>
-          <h1 className="font-display" style={{ fontSize: "clamp(40px, 6vw, 64px)", marginBottom: 12 }}>Neighborhoods</h1>
-          <p style={{ color: BRAND.textMuted, fontSize: 16, maxWidth: 600, marginBottom: 56 }}>
-            Explore O'ahu's most desirable communities. Each neighborhood has its own unique character and lifestyle.
-          </p>
-        </Reveal>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(380px, 1fr))", gap: 24 }}>
-          {(nResp?.neighborhoods || FALLBACK_NEIGHBORHOODS).map((n, i) => (
-            <Reveal key={n.id} delay={i * 0.1} direction="up">
-              <div className="card-hover" style={{ background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, overflow: "hidden" }}>
-                <div className="img-zoom" style={{ aspectRatio: "16/9" }}>
+      {/* Hero */}
+      <section style={{ position: "relative", padding: "80px 24px 100px", overflow: "hidden", textAlign: "center" }}>
+        <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1600&q=80" alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, rgba(27,42,51,0.85) 0%, rgba(26,138,125,0.5) 100%)" }} />
+        <div style={{ position: "relative", zIndex: 1, maxWidth: 700, margin: "0 auto" }}>
+          <Reveal>
+            <div style={{ color: "#fff", fontSize: 11, letterSpacing: "0.35em", textTransform: "uppercase", marginBottom: 16, opacity: 0.8 }}>Explore O'ahu</div>
+            <h1 className="font-display" style={{ fontSize: "clamp(40px, 7vw, 68px)", color: "#fff", marginBottom: 16, lineHeight: 1.05 }}>
+              Find Your <span style={{ fontStyle: "italic", color: BRAND.goldLight }}>Neighborhood</span>
+            </h1>
+            <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 16, maxWidth: 520, margin: "0 auto" }}>
+              Every neighborhood on O'ahu has its own personality. Tap any to explore schools, dining, lifestyle, and what it's really like to live there.
+            </p>
+          </Reveal>
+        </div>
+      </section>
+
+      <div className="section-pad">
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(360px, 1fr))", gap: 28 }}>
+          {neighborhoods.map((n, i) => (
+            <Reveal key={n.id} delay={i * 0.08} direction="up">
+              <div className="card-hover" onClick={() => goDetail(n)} style={{ cursor: "pointer", background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, overflow: "hidden", borderRadius: 12, height: "100%", display: "flex", flexDirection: "column" }}>
+                <div className="img-zoom" style={{ aspectRatio: "16/9", position: "relative" }}>
                   <img src={n.coverImage || n.images?.[0]?.url || n.img} alt={n.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                </div>
-                <div style={{ padding: 28 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-                    <h3 className="font-display" style={{ fontSize: 26 }}>{n.name}</h3>
-                    <span className="gold-text" style={{ fontSize: 12, fontWeight: 600 }}>{n.growth}</span>
+                  <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 50%)" }} />
+                  <div style={{ position: "absolute", bottom: 16, left: 20 }}>
+                    <h3 className="font-display" style={{ fontSize: 28, color: "#fff", textShadow: "0 2px 8px rgba(0,0,0,0.3)" }}>{n.name}</h3>
+                    <p style={{ color: "rgba(255,255,255,0.85)", fontSize: 13 }}>{n.tagline}</p>
                   </div>
-                  <p style={{ color: BRAND.textMuted, fontSize: 14, lineHeight: 1.7, marginBottom: 20 }}>{n.description || n.desc}</p>
+                  {n.growth && <div style={{ position: "absolute", top: 12, right: 12, background: `${BRAND.teal}DD`, color: "#fff", fontSize: 11, fontWeight: 700, padding: "4px 10px", borderRadius: 6, letterSpacing: "0.05em" }}>{n.growth} YoY</div>}
+                </div>
+                <div style={{ padding: 24, flex: 1, display: "flex", flexDirection: "column" }}>
+                  <p style={{ color: BRAND.textMuted, fontSize: 14, lineHeight: 1.7, flex: 1, marginBottom: 16 }}>{n.description}</p>
+                  {n.vibe && <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 16 }}>{n.vibe.split(" · ").map((v, j) => <span key={j} style={{ padding: "4px 10px", background: `${BRAND.teal}0A`, border: `1px solid ${BRAND.teal}22`, borderRadius: 20, fontSize: 11, color: BRAND.teal, fontWeight: 500 }}>{v}</span>)}</div>}
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 16, borderTop: `1px solid ${BRAND.border}` }}>
                     <div>
-                      <div style={{ fontSize: 10, letterSpacing: "0.12em", textTransform: "uppercase", color: BRAND.textDim }}>Median Price</div>
-                      <div className="font-display gold-text" style={{ fontSize: 20 }}>{n.medianHomePrice || n.medianPrice || "N/A"}</div>
+                      <div style={{ fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: BRAND.textDim }}>Median</div>
+                      <div className="font-display" style={{ fontSize: 22, color: BRAND.teal }}>{n.medianHomePrice}</div>
                     </div>
-                    <span style={{ color: BRAND.teal, fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", fontWeight: 600, display: "flex", alignItems: "center", gap: 6, cursor: "pointer" }}>
-                      View Guide <ArrowRight size={14} />
-                    </span>
+                    <span style={{ color: BRAND.teal, fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", fontWeight: 600, display: "flex", alignItems: "center", gap: 6 }}>Explore <ArrowRight size={14} /></span>
                   </div>
                 </div>
               </div>
             </Reveal>
           ))}
         </div>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
+// NEIGHBORHOOD DETAIL PAGE
+// ─────────────────────────────────────────────
+
+function NeighborhoodDetailPage({ setPage }) {
+  const n = window.__selectedNeighborhood || FALLBACK_NEIGHBORHOODS[0];
+  const go = (p) => { setPage(p); window.scrollTo({ top: 0, behavior: "smooth" }); };
+
+  return (
+    <div style={{ paddingTop: 120 }}>
+      {/* Hero */}
+      <section style={{ position: "relative", height: "50vh", minHeight: 350, overflow: "hidden", display: "flex", alignItems: "flex-end" }}>
+        <img src={n.coverImage || n.images?.[0]?.url} alt={n.name} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(27,42,51,0.9) 0%, transparent 60%)" }} />
+        <div style={{ position: "relative", zIndex: 1, padding: "0 24px 48px", maxWidth: 1400, margin: "0 auto", width: "100%" }}>
+          <button onClick={() => go("neighborhoods")} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.7)", cursor: "pointer", fontSize: 11, letterSpacing: "0.15em", textTransform: "uppercase", display: "flex", alignItems: "center", gap: 8, marginBottom: 16, fontFamily: "'DM Sans'" }}><ArrowLeft size={14} /> All Neighborhoods</button>
+          <h1 className="font-display" style={{ fontSize: "clamp(40px, 7vw, 64px)", color: "#fff", marginBottom: 8 }}>{n.name}</h1>
+          <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 18 }}>{n.tagline}</p>
+        </div>
+      </section>
+
+      <div className="section-pad" style={{ paddingTop: 48 }}>
+        {/* Stats bar */}
+        <Reveal>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 20, marginBottom: 48 }}>
+            <div style={{ background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, borderRadius: 12, padding: 24, textAlign: "center" }}>
+              <div className="font-display" style={{ fontSize: 28, color: BRAND.teal }}>{n.medianHomePrice}</div>
+              <div style={{ fontSize: 11, color: BRAND.textDim, letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 4 }}>Median Price</div>
+            </div>
+            {n.growth && <div style={{ background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, borderRadius: 12, padding: 24, textAlign: "center" }}>
+              <div className="font-display" style={{ fontSize: 28, color: "#4CAF50" }}>{n.growth}</div>
+              <div style={{ fontSize: 11, color: BRAND.textDim, letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 4 }}>Annual Growth</div>
+            </div>}
+          </div>
+        </Reveal>
+
+        {/* About */}
+        <Reveal delay={0.1}>
+          <h2 className="font-display" style={{ fontSize: 32, marginBottom: 16 }}>Living in {n.name}</h2>
+          <p style={{ color: BRAND.textMuted, fontSize: 16, lineHeight: 1.9, marginBottom: 48, maxWidth: 800 }}>{n.longDesc || n.description}</p>
+        </Reveal>
+
+        {/* Info grid */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 24, marginBottom: 48 }}>
+          {[
+            { icon: <BookOpen size={20} color={BRAND.teal} />, title: "Schools", content: n.schools },
+            { icon: <MapPin size={20} color={BRAND.teal} />, title: "Dining & Shopping", content: n.dining },
+            { icon: <Star size={20} color={BRAND.teal} />, title: "Things to Do", content: n.thingsToDo },
+          ].filter(s => s.content).map((s, i) => (
+            <Reveal key={i} delay={i * 0.1}>
+              <div style={{ background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, borderRadius: 12, padding: 28 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>{s.icon}<h3 style={{ fontSize: 16, fontWeight: 600 }}>{s.title}</h3></div>
+                <p style={{ color: BRAND.textMuted, fontSize: 14, lineHeight: 1.7 }}>{s.content}</p>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+
+        {/* CTA */}
+        <Reveal>
+          <div style={{ background: `linear-gradient(135deg, ${BRAND.teal}, ${BRAND.tealDark})`, borderRadius: 16, padding: "40px 32px", textAlign: "center", color: "#fff" }}>
+            <h3 className="font-display" style={{ fontSize: 28, marginBottom: 12 }}>Interested in {n.name}?</h3>
+            <p style={{ opacity: 0.8, fontSize: 14, marginBottom: 24 }}>Mel knows this neighborhood inside and out. Let's find your perfect home here.</p>
+            <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+              <button className="btn-primary" onClick={() => go("contact")} style={{ background: "#fff", color: BRAND.teal }}>Talk to Mel</button>
+              <button className="btn-outline" onClick={() => go("properties")} style={{ borderColor: "rgba(255,255,255,0.4)", color: "#fff" }}>View Listings</button>
+            </div>
+          </div>
+        </Reveal>
       </div>
     </div>
   );
@@ -1899,87 +2013,110 @@ function Footer({ setPage }) {
   const { data: agent } = useApi(() => api.getAgent(), FALLBACK_AGENT);
 
   return (
-    <footer style={{ background: BRAND.bgLight, borderTop: `1px solid ${BRAND.border}`, paddingTop: 80, paddingBottom: 40 }}>
-      <div style={{ maxWidth: 1400, margin: "0 auto", padding: "0 24px", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 48 }}>
-        <div>
-          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
-            <div style={{ width: 32, height: 32, border: `1px solid ${BRAND.gold}`, display: "flex", alignItems: "center", justifyContent: "center", transform: "rotate(45deg)" }}>
-              <span style={{ transform: "rotate(-45deg)", fontFamily: "'DM Serif Display', serif", fontSize: 14, color: BRAND.teal, fontWeight: 600 }}>M</span>
-            </div>
-            <span className="font-display" style={{ fontSize: 18, letterSpacing: "0.12em", textTransform: "uppercase", color: BRAND.teal }}>Mel Castanares</span>
-          </div>
-          <p style={{ color: BRAND.textMuted, fontSize: 13, lineHeight: 1.7, marginBottom: 20 }}>
-            Curating extraordinary living experiences across O'ahu with discretion and expertise.
+    <footer>
+      {/* CTA Band */}
+      <div style={{ background: `linear-gradient(135deg, ${BRAND.teal}, ${BRAND.tealDark})`, padding: "56px 24px", textAlign: "center" }}>
+        <div style={{ maxWidth: 600, margin: "0 auto" }}>
+          <h2 className="font-display" style={{ fontSize: "clamp(28px, 4vw, 40px)", color: "#fff", marginBottom: 12, lineHeight: 1.15 }}>
+            Let's Find Your Dream Home
+          </h2>
+          <p style={{ color: "rgba(255,255,255,0.75)", fontSize: 15, marginBottom: 28, lineHeight: 1.6 }}>
+            Whether you're buying your first home, selling, or investing — Mel makes it personal.
           </p>
-          <div style={{ display: "flex", gap: 12 }}>
-            {[Instagram, Facebook, Linkedin, Youtube].map((Icon, i) => (
-              <div key={i} style={{ width: 36, height: 36, border: `1px solid ${BRAND.border}`, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", transition: "all 0.3s" }}>
-                <Icon size={16} color={BRAND.textMuted} />
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <h4 style={{ fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", color: BRAND.text, marginBottom: 20 }}>Explore</h4>
-          {[
-            { label: "Portfolio", page: "properties" },
-            { label: "Neighborhoods", page: "neighborhoods" },
-            { label: "Market Data", page: "market" },
-            { label: "Insights", page: "blog" },
-            { label: "About Mel", page: "about" },
-          ].map((link, i) => (
-            <button key={i} onClick={() => go(link.page)} style={{
-              display: "block", background: "none", border: "none", color: BRAND.textMuted, cursor: "pointer",
-              fontSize: 13, marginBottom: 12, fontFamily: "'DM Sans', sans-serif", padding: 0, transition: "color 0.3s",
-            }} onMouseEnter={e => e.target.style.color = BRAND.gold} onMouseLeave={e => e.target.style.color = BRAND.textMuted}>
-              {link.label}
-            </button>
-          ))}
-        </div>
-
-        <div>
-          <h4 style={{ fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", color: BRAND.text, marginBottom: 20 }}>Services</h4>
-          {[
-            { label: "Buyer's Experience", page: "buyers" },
-            { label: "Seller's Experience", page: "sellers" },
-            { label: "Home Valuation", page: "valuation" },
-            { label: "Relocation Guide", page: "relocation" },
-            { label: "Testimonials", page: "testimonials" },
-          ].map((link, i) => (
-            <button key={i} onClick={() => go(link.page)} style={{
-              display: "block", background: "none", border: "none", color: BRAND.textMuted, cursor: "pointer",
-              fontSize: 13, marginBottom: 12, fontFamily: "'DM Sans', sans-serif", padding: 0, transition: "color 0.3s",
-            }} onMouseEnter={e => e.target.style.color = BRAND.gold} onMouseLeave={e => e.target.style.color = BRAND.textMuted}>
-              {link.label}
-            </button>
-          ))}
-        </div>
-
-        <div>
-          <h4 style={{ fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", color: BRAND.text, marginBottom: 20 }}>Contact</h4>
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: BRAND.textMuted }}>
-              <Phone size={14} color={BRAND.teal} /> {agent.phone || FALLBACK_AGENT.phone}
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: BRAND.textMuted }}>
-              <Mail size={14} color={BRAND.teal} /> {agent.email || FALLBACK_AGENT.email}
-            </div>
-            <div style={{ display: "flex", alignItems: "flex-start", gap: 8, fontSize: 13, color: BRAND.textMuted }}>
-              <MapPin size={14} color={BRAND.teal} style={{ flexShrink: 0, marginTop: 2 }} />
-              <span style={{ whiteSpace: "pre-line" }}>{agent.brokerage || FALLBACK_AGENT.brokerage}{"\n"}{agent.brokerageAddress || agent.address || FALLBACK_AGENT.address}</span>
-            </div>
+          <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+            <button className="btn-primary" onClick={() => go("contact")} style={{ background: "#fff", color: BRAND.teal, borderRadius: 8 }}>Get in Touch</button>
+            <a href="tel:8082858774" className="btn-outline" style={{ borderColor: "rgba(255,255,255,0.35)", color: "#fff", borderRadius: 8, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8 }}>
+              <Phone size={14} /> (808) 285-8774
+            </a>
           </div>
         </div>
       </div>
 
-      <div style={{ maxWidth: 1400, margin: "0 auto", padding: "32px 24px 0", marginTop: 48, borderTop: `1px solid ${BRAND.border}`, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 16 }}>
-        <p style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: BRAND.textDim }}>
-          © {new Date().getFullYear()} Mel Castanares. All Rights Reserved.
-        </p>
-        <div style={{ display: "flex", gap: 20 }}>
-          <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: BRAND.textDim, cursor: "pointer" }}>Privacy Policy</span>
-          <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: BRAND.textDim, cursor: "pointer" }}>Terms</span>
+      {/* Main Footer */}
+      <div style={{ background: BRAND.bgDark, padding: "64px 24px 32px", color: "rgba(255,255,255,0.85)" }}>
+        <div style={{ maxWidth: 1400, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 48 }}>
+          {/* Brand + Agent */}
+          <div>
+            <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 20 }}>
+              <img src="/images/mel-headshot.jpg" alt="Mel" style={{ width: 48, height: 48, borderRadius: "50%", objectFit: "cover", border: "2px solid rgba(255,255,255,0.15)" }} />
+              <div>
+                <div style={{ fontWeight: 600, fontSize: 16 }}>Mel Castanares</div>
+                <div style={{ fontSize: 12, color: "rgba(255,255,255,0.5)" }}>REALTOR® | RS-#####</div>
+              </div>
+            </div>
+            <p style={{ color: "rgba(255,255,255,0.55)", fontSize: 13, lineHeight: 1.7, marginBottom: 20 }}>
+              Dream Home Realty Hawai'i<br/>O'ahu born & raised. Helping you find your dream home in paradise.
+            </p>
+            <div style={{ display: "flex", gap: 10 }}>
+              {[
+                { Icon: Instagram, href: "https://www.instagram.com/mel.castanares" },
+                { Icon: Facebook, href: "https://www.facebook.com/dreamhomehi" },
+                { Icon: Linkedin, href: "#" },
+              ].map(({ Icon, href }, i) => (
+                <a key={i} href={href} target="_blank" rel="noopener noreferrer" style={{ width: 36, height: 36, borderRadius: 8, background: "rgba(255,255,255,0.08)", display: "flex", alignItems: "center", justifyContent: "center", transition: "background 0.3s" }}
+                  onMouseEnter={e => e.currentTarget.style.background = BRAND.teal}
+                  onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.08)"}>
+                  <Icon size={16} color="#fff" />
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* Quick Links */}
+          <div>
+            <h4 style={{ fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)", marginBottom: 20 }}>Explore</h4>
+            {[
+              { l: "Properties", p: "properties" }, { l: "Neighborhoods", p: "neighborhoods" },
+              { l: "Market Data", p: "market" }, { l: "News", p: "blog" },
+              { l: "About Mel", p: "about" }, { l: "Mortgage Calculator", p: "mortgage" },
+            ].map((lk, i) => (
+              <button key={i} onClick={() => go(lk.p)} style={{ display: "block", background: "none", border: "none", color: "rgba(255,255,255,0.55)", cursor: "pointer", fontSize: 13, marginBottom: 10, fontFamily: "'DM Sans'", padding: 0, transition: "color 0.3s" }}
+                onMouseEnter={e => e.target.style.color = "#fff"} onMouseLeave={e => e.target.style.color = "rgba(255,255,255,0.55)"}>{lk.l}</button>
+            ))}
+          </div>
+
+          {/* Services */}
+          <div>
+            <h4 style={{ fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)", marginBottom: 20 }}>Services</h4>
+            {[
+              { l: "Buyer's Experience", p: "buyers" }, { l: "Seller's Experience", p: "sellers" },
+              { l: "Home Valuation", p: "valuation" }, { l: "Relocation Guide", p: "relocation" },
+              { l: "Testimonials", p: "testimonials" },
+            ].map((lk, i) => (
+              <button key={i} onClick={() => go(lk.p)} style={{ display: "block", background: "none", border: "none", color: "rgba(255,255,255,0.55)", cursor: "pointer", fontSize: 13, marginBottom: 10, fontFamily: "'DM Sans'", padding: 0, transition: "color 0.3s" }}
+                onMouseEnter={e => e.target.style.color = "#fff"} onMouseLeave={e => e.target.style.color = "rgba(255,255,255,0.55)"}>{lk.l}</button>
+            ))}
+          </div>
+
+          {/* Contact */}
+          <div>
+            <h4 style={{ fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)", marginBottom: 20 }}>Contact</h4>
+            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+              <a href="tel:8082858774" style={{ display: "flex", alignItems: "center", gap: 10, color: "rgba(255,255,255,0.65)", fontSize: 13, textDecoration: "none" }}>
+                <div style={{ width: 32, height: 32, borderRadius: 8, background: `${BRAND.teal}22`, display: "flex", alignItems: "center", justifyContent: "center" }}><Phone size={14} color={BRAND.tealLight} /></div>
+                (808) 285-8774
+              </a>
+              <a href="mailto:mel@homesweethomehawaii.com" style={{ display: "flex", alignItems: "center", gap: 10, color: "rgba(255,255,255,0.65)", fontSize: 13, textDecoration: "none" }}>
+                <div style={{ width: 32, height: 32, borderRadius: 8, background: `${BRAND.gold}22`, display: "flex", alignItems: "center", justifyContent: "center" }}><Mail size={14} color={BRAND.goldLight} /></div>
+                mel@homesweethomehawaii.com
+              </a>
+              <div style={{ display: "flex", alignItems: "flex-start", gap: 10, color: "rgba(255,255,255,0.65)", fontSize: 13 }}>
+                <div style={{ width: 32, height: 32, borderRadius: 8, background: "rgba(255,255,255,0.06)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><MapPin size={14} color="rgba(255,255,255,0.5)" /></div>
+                <span>Dream Home Realty Hawai'i<br/>95-1249 Meheula Pkwy #B-15B<br/>Mililani, HI 96789</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom bar */}
+        <div style={{ maxWidth: 1400, margin: "0 auto", marginTop: 48, paddingTop: 24, borderTop: "1px solid rgba(255,255,255,0.08)", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
+          <p style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", letterSpacing: "0.05em" }}>
+            © {new Date().getFullYear()} Mel Castanares | Dream Home Realty Hawai'i LLC | RB-23566
+          </p>
+          <div style={{ display: "flex", gap: 16 }}>
+            <a href="https://www.dreamhomerealtyhawaii.com" target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", textDecoration: "none" }}>dreamhomerealtyhawaii.com</a>
+            <span style={{ fontSize: 11, color: "rgba(255,255,255,0.3)" }}>Privacy Policy</span>
+          </div>
         </div>
       </div>
     </footer>
@@ -2157,7 +2294,8 @@ export default function App() {
       case "properties": return <PropertiesPage setPage={setPage} />;
       case "property-detail": return <PropertyDetailPage setPage={setPage} />;
       case "about": return <AboutPage setPage={setPage} />;
-      case "neighborhoods": return <NeighborhoodsPage />;
+      case "neighborhoods": return <NeighborhoodsPage setPage={setPage} />;
+      case "neighborhood-detail": return <NeighborhoodDetailPage setPage={setPage} />;
       case "market": return <MarketPage />;
       case "blog": return <BlogPage setPage={setPage} />;
       case "blog-post": return <BlogPostPage setPage={setPage} />;
