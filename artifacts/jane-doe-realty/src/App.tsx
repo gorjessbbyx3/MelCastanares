@@ -905,9 +905,6 @@ function HomePage({ setPage }) {
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 20 }}>
             {[
               { label: "Search All MLS Listings", sub: "Updated daily from O'ahu MLS", url: "https://www.dreamhomerealtyhawaii.com/property-search", img: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&q=80" },
-              { label: "Featured Listing", sub: "Mel's hand-picked property", url: "https://portal.onehome.com/en-US/share/1039187l44771", img: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80" },
-              { label: "New Apts & Townhomes", sub: "Newly listed condos & townhomes", url: "https://tr.ee/TD4XEaS8fj", img: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80" },
-              { label: "New Single Family Homes", sub: "Newly listed homes", url: "https://tr.ee/genAf8Ucfz", img: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=800&q=80" },
               { label: "Available Rentals", sub: "Managed by Dream Home Realty", url: "https://dreamhomerlty.appfolio.com/listings/", img: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80" },
               { label: "Open Houses", sub: "This week on O'ahu", url: "https://propertysearch.hicentral.com/HBR/OpenHouses/?/Results/HotSheet/d///", img: "https://images.unsplash.com/photo-1507089947368-19c1da9775ae?w=800&q=80" },
             ].map((item, i) => (
@@ -1218,9 +1215,6 @@ function PropertiesPage({ setPage }) {
 
   const SALE_PORTALS = [
     { label: "Search All MLS Listings", url: "https://www.dreamhomerealtyhawaii.com/property-search", primary: true, icon: <Search size={14} /> },
-    { label: "Featured Listing", url: "https://portal.onehome.com/en-US/share/1039187l44771", icon: <Star size={14} /> },
-    { label: "New Apts & Townhomes", url: "https://tr.ee/TD4XEaS8fj", icon: <Building size={14} /> },
-    { label: "New Single Family Homes", url: "https://tr.ee/genAf8Ucfz", icon: <HomeIcon size={14} /> },
     { label: "Open Houses This Week", url: "https://propertysearch.hicentral.com/HBR/OpenHouses/?/Results/HotSheet/d///", icon: <Calendar size={14} /> },
   ];
 
@@ -1273,7 +1267,7 @@ function PropertiesPage({ setPage }) {
               <a href="https://propertysearch.hicentral.com/HBR/OpenHouses/?/Results/HotSheet/d///" target="_blank" rel="noopener noreferrer" className="btn-outline" style={{ padding: "10px 16px", textDecoration: "none", fontSize: 11, display: "inline-flex", alignItems: "center", gap: 6, borderRadius: 8 }}>
                 <Calendar size={13} /> Open Houses
               </a>
-              <a href="https://portal.onehome.com/en-US/share/1039187l44771" target="_blank" rel="noopener noreferrer" className="btn-outline" style={{ padding: "10px 16px", textDecoration: "none", fontSize: 11, display: "inline-flex", alignItems: "center", gap: 6, borderRadius: 8 }}>
+              <a href="https://www.dreamhomerealtyhawaii.com/property-search" target="_blank" rel="noopener noreferrer" className="btn-outline" style={{ padding: "10px 16px", textDecoration: "none", fontSize: 11, display: "inline-flex", alignItems: "center", gap: 6, borderRadius: 8 }}>
                 <Search size={13} /> Full MLS Search
               </a>
             </div>
