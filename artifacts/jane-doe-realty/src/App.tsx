@@ -527,7 +527,6 @@ function Nav({ page, setPage }) {
       label: "More", children: [
         { label: "Real Talk with Mel", page: "blog" },
         { label: "Market Insights", page: "market" },
-        { label: "Meet the Firm", page: "about" },
       ]
     },
   ];
@@ -2948,7 +2947,6 @@ function Footer({ setPage }) {
             { label: "Seller's Experience", page: "sellers" },
             { label: "Home Valuation", page: "valuation" },
             { label: "Relocation Guide", page: "relocation" },
-            { label: "Meet the Firm", page: "about" },
           ].map((link, i) => (
             <button key={i} onClick={() => go(link.page)} style={{
               display: "block", background: "none", border: "none", color: BRAND.textMuted, cursor: "pointer",
