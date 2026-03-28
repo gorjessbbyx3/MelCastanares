@@ -790,13 +790,11 @@ function HomePage({ setPage }) {
                 boxShadow: `0 40px 100px rgba(0,0,0,0.22), 0 0 0 1px ${BRAND.gold}30`,
                 aspectRatio: "9/16", maxHeight: 680,
               }}>
-                <video
-                  autoPlay muted loop playsInline
-                  style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-                  onError={e => { (e.currentTarget as HTMLVideoElement).style.display = "none"; }}
-                >
-                  <source src="/images/about-mel.mp4" type="video/mp4" />
-                </video>
+                <img
+                  src="/images/mel-headshot.jpg"
+                  alt="Mel Castanares"
+                  style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top", display: "block" }}
+                />
                 {/* Name tag overlay */}
                 <div style={{
                   position: "absolute", bottom: 24, left: 24, right: 24,
@@ -1427,19 +1425,11 @@ function AboutPage({ setPage }) {
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 64, alignItems: "center" }}>
           <Reveal direction="right">
             <div style={{ position: "relative", borderRadius: 20, overflow: "hidden", boxShadow: `0 32px 80px rgba(0,0,0,0.16), 0 0 0 1px ${BRAND.gold}22` }}>
-              <video
-                autoPlay muted loop playsInline
-                style={{ width: "100%", aspectRatio: "3/4", objectFit: "cover", display: "block" }}
-                onError={e => {
-                  const vid = e.currentTarget as HTMLVideoElement;
-                  vid.style.display = "none";
-                  (vid.nextElementSibling as HTMLElement).style.display = "block";
-                }}
-              >
-                <source src="/images/about-mel.mp4" type="video/mp4" />
-              </video>
-              {/* Fallback headshot if video fails */}
-              <img src={agent.photoUrl || agent.photo || FALLBACK_AGENT.photo} alt="Mel Castanares" style={{ display: "none", width: "100%", aspectRatio: "3/4", objectFit: "cover" }} />
+              <img
+                src="/images/mel-headshot.jpg"
+                alt="Mel Castanares"
+                style={{ width: "100%", aspectRatio: "3/4", objectFit: "cover", objectPosition: "center top", display: "block" }}
+              />
               <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 100, background: "linear-gradient(to bottom, transparent, rgba(27,42,51,0.6))", pointerEvents: "none" }} />
               <div style={{ position: "absolute", bottom: 20, left: 20, color: "#fff" }}>
                 <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", opacity: 0.9 }}>Mel Castanares</div>
@@ -1818,55 +1808,66 @@ function BlogPage({ setPage }) {
                 <Instagram size={14} /> @__mellio
               </a>
             </div>
-            {/* Styled Instagram profile card — iframes blocked by Instagram policy */}
-            <a href="https://www.instagram.com/__mellio" target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none", display: "block" }}>
-              <div style={{
-                background: BRAND.bgCard, border: `1px solid ${BRAND.border}`,
-                borderRadius: 16, overflow: "hidden",
-                boxShadow: "0 8px 40px rgba(0,0,0,0.06)",
-                transition: "box-shadow 0.3s, transform 0.3s",
-                display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-              }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.boxShadow = "0 16px 60px rgba(0,0,0,0.12)"; (e.currentTarget as HTMLElement).style.transform = "translateY(-4px)"; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 40px rgba(0,0,0,0.06)"; (e.currentTarget as HTMLElement).style.transform = "translateY(0)"; }}
-              >
-                {/* Profile info panel */}
-                <div style={{ padding: "40px 48px", display: "flex", flexDirection: "column", justifyContent: "center", gap: 20 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-                    <div style={{ width: 64, height: 64, borderRadius: "50%", background: `linear-gradient(135deg, ${BRAND.gold}, ${BRAND.teal})`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                      <span className="font-display" style={{ color: "#fff", fontSize: 22 }}>M</span>
-                    </div>
-                    <div>
-                      <div style={{ fontWeight: 700, fontSize: 15, color: BRAND.text }}>@__mellio</div>
-                      <div style={{ color: BRAND.textMuted, fontSize: 12, marginTop: 2 }}>Mel Castanares · REALTOR®</div>
-                    </div>
+            {/* Instagram — split: embedded reel on left, profile card on right */}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 24, alignItems: "start" }}>
+              {/* Embedded reel iframe */}
+              <div style={{ background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, borderRadius: 16, overflow: "hidden", boxShadow: "0 8px 32px rgba(0,0,0,0.07)" }}>
+                <div style={{ background: "#000", padding: "10px 16px", display: "flex", alignItems: "center", gap: 10 }}>
+                  <div style={{ width: 28, height: 28, borderRadius: "50%", background: "linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <Instagram size={14} color="#fff" />
                   </div>
-                  <p style={{ color: BRAND.textMuted, fontSize: 14, lineHeight: 1.7, margin: 0 }}>
-                    Real estate tips, market updates, and life in Hawai'i 🌺 — O'ahu REALTOR® helping families find their place in paradise.
-                  </p>
-                  <div style={{ display: "flex", gap: 32 }}>
-                    {[{ label: "Posts", val: "120+" }, { label: "Followers", val: "2.4K" }, { label: "Following", val: "842" }].map((s, i) => (
-                      <div key={i} style={{ textAlign: "center" }}>
-                        <div className="font-display" style={{ fontSize: 18, color: BRAND.text }}>{s.val}</div>
-                        <div style={{ fontSize: 10, color: BRAND.textDim, letterSpacing: "0.1em", textTransform: "uppercase" }}>{s.label}</div>
-                      </div>
-                    ))}
-                  </div>
-                  <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: `linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045)`, color: "#fff", padding: "12px 24px", borderRadius: 8, fontSize: 12, fontWeight: 600, width: "fit-content" }}>
-                    <Instagram size={14} /> View Profile on Instagram
-                  </div>
+                  <span style={{ color: "#fff", fontSize: 13, fontWeight: 600 }}>@__mellio</span>
                 </div>
-                {/* Preview grid panel */}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 2 }}>
-                  {["/images/mel-showing.jpg", "/images/hero-diamondhead.jpg", "/images/mel-headshot.jpg",
-                    "/images/testimonial-sold.jpg", "/images/mel-showing.jpg", "/images/hero-diamondhead.jpg"].map((src, i) => (
-                    <div key={i} style={{ aspectRatio: "1", overflow: "hidden", background: BRAND.bgElevated }}>
-                      <img src={src} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", filter: i % 2 === 1 ? "brightness(0.9)" : "none" }} />
-                    </div>
-                  ))}
+                <div style={{ position: "relative", paddingBottom: "177%", height: 0, overflow: "hidden" }}>
+                  <iframe
+                    src="https://www.instagram.com/reel/DWQWkHZgg2j/embed"
+                    style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", border: "none" }}
+                    allowFullScreen
+                    loading="lazy"
+                    title="Mel Castanares Instagram Reel"
+                  />
                 </div>
               </div>
-            </a>
+
+              {/* Profile card */}
+              <a href="https://www.instagram.com/__mellio" target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none", display: "block" }}>
+                <div style={{
+                  background: BRAND.bgCard, border: `1px solid ${BRAND.border}`,
+                  borderRadius: 16, overflow: "hidden",
+                  boxShadow: "0 8px 32px rgba(0,0,0,0.07)",
+                  transition: "box-shadow 0.25s, transform 0.25s",
+                }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.boxShadow = "0 16px 56px rgba(0,0,0,0.13)"; (e.currentTarget as HTMLElement).style.transform = "translateY(-3px)"; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 32px rgba(0,0,0,0.07)"; (e.currentTarget as HTMLElement).style.transform = "translateY(0)"; }}
+                >
+                  {/* Header gradient */}
+                  <div style={{ height: 80, background: "linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%)", position: "relative" }}>
+                    <div style={{ position: "absolute", bottom: -32, left: 24, width: 64, height: 64, borderRadius: "50%", border: "3px solid #fff", overflow: "hidden", boxShadow: "0 4px 12px rgba(0,0,0,0.15)" }}>
+                      <img src="/images/mel-headshot.jpg" alt="Mel" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top" }} />
+                    </div>
+                  </div>
+                  <div style={{ padding: "44px 24px 28px" }}>
+                    <div style={{ fontWeight: 700, fontSize: 16, color: BRAND.text, marginBottom: 2 }}>__mellio</div>
+                    <div style={{ color: BRAND.textMuted, fontSize: 13, marginBottom: 14 }}>Mel Castanares · REALTOR® · Dream Home Realty Hawai'i</div>
+                    <p style={{ color: BRAND.textMuted, fontSize: 13, lineHeight: 1.65, marginBottom: 20 }}>
+                      Real estate tips, market updates, and life in Hawai'i 🌺 O'ahu REALTOR® helping families find their place in paradise.
+                    </p>
+                    {/* Photo grid preview */}
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 2, marginBottom: 20, borderRadius: 8, overflow: "hidden" }}>
+                      {["/images/mel-headshot.jpg", "/images/hero-diamondhead.jpg", "/images/mel-showing.jpg",
+                        "/images/testimonial-sold.jpg", "/images/mel-headshot.jpg", "/images/hero-diamondhead.jpg"].map((src, i) => (
+                        <div key={i} style={{ aspectRatio: "1", overflow: "hidden", background: BRAND.bgElevated }}>
+                          <img src={src} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                        </div>
+                      ))}
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: "linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045)", color: "#fff", padding: "11px 20px", borderRadius: 8, fontSize: 12, fontWeight: 600 }}>
+                      <Instagram size={14} /> Follow @__mellio
+                    </div>
+                  </div>
+                </div>
+              </a>
+            </div>
             <p style={{ color: BRAND.textDim, fontSize: 13, marginTop: 20, textAlign: "center" }}>
               Market updates, listings, and O'ahu life — follow <a href="https://www.instagram.com/__mellio" target="_blank" rel="noopener noreferrer" style={{ color: BRAND.teal, textDecoration: "none", fontWeight: 600 }}>@__mellio</a> on Instagram.
             </p>
