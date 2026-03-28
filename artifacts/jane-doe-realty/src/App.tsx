@@ -121,7 +121,7 @@ const FALLBACK_AGENT = {
 const FALLBACK_PROPERTIES: any[] = [];
 
 const FALLBACK_NEIGHBORHOODS = [
-  { id: "mililani", name: "Mililani", tagline: "Mel's home turf · Best schools on O'ahu", description: "Central O'ahu's crown jewel — Mililani is a master-planned community built for families. Top-ranked schools (Mililani High, Mililani Uka Elementary), 23 parks, 7 recreation centers, and HOA-maintained common areas make it one of the most livable communities in the state. Easy H-2 freeway access puts downtown Honolulu 30 minutes away. Mel grew up in Central O'ahu and knows every street, school district, and neighborhood park here. Median prices range from $600K (townhomes) to $900K+ (single-family). A perennial seller's market due to limited inventory and strong demand from families.", coverImage: "https://www.wilkow.com/wp-content/uploads/2024/10/HI-Town-Center-of-Mililani-main_0-copy.webp", images: [{url: "https://www.wilkow.com/wp-content/uploads/2024/10/HI-Town-Center-of-Mililani-main_0-copy.webp", isPrimary: true}, {url: "https://locationsimages.s3.us-west-1.amazonaws.com/blog/Mililani001.jpg?w=800", isPrimary: false}, {url: "https://www.chronogolf.com/_next/image?url=https%3A%2F%2Fcdn2.chronogolf.com%2F5mfwz6srouco3icuvcgkll11dp8w&w=3840&q=75", isPrimary: false}], medianHomePrice: "$820K", growth: "+4.8%", highlights: ["Top-Rated Schools", "23 Parks", "Family-Friendly", "Master-Planned"] },
+  { id: "mililani", name: "Mililani", tagline: "Mel's home turf · Best schools on O'ahu", description: "Central O'ahu's crown jewel — Mililani is a master-planned community built for families. Top-ranked schools, 15+ neighborhood parks, multiple rec centers with pools and waterslides, and HOA-maintained open spaces make it one of the most livable communities in the state. Easy H-2 freeway access puts downtown Honolulu 30 minutes away. Mel grew up in Central O'ahu and knows every street, school district, and park here.", longDesc: "Mililani is Central O'ahu's crown jewel — a master-planned community that was built with families in mind from the ground up, and it shows in every detail.\n\nSafety & Community: Low crime rates, tree-lined streets with sidewalks, and a strong suburban community vibe. Neighbors know each other. Kids ride bikes and walk to school. It feels the way neighborhoods are supposed to feel.\n\nTop-Rated Schools: Mililani High School consistently ranks among the best public high schools on O'ahu. Mililani Uka, Mililani Waena, and Mililani Mauka elementaries all feed into a strong pipeline that families plan their moves around.\n\nRecreation Like Nowhere Else: 15+ neighborhood parks, multiple community recreation centers, swimming pools with waterslides, tennis courts, jogging paths, and open green spaces. The rec centers are a huge draw — your kids will spend entire summers there.\n\nCooler & Greener: Sitting at roughly 600 feet elevation, Mililani stays noticeably cooler than Honolulu. The area is lush, planned with open spaces and greenery that make it feel like you're living inside a park.\n\nCentral Location: Quick H-2 freeway access to Honolulu (30 min), the North Shore (25 min), military bases, major shopping, and Waikele Premium Outlets. You're central to everything without being in the middle of the urban congestion.\n\nMaster-Planned with a Community Association: HOA maintains common areas, amenities, and neighborhood standards. That consistency is a big reason why Mililani holds its value so well — and why Mel recommends it to almost every family relocating to O'ahu.", coverImage: "https://www.wilkow.com/wp-content/uploads/2024/10/HI-Town-Center-of-Mililani-main_0-copy.webp", images: [{url: "https://www.wilkow.com/wp-content/uploads/2024/10/HI-Town-Center-of-Mililani-main_0-copy.webp", isPrimary: true}, {url: "https://i.imgur.com/QimGY.jpg", isPrimary: false}, {url: "https://i.imgur.com/r8Ig7.jpg", isPrimary: false}, {url: "https://i.imgur.com/a909V.jpg", isPrimary: false}, {url: "https://i.imgur.com/L9kYq.jpg", isPrimary: false}, {url: "https://i.imgur.com/Y8tIN.jpg", isPrimary: false}, {url: "https://i.imgur.com/mkVuG.jpg", isPrimary: false}, {url: "https://i.imgur.com/Aecsu.jpg", isPrimary: false}, {url: "https://i.imgur.com/PslwA.jpg", isPrimary: false}, {url: "https://i.imgur.com/Z0xyN.jpg", isPrimary: false}, {url: "https://i.imgur.com/ZKE15.jpg", isPrimary: false}], medianHomePrice: "$820K", growth: "+4.8%", highlights: ["Top-Rated Schools", "15+ Parks", "Rec Centers & Pools", "Family-Friendly", "Master-Planned", "Cooler Elevation", "Central O'ahu"], schools: "Mililani High School (top-ranked on O'ahu), Mililani Uka Elementary, Mililani Waena Elementary, Mililani Mauka Elementary, Mililani Middle School. All within the neighborhood — most kids can walk.", dining: "Mililani Shopping Center, Waikele Premium Outlets (10 min), Costco, Target, Times Supermarket, and a growing restaurant corridor along Kamehameha Hwy. Everything you need is within a 10-minute drive.", thingsToDo: "15+ neighborhood parks including Mililani District Park, 7 recreation centers with swimming pools, waterslides, tennis courts, and fitness facilities, jogging/biking paths throughout the community, easy freeway access to North Shore surf beaches, Pearl Harbor historic sites, and Waipio Valley lookout." },
   { id: "ewa-beach", name: "Ewa Beach / Kapolei", tagline: "O'ahu's fastest-growing 'second city'", description: "The west side is booming — and for good reason. Newer construction, more space per dollar, and a rapidly expanding infrastructure (restaurants, Target, Costco, soon the rail) make Ewa Beach and Kapolei the best value on island right now. Single-family homes from $700K–$1.1M. Great schools, beach parks, and a strong sense of community. Mel has helped dozens of families make the move west and knows which streets, builders, and HOAs are worth your time. This is where savvy buyers are investing right now.", coverImage: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1400&q=85", images: [{url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1400&q=85", isPrimary: true}], medianHomePrice: "$780K", growth: "+6.2%", highlights: ["New Construction", "Rail Access", "Great Value", "Growing Infrastructure"] },
   { id: "pearl-city", name: "Pearl City / Aiea", tagline: "Central location, unbeatable convenience", description: "Sitting at the geographic center of O'ahu, Pearl City and Aiea offer the perfect balance of affordability and access. Quick freeway on-ramps to every part of the island, the Pearl Highlands shopping center, and strong public schools. Condos from $350K–$600K; single-family from $750K+. Great for first-time buyers who want more home for their money without sacrificing convenience. Mel specializes in this corridor and has extensive knowledge of the condo market here.", coverImage: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1400&q=85", images: [{url: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1400&q=85", isPrimary: true}], medianHomePrice: "$620K", growth: "+3.9%", highlights: ["Central Location", "Freeway Access", "First-Time Buyers", "Condo Value"] },
   { id: "kaneohe", name: "Kāne'ohe", tagline: "Lush windward living · Cooler & greener", description: "Known for cooler weather and peaceful neighborhoods on the windward side. Sandbar adventures, botanical gardens, and breathtaking mountain ridges. Mel has helped multiple families find rental investments and primary homes in this community. Local tips: the Kāne'ohe sandbar is life-changing, and the morning drive over the Pali is one of the most scenic in the world.", coverImage: "https://images.unsplash.com/photo-1598135753163-6167c1a1ad65?w=1400&q=85", images: [{url: "https://images.unsplash.com/photo-1598135753163-6167c1a1ad65?w=1400&q=85", isPrimary: true}], medianHomePrice: "$890K", growth: "+3.5%", highlights: ["Cooler Climate", "Windward Side", "Mountain Views", "Rental Potential"] },
@@ -958,7 +958,11 @@ function HomePage({ setPage }) {
       </section>
 
       {/* NEIGHBORHOODS — interactive showcase */}
-      <NeighborhoodShowcase neighborhoods={nResp?.neighborhoods || FALLBACK_NEIGHBORHOODS} onNavigate={() => go("neighborhoods")} />
+      <NeighborhoodShowcase
+        neighborhoods={nResp?.neighborhoods || FALLBACK_NEIGHBORHOODS}
+        onNavigate={() => go("neighborhoods")}
+        onNavigateDetail={(n) => { window.__selectedNeighborhood = n; go("neighborhood-detail"); }}
+      />
 
       {/* TESTIMONIALS */}
       <section className="section-pad" style={{ overflow: "hidden" }}>
@@ -1018,13 +1022,16 @@ function HomePage({ setPage }) {
 // NEIGHBORHOOD SHOWCASE
 // ─────────────────────────────────────────────
 
-function NeighborhoodShowcase({ neighborhoods = [], onNavigate }: { neighborhoods: any[]; onNavigate: () => void }) {
+function NeighborhoodShowcase({ neighborhoods = [], onNavigate, onNavigateDetail }: { neighborhoods: any[]; onNavigate: () => void; onNavigateDetail: (n: any) => void }) {
   const [active, setActive] = useState(0);
   const [fading, setFading] = useState(false);
   const items = neighborhoods.slice(0, 8);
 
   const handleSelect = (i: number) => {
-    if (i === active) return;
+    if (i === active) {
+      onNavigateDetail(items[i]);
+      return;
+    }
     setFading(true);
     setTimeout(() => { setActive(i); setFading(false); }, 260);
   };
@@ -1114,7 +1121,7 @@ function NeighborhoodShowcase({ neighborhoods = [], onNavigate }: { neighborhood
                 ))}
               </div>
             )}
-            <button onClick={onNavigate} style={{
+            <button onClick={() => onNavigateDetail(n)} style={{
               display: "inline-flex", alignItems: "center", gap: 8,
               background: BRAND.gold, color: "#fff", border: "none",
               padding: "12px 28px", fontSize: 11, fontWeight: 700,
@@ -1759,8 +1766,40 @@ function NeighborhoodDetailPage({ setPage }) {
         {/* About */}
         <Reveal delay={0.1}>
           <h2 className="font-display" style={{ fontSize: 32, marginBottom: 16 }}>Living in {n.name}</h2>
-          <p style={{ color: BRAND.textMuted, fontSize: 16, lineHeight: 1.9, marginBottom: 48, maxWidth: 800 }}>{n.longDesc || n.description}</p>
+          <div style={{ color: BRAND.textMuted, fontSize: 16, lineHeight: 1.9, marginBottom: 48, maxWidth: 800 }}>
+            {(n.longDesc || n.description).split("\n\n").map((para: string, i: number) => (
+              <p key={i} style={{ marginBottom: 20 }}>
+                {para.includes(":") && !para.startsWith("Mel") ? (
+                  <>
+                    <strong style={{ color: BRAND.text }}>{para.split(":")[0]}:</strong>
+                    {para.slice(para.indexOf(":") + 1)}
+                  </>
+                ) : para}
+              </p>
+            ))}
+          </div>
         </Reveal>
+
+        {/* Photo gallery */}
+        {n.images && n.images.length > 1 && (
+          <Reveal delay={0.15}>
+            <h2 className="font-display" style={{ fontSize: 28, marginBottom: 20 }}>Photo Gallery</h2>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 12, marginBottom: 56 }}>
+              {n.images.map((img: any, i: number) => (
+                <div key={i} style={{ aspectRatio: "4/3", overflow: "hidden", borderRadius: 10, background: BRAND.bgElevated }}>
+                  <img
+                    src={img.url}
+                    alt={`${n.name} ${i + 1}`}
+                    style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", transition: "transform 0.4s" }}
+                    onMouseEnter={e => (e.currentTarget.style.transform = "scale(1.05)")}
+                    onMouseLeave={e => (e.currentTarget.style.transform = "scale(1)")}
+                    onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+                  />
+                </div>
+              ))}
+            </div>
+          </Reveal>
+        )}
 
         {/* Info grid */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 24, marginBottom: 48 }}>
