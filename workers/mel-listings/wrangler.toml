@@ -1,0 +1,15 @@
+name = "mel-listings"
+main = "src/index.js"
+compatibility_date = "2024-12-01"
+
+# Cron: scrape AppFolio every 5 hours
+[triggers]
+crons = ["0 0,5,10,15,20 * * *"]
+
+# KV namespace for caching scraped listings.
+# To set up:
+#   1. Run: wrangler kv:namespace create LISTINGS_CACHE
+#   2. Copy the printed id into the line below.
+[[kv_namespaces]]
+binding = "LISTINGS_CACHE"
+id = "REPLACE_WITH_YOUR_KV_NAMESPACE_ID"

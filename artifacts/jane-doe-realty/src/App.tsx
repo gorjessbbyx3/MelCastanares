@@ -1154,12 +1154,16 @@ function PropertyCard({ property: p, onClick }) {
 
 function PropertiesPage({ setPage }) {
   const [tab, setTab] = useState<"sale" | "rental">("sale");
+  const [filter, setFilter] = useState<{ status: string; type: string }>({ status: "", type: "" });
   const [rentals, setRentals] = useState<any[]>([]);
   const [rentalsLoading, setRentalsLoading] = useState(true);
   const [rentalsError, setRentalsError] = useState<string | null>(null);
 
+  // Sale properties are browsed via MLS portals — not stored here
+  const filtered = useMemo<any[]>(() => [], []);
+
   useEffect(() => {
-    // Fetch live rentals via Cloudflare Pages Function proxy → AppFolio
+    // Fetch live rentals from Express /api/rentals → AppFolio scrape (5-hour cache)
     api.getRentals()
       .then((data: any) => {
         if (!data) throw new Error("No response");
@@ -1213,7 +1217,11 @@ function PropertiesPage({ setPage }) {
             </div>
             <div>
               <label style={{ fontSize: 11, color: BRAND.textDim, letterSpacing: "0.1em", textTransform: "uppercase", display: "block", marginBottom: 6 }}>Type</label>
-              <select className="input-custom" style={{ maxWidth: 180 }} value={filter.type} onChange={e => setFilter(f => ({ ...f, type: e.target.value }))}>
+              <select className="input-custom" style={{ maxWidth: 180 }} value={filter.type} onChange={e => {
+                const type = e.target.value;
+                setFilter(f => ({ ...f, type }));
+                setTab(type === "rental" ? "rental" : "sale");
+              }}>
                 <option value="">All Types</option>
                 <option value="rental">Rentals</option>
                 <option value="single_family">Single Family</option>
