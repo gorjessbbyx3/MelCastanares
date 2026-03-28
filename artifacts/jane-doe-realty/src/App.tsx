@@ -866,28 +866,33 @@ function HomePage({ setPage }) {
             ))}
           </div>
         ) : (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 16 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 20 }}>
             {[
-              { label: "Search All MLS Listings", sub: "Dream Home Realty Hawaii", url: "https://www.dreamhomerealtyhawaii.com/property-search", accent: BRAND.teal },
-              { label: "Featured Listing", sub: "OneHome portal", url: "https://portal.onehome.com/en-US/share/1039187l44771", accent: BRAND.gold },
-              { label: "New Apts & Townhomes", sub: "Newly listed", url: "https://tr.ee/TD4XEaS8fj", accent: BRAND.teal },
-              { label: "New Single Family Homes", sub: "Newly listed", url: "https://tr.ee/genAf8Ucfz", accent: BRAND.gold },
-              { label: "Available Rentals", sub: "AppFolio listings", url: "https://dreamhomerlty.appfolio.com/listings/", accent: BRAND.teal },
-              { label: "Open Houses", sub: "HiCentral schedule", url: "https://propertysearch.hicentral.com/HBR/OpenHouses/?/Results/HotSheet/d///", accent: BRAND.gold },
+              { label: "Search All MLS Listings", sub: "Updated daily from O'ahu MLS", url: "https://www.dreamhomerealtyhawaii.com/property-search", img: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&q=80" },
+              { label: "Featured Listing", sub: "Mel's hand-picked property", url: "https://portal.onehome.com/en-US/share/1039187l44771", img: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80" },
+              { label: "New Apts & Townhomes", sub: "Newly listed condos & townhomes", url: "https://tr.ee/TD4XEaS8fj", img: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80" },
+              { label: "New Single Family Homes", sub: "Newly listed homes", url: "https://tr.ee/genAf8Ucfz", img: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=800&q=80" },
+              { label: "Available Rentals", sub: "Managed by Dream Home Realty", url: "https://dreamhomerlty.appfolio.com/listings/", img: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80" },
+              { label: "Open Houses", sub: "This week on O'ahu", url: "https://propertysearch.hicentral.com/HBR/OpenHouses/?/Results/HotSheet/d///", img: "https://images.unsplash.com/photo-1507089947368-19c1da9775ae?w=800&q=80" },
             ].map((item, i) => (
               <Reveal key={item.label} delay={i * 0.07} direction="up">
                 <a href={item.url} target="_blank" rel="noopener noreferrer" style={{
-                  display: "flex", flexDirection: "column", gap: 8, padding: "24px 20px",
-                  background: BRAND.bgCard, border: `1px solid ${BRAND.border}`,
-                  textDecoration: "none", transition: "box-shadow 0.2s, border-color 0.2s", height: "100%",
+                  display: "block", position: "relative", overflow: "hidden",
+                  aspectRatio: "4/3", textDecoration: "none",
+                  boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+                  transition: "transform 0.25s, box-shadow 0.25s",
                 }}
-                onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = item.accent; (e.currentTarget as HTMLAnchorElement).style.boxShadow = `0 6px 24px rgba(0,0,0,0.08)`; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = BRAND.border; (e.currentTarget as HTMLAnchorElement).style.boxShadow = "none"; }}>
-                  <div style={{ width: 32, height: 3, background: item.accent, marginBottom: 4 }} />
-                  <div style={{ fontSize: 15, fontWeight: 700, color: BRAND.text, lineHeight: 1.3 }}>{item.label}</div>
-                  <div style={{ fontSize: 12, color: BRAND.textDim, flex: 1 }}>{item.sub}</div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 4, color: item.accent, fontSize: 11, fontWeight: 600, marginTop: 4 }}>
-                    View ↗
+                onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.transform = "translateY(-4px)"; (e.currentTarget as HTMLAnchorElement).style.boxShadow = "0 16px 48px rgba(0,0,0,0.2)"; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.transform = "translateY(0)"; (e.currentTarget as HTMLAnchorElement).style.boxShadow = "0 4px 20px rgba(0,0,0,0.1)"; }}>
+                  {/* Background photo */}
+                  <img src={item.img} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                  {/* Dark gradient */}
+                  <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(5,5,5,0.85) 0%, rgba(5,5,5,0.2) 60%, transparent 100%)" }} />
+                  {/* Text */}
+                  <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "20px 22px" }}>
+                    <div style={{ color: "#fff", fontWeight: 700, fontSize: 15, fontFamily: "'DM Serif Display', Georgia, serif", marginBottom: 4, lineHeight: 1.2 }}>{item.label}</div>
+                    <div style={{ color: "rgba(255,255,255,0.65)", fontSize: 11 }}>{item.sub}</div>
+                    <div style={{ color: BRAND.gold, fontSize: 11, fontWeight: 600, marginTop: 8 }}>View ↗</div>
                   </div>
                 </a>
               </Reveal>
@@ -957,116 +962,115 @@ function HomePage({ setPage }) {
 // NEIGHBORHOOD SHOWCASE
 // ─────────────────────────────────────────────
 
-function NeighborhoodCard({ neighborhood: n, index, onNavigate }: { neighborhood: any; index: number; onNavigate: () => void }) {
-  const [imgIdx, setImgIdx] = useState(0);
-  const imgs: any[] = n.images && n.images.length > 0 ? n.images : (n.coverImage ? [{ url: n.coverImage }] : []);
-  const imgUrl = imgs[imgIdx]?.url || n.coverImage || "";
-
-  return (
-    <Reveal delay={index * 0.07} direction="up">
-      <div
-        onClick={onNavigate}
-        style={{
-          cursor: "pointer", borderRadius: 12, overflow: "hidden",
-          border: `1px solid ${BRAND.border}`, background: BRAND.bgCard,
-          transition: "box-shadow 0.25s, transform 0.25s",
-          boxShadow: "0 4px 20px rgba(0,0,0,0.06)",
-        }}
-        onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.boxShadow = "0 16px 48px rgba(0,0,0,0.14)"; (e.currentTarget as HTMLDivElement).style.transform = "translateY(-4px)"; }}
-        onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.boxShadow = "0 4px 20px rgba(0,0,0,0.06)"; (e.currentTarget as HTMLDivElement).style.transform = "translateY(0)"; }}>
-        {/* Photo */}
-        <div style={{ position: "relative", aspectRatio: "4/3", overflow: "hidden" }}>
-          <img
-            src={imgUrl}
-            alt={n.name}
-            style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", transition: "opacity 0.3s" }}
-            onError={e => { (e.currentTarget as HTMLImageElement).style.opacity = "0"; }}
-          />
-          {/* Gradient */}
-          <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "55%", background: "linear-gradient(to top, rgba(0,0,0,0.72) 0%, transparent 100%)", pointerEvents: "none" }} />
-          {/* Name overlay */}
-          <div style={{ position: "absolute", bottom: 14, left: 16, right: imgs.length > 1 ? 80 : 16, pointerEvents: "none" }}>
-            <div style={{ color: "#fff", fontWeight: 700, fontSize: 18, fontFamily: "'DM Serif Display', Georgia, serif", lineHeight: 1.2 }}>{n.name}</div>
-            <div style={{ color: BRAND.gold, fontSize: 11, marginTop: 3, fontWeight: 500 }}>{n.tagline}</div>
-          </div>
-          {/* Slideshow controls */}
-          {imgs.length > 1 && (
-            <>
-              <button
-                onClick={e => { e.stopPropagation(); setImgIdx((imgIdx - 1 + imgs.length) % imgs.length); }}
-                style={{ position: "absolute", left: 8, bottom: 16, width: 28, height: 28, borderRadius: "50%", background: "rgba(0,0,0,0.55)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff" }}>
-                <ArrowLeft size={12} />
-              </button>
-              <button
-                onClick={e => { e.stopPropagation(); setImgIdx((imgIdx + 1) % imgs.length); }}
-                style={{ position: "absolute", right: 8, bottom: 16, width: 28, height: 28, borderRadius: "50%", background: "rgba(0,0,0,0.55)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff" }}>
-                <ArrowRight size={12} />
-              </button>
-              {/* Dot indicators */}
-              <div style={{ position: "absolute", top: 10, right: 10, display: "flex", gap: 4 }}>
-                {imgs.map((_, i) => (
-                  <div key={i} onClick={e => { e.stopPropagation(); setImgIdx(i); }} style={{ width: i === imgIdx ? 16 : 6, height: 6, borderRadius: 3, background: i === imgIdx ? BRAND.gold : "rgba(255,255,255,0.6)", transition: "width 0.2s", cursor: "pointer" }} />
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-        {/* Info row */}
-        <div style={{ padding: "16px 18px 18px" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: n.highlights ? 10 : 0 }}>
-            <div>
-              <div style={{ fontSize: 11, color: BRAND.textDim, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 2 }}>Median Price</div>
-              <div style={{ fontSize: 16, fontWeight: 700, color: BRAND.text }}>{n.medianHomePrice || "—"}</div>
-            </div>
-            {n.growth && (
-              <div style={{ textAlign: "right" }}>
-                <div style={{ fontSize: 11, color: BRAND.textDim, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 2 }}>YoY</div>
-                <div style={{ fontSize: 14, fontWeight: 700, color: BRAND.teal }}>{n.growth}</div>
-              </div>
-            )}
-          </div>
-          {n.highlights && n.highlights.length > 0 && (
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
-              {n.highlights.slice(0, 2).map((h: string) => (
-                <span key={h} style={{ fontSize: 10, padding: "3px 9px", border: `1px solid ${BRAND.border}`, color: BRAND.textMuted, background: BRAND.bgElevated, borderRadius: 2 }}>{h}</span>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-    </Reveal>
-  );
-}
-
 function NeighborhoodShowcase({ neighborhoods = [], onNavigate }: { neighborhoods: any[]; onNavigate: () => void }) {
+  const [active, setActive] = useState(0);
+  const [fading, setFading] = useState(false);
   const items = neighborhoods.slice(0, 8);
 
+  const handleSelect = (i: number) => {
+    if (i === active) return;
+    setFading(true);
+    setTimeout(() => { setActive(i); setFading(false); }, 260);
+  };
+
+  const n = items[active] || {};
+  const imgUrl = n.coverImage || n.images?.[0]?.url || n.img || "";
+  const highlights: string[] = n.highlights || [];
+
   return (
-    <section style={{ background: BRAND.bgLight, borderTop: `1px solid ${BRAND.border}`, paddingBottom: 80 }}>
-      {/* Header */}
+    <section style={{ background: BRAND.bgLight, borderTop: `1px solid ${BRAND.border}` }}>
+      {/* Section header */}
       <div className="section-pad" style={{ paddingBottom: 0, textAlign: "center" }}>
         <Reveal>
           <div style={{ color: BRAND.teal, fontSize: 11, letterSpacing: "0.28em", textTransform: "uppercase", marginBottom: 12, fontWeight: 600 }}>Explore O'ahu</div>
-          <h2 className="font-display" style={{ fontSize: "clamp(32px, 4vw, 48px)", marginBottom: 12 }}>
+          <h2 className="font-display" style={{ fontSize: "clamp(32px, 4vw, 48px)", marginBottom: 48 }}>
             Find Your <em style={{ color: BRAND.gold }}>Neighborhood</em>
           </h2>
-          <p style={{ color: BRAND.textMuted, fontSize: 14, maxWidth: 440, margin: "0 auto 48px" }}>
-            From surf-town vibes to master-planned family havens — explore every corner of O'ahu
-          </p>
         </Reveal>
       </div>
 
-      {/* Cards grid */}
-      <div className="section-pad" style={{ paddingTop: 0 }}>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 24 }}>
-          {items.map((n, i) => (
-            <NeighborhoodCard key={n.id || i} neighborhood={n} index={i} onNavigate={onNavigate} />
+      {/* Split layout */}
+      <div className="nh-split" style={{ display: "flex", minHeight: 560, maxWidth: 1400, margin: "0 auto", overflow: "hidden" }}>
+        {/* Left — neighborhood list */}
+        <div className="nh-list" style={{
+          width: "clamp(220px, 30%, 320px)", flexShrink: 0,
+          background: BRAND.bg, borderRight: `1px solid ${BRAND.border}`,
+          overflowY: "auto",
+        }}>
+          {items.map((item, i) => (
+            <button
+              key={item.id}
+              onClick={() => handleSelect(i)}
+              style={{
+                display: "block", width: "100%", textAlign: "left",
+                padding: "20px 28px", border: "none",
+                borderLeft: i === active ? `3px solid ${BRAND.gold}` : "3px solid transparent",
+                cursor: "pointer", transition: "all 0.2s",
+                borderBottom: `1px solid ${BRAND.border}`,
+                background: i === active ? `${BRAND.gold}10` : "transparent",
+              }}
+              onMouseEnter={e => { if (i !== active) (e.currentTarget as HTMLButtonElement).style.background = BRAND.bgElevated; }}
+              onMouseLeave={e => { if (i !== active) (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
+            >
+              <div style={{
+                fontWeight: i === active ? 700 : 500, fontSize: 15,
+                color: i === active ? BRAND.gold : BRAND.text,
+                marginBottom: 3, transition: "color 0.2s",
+              }}>{item.name}</div>
+              <div style={{ fontSize: 11, color: BRAND.textMuted, lineHeight: 1.4 }}>{item.tagline}</div>
+            </button>
           ))}
         </div>
-        <div style={{ textAlign: "center", marginTop: 40 }}>
-          <button onClick={onNavigate} className="btn-outline" style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
-            View All Neighborhoods <ArrowRight size={14} />
-          </button>
+
+        {/* Right — image + info overlay */}
+        <div className="nh-img" style={{ flex: 1, position: "relative", minHeight: 520, overflow: "hidden" }}>
+          {/* Crossfading image */}
+          <div style={{
+            position: "absolute", inset: 0,
+            backgroundImage: imgUrl ? `url('${imgUrl}')` : "none",
+            backgroundSize: "cover", backgroundPosition: "center",
+            opacity: fading ? 0 : 1,
+            transition: "opacity 0.28s ease",
+          }} />
+          {/* Gradient overlay */}
+          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(5,5,5,0.92) 0%, rgba(5,5,5,0.3) 55%, transparent 100%)" }} />
+
+          {/* Info overlay */}
+          <div style={{
+            position: "absolute", bottom: 0, left: 0, right: 0, padding: "40px 48px",
+            opacity: fading ? 0 : 1, transition: "opacity 0.28s ease",
+          }}>
+            <div style={{ color: BRAND.gold, fontSize: 11, letterSpacing: "0.3em", textTransform: "uppercase", marginBottom: 10, fontWeight: 600 }}>
+              {n.medianHomePrice && `Median ${n.medianHomePrice}`}{n.growth && ` · ${n.growth} YoY`}
+            </div>
+            <h3 className="font-display" style={{ fontSize: "clamp(28px, 3.5vw, 44px)", color: "#fff", marginBottom: 10, lineHeight: 1.1 }}>{n.name}</h3>
+            <p style={{ color: "rgba(255,255,255,0.72)", fontSize: 14, marginBottom: 20, maxWidth: 480, lineHeight: 1.65 }}>{n.tagline}</p>
+            {highlights.length > 0 && (
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 28 }}>
+                {highlights.map(h => (
+                  <span key={h} style={{
+                    fontSize: 10, padding: "5px 12px",
+                    border: "1px solid rgba(255,255,255,0.25)",
+                    color: "rgba(255,255,255,0.85)", letterSpacing: "0.08em",
+                    background: "rgba(255,255,255,0.08)", backdropFilter: "blur(8px)",
+                  }}>{h}</span>
+                ))}
+              </div>
+            )}
+            <button onClick={onNavigate} style={{
+              display: "inline-flex", alignItems: "center", gap: 8,
+              background: BRAND.gold, color: "#fff", border: "none",
+              padding: "12px 28px", fontSize: 11, fontWeight: 700,
+              letterSpacing: "0.18em", textTransform: "uppercase",
+              cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+              transition: "background 0.2s",
+            }}
+              onMouseEnter={e => (e.currentTarget.style.background = BRAND.goldDark)}
+              onMouseLeave={e => (e.currentTarget.style.background = BRAND.gold)}
+            >
+              Explore {n.name} <ArrowRight size={12} />
+            </button>
+          </div>
         </div>
       </div>
     </section>
