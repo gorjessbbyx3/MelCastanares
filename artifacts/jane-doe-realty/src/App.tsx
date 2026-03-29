@@ -1370,14 +1370,6 @@ function PropertiesPage({ setPage }) {
             </div>
           </div>
         </Reveal>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: 24 }}>
-          {filtered.map((p, i) => (
-            <Reveal key={p.id} delay={i * 0.08} direction="up">
-              <PropertyCard property={p} onClick={() => { setPage("property-detail"); window.__selectedProperty = p; window.scrollTo({ top: 0, behavior: "smooth" }); }} />
-            </Reveal>
-          ))}
-        </div>
-
         {/* FOR SALE — realty.com scrape + Trestle stub */}
         {tab === "sale" && (
           <div>
