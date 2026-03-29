@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+:root {
+  --sidebar: #1a2c24;
+  --sidebar-hover: #243d32;
+  --sidebar-active: #2e5040;
+  --gold: #c9a96e;
+  --gold-light: #e8d5b0;
+  --teal: #2a6b4a;
+  --teal-light: #3d8f63;
+  --cream: #fdfaf6;
+  --bg: #f5efe7;
+  --card: #ffffff;
+  --border: #e8e0d4;
+  --text: #2c2218;
+  --muted: #7a6a5a;
+  --dim: #a89880;
+  --danger: #c0392b;
+  --warn: #d4851a;
+  --success: #2a7a4a;
+  --info: #1e5a8a;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; font-family: 'DM Sans', system-ui, sans-serif; background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; }
+input, textarea, select { font-family: 'DM Sans', system-ui, sans-serif; font-size: 14px; }
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+.crm-input { width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--card); color: var(--text); font-size: 14px; outline: none; transition: border-color 0.15s; }
+.crm-input:focus { border-color: var(--teal); }
+.crm-input::placeholder { color: var(--dim); }
+
+.crm-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; font-family: 'DM Sans', sans-serif; cursor: pointer; border: none; transition: opacity 0.15s, background 0.15s; }
+.crm-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.crm-btn-primary { background: var(--teal); color: #fff; }
+.crm-btn-primary:hover:not(:disabled) { background: var(--teal-light); }
+.crm-btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+.crm-btn-ghost:hover:not(:disabled) { background: var(--bg); color: var(--text); }
+.crm-btn-danger { background: var(--danger); color: #fff; }
+.crm-btn-danger:hover:not(:disabled) { opacity: 0.85; }
+.crm-btn-sm { padding: 5px 10px; font-size: 12px; }
+
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.modal-box { background: var(--card); border-radius: 12px; padding: 28px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.15); }
+.modal-title { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 22px; font-weight: 600; color: var(--text); margin: 0 0 20px; }
+
+.stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; }
+.stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 6px; }
+.stat-value { font-size: 26px; font-weight: 700; color: var(--text); line-height: 1; }
+.stat-sub { font-size: 12px; color: var(--dim); margin-top: 4px; }
+
+.badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+
+.section-title { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 24px; font-weight: 600; color: var(--text); margin: 0 0 4px; }
+.section-sub { font-size: 13px; color: var(--muted); margin: 0 0 20px; }
+
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+
+.form-row { display: flex; flex-direction: column; gap: 5px; }
+.form-label { font-size: 12px; font-weight: 600; color: var(--muted); }
+.form-grid { display: grid; gap: 14px; }
+
+.toast { position: relative; background: var(--sidebar); color: #fff; padding: 12px 18px; border-radius: 8px; font-size: 13px; font-weight: 500; box-shadow: 0 8px 24px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 8px; }
+.toast-success { border-left: 3px solid var(--gold); }
+.toast-error { border-left: 3px solid #e74c3c; }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.fade-in { animation: fadeIn 0.2s ease; }
+@keyframes slideIn { from { opacity: 0; transform: scale(0.97) translateY(8px); } to { opacity: 1; transform: none; } }
+.slide-in { animation: slideIn 0.25s ease; }
