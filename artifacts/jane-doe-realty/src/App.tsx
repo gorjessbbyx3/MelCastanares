@@ -39,6 +39,8 @@ const api = {
   getProperties:    (params={})  => apiFetch('/properties' + qs(params)),
   getProperty:      (id)         => apiFetch('/properties/' + id),
   getRentals:       ()           => apiFetch('/rentals'),
+  getSalesListings: ()           => apiFetch('/listings/sales'),
+  getTrestleStatus: ()           => apiFetch('/listings/trestle'),
   getTestimonials:  ()           => apiFetch('/testimonials'),
   getNeighborhoods: ()           => apiFetch('/neighborhoods'),
   getNeighborhood:  (slug)       => apiFetch('/neighborhoods/' + slug),
@@ -1264,31 +1266,53 @@ function PropertyCard({ property: p, onClick }) {
 function PropertiesPage({ setPage }) {
   const [tab, setTab] = useState<"sale" | "rental">("sale");
   const [filter, setFilter] = useState<{ status: string; type: string }>({ status: "", type: "" });
+
+  // ── Rentals (AppFolio) ──
   const [rentals, setRentals] = useState<any[]>([]);
   const [rentalsLoading, setRentalsLoading] = useState(true);
   const [rentalsError, setRentalsError] = useState<string | null>(null);
 
-  // Sale properties are browsed via MLS portals — not stored here
-  const filtered = useMemo<any[]>(() => [], []);
+  // ── For Sale (realty.com scraper) ──
+  const [sales, setSales] = useState<any[]>([]);
+  const [salesLoading, setSalesLoading] = useState(true);
+  const [salesBlocked, setSalesBlocked] = useState(false);
+  const [salesFetchedAt, setSalesFetchedAt] = useState<string | null>(null);
 
   useEffect(() => {
-    // Fetch live rentals from Express /api/rentals → AppFolio scrape (5-hour cache)
+    // Fetch live rentals → AppFolio scrape (5-hour cache)
     api.getRentals()
       .then((data: any) => {
         if (!data) throw new Error("No response");
-        if (data.error && !data.properties?.length) {
-          setRentalsError(data.error);
-        } else {
-          setRentals(data.properties || []);
-        }
+        if (data.error && !data.properties?.length) setRentalsError(data.error);
+        else setRentals(data.properties || []);
       })
       .catch((e: any) => setRentalsError(e?.message || "Failed to load listings"))
       .finally(() => setRentalsLoading(false));
+
+    // Fetch for-sale listings → realty.com scrape (24-hour cache)
+    api.getSalesListings()
+      .then((data: any) => {
+        if (!data) return;
+        setSales(data.listings || []);
+        setSalesBlocked(!!data.blocked);
+        setSalesFetchedAt(data.fetchedAt || null);
+      })
+      .catch(() => setSalesBlocked(true))
+      .finally(() => setSalesLoading(false));
   }, []);
+
+  // Apply status/type filter to sale listings
+  const filteredSales = useMemo(() => {
+    let list = [...sales];
+    if (filter.status) list = list.filter(p => p.status === filter.status);
+    if (filter.type && filter.type !== "rental") list = list.filter(p => p.propertyType?.includes(filter.type) || p.type === filter.type);
+    return list;
+  }, [sales, filter]);
 
   const SALE_PORTALS = [
     { label: "Search All MLS Listings", url: "https://www.dreamhomerealtyhawaii.com/property-search", primary: true, icon: <Search size={14} /> },
     { label: "Open Houses This Week", url: "https://propertysearch.hicentral.com/HBR/OpenHouses/?/Results/HotSheet/d///", icon: <Calendar size={14} /> },
+    { label: "View on Realty.com", url: "https://www.realty.com/office/148284/hawaii_dream_realty_llc", icon: <HomeIcon size={14} /> },
   ];
 
   return (
@@ -1354,27 +1378,76 @@ function PropertiesPage({ setPage }) {
           ))}
         </div>
 
-        {/* FOR SALE — MLS portals */}
+        {/* FOR SALE — realty.com scrape + Trestle stub */}
         {tab === "sale" && (
           <div>
-            <Reveal>
-              <div style={{ background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, padding: "48px 40px", textAlign: "center", marginBottom: 40, position: "relative", overflow: "hidden" }}>
-                <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${BRAND.teal}, ${BRAND.gold})` }} />
-                <div style={{ color: BRAND.teal, fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 12, fontWeight: 600 }}>Live MLS Data</div>
-                <h2 className="font-display" style={{ fontSize: "clamp(26px, 4vw, 38px)", marginBottom: 14 }}>Browse O'ahu Listings in Real Time</h2>
-                <p style={{ color: BRAND.textMuted, fontSize: 15, lineHeight: 1.7, marginBottom: 28, maxWidth: 520, margin: "0 auto 28px" }}>
-                  Mel's curated listings pull directly from the O'ahu MLS — updated the moment a property changes status. Search by neighborhood, price, and type.
-                </p>
-                <a href="https://www.dreamhomerealtyhawaii.com/property-search" target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ textDecoration: "none", fontSize: 13, padding: "14px 36px", display: "inline-flex", alignItems: "center", gap: 8 }}>
-                  <Search size={15} /> Search All Listings ↗
-                </a>
+            {/* Loading state */}
+            {salesLoading && (
+              <div style={{ textAlign: "center", padding: "60px 0" }}>
+                <div style={{ maxWidth: 360, margin: "0 auto 20px", background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, borderRadius: 4, height: 6, overflow: "hidden" }}>
+                  <div className="ai-loading-bar" style={{ height: "100%", background: `linear-gradient(90deg, ${BRAND.teal}, ${BRAND.gold})`, borderRadius: 4 }} />
+                </div>
+                <p style={{ color: BRAND.textMuted, fontSize: 14 }}>Loading Dream Home Realty listings...</p>
               </div>
-            </Reveal>
+            )}
 
+            {/* Live listing cards from realty.com */}
+            {!salesLoading && filteredSales.length > 0 && (
+              <>
+                <Reveal>
+                  <div style={{ background: `${BRAND.teal}0F`, border: `1px solid ${BRAND.teal}30`, padding: "12px 18px", marginBottom: 28, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <div style={{ width: 8, height: 8, borderRadius: "50%", background: BRAND.teal }} />
+                      <span style={{ fontSize: 13, color: BRAND.teal, fontWeight: 600 }}>
+                        Dream Home Realty · {filteredSales.length} listing{filteredSales.length !== 1 ? "s" : ""}
+                        {salesFetchedAt && <span style={{ fontWeight: 400, color: BRAND.textDim, fontSize: 11, marginLeft: 8 }}>Updated {new Date(salesFetchedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>}
+                      </span>
+                    </div>
+                    <a href="https://www.realty.com/office/148284/hawaii_dream_realty_llc" target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, color: BRAND.teal, fontWeight: 600, textDecoration: "none", display: "flex", alignItems: "center", gap: 4 }}>
+                      View on Realty.com <ArrowRight size={11} />
+                    </a>
+                  </div>
+                </Reveal>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: 24, marginBottom: 48 }}>
+                  {filteredSales.map((p, i) => (
+                    <Reveal key={p.id} delay={i * 0.08} direction="up">
+                      <PropertyCard
+                        property={p}
+                        onClick={() => { window.open(p.listingUrl || "https://www.realty.com/office/148284/hawaii_dream_realty_llc", "_blank"); }}
+                      />
+                    </Reveal>
+                  ))}
+                </div>
+              </>
+            )}
+
+            {/* Blocked / no live listings — portal fallback */}
+            {!salesLoading && (filteredSales.length === 0 || salesBlocked) && (
+              <Reveal>
+                <div style={{ background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, padding: "48px 40px", textAlign: "center", marginBottom: 40, position: "relative", overflow: "hidden" }}>
+                  <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${BRAND.teal}, ${BRAND.gold})` }} />
+                  <div style={{ color: BRAND.teal, fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 12, fontWeight: 600 }}>Live MLS Data</div>
+                  <h2 className="font-display" style={{ fontSize: "clamp(26px, 4vw, 38px)", marginBottom: 14 }}>Browse O'ahu Listings in Real Time</h2>
+                  <p style={{ color: BRAND.textMuted, fontSize: 15, lineHeight: 1.7, marginBottom: 28, maxWidth: 520, margin: "0 auto 28px" }}>
+                    Browse Mel's active listings and all O'ahu MLS properties — updated the moment a property changes status.
+                  </p>
+                  <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+                    <a href="https://www.realty.com/office/148284/hawaii_dream_realty_llc" target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ textDecoration: "none", fontSize: 13, padding: "14px 28px", display: "inline-flex", alignItems: "center", gap: 8 }}>
+                      <HomeIcon size={15} /> View Dream Home Listings ↗
+                    </a>
+                    <a href="https://www.dreamhomerealtyhawaii.com/property-search" target="_blank" rel="noopener noreferrer" className="btn-outline" style={{ textDecoration: "none", fontSize: 13, padding: "14px 28px", display: "inline-flex", alignItems: "center", gap: 8 }}>
+                      <Search size={15} /> Full MLS Search ↗
+                    </a>
+                  </div>
+                </div>
+              </Reveal>
+            )}
+
+            {/* Quick access portals */}
             <Reveal delay={0.1}>
               <div style={{ color: BRAND.textDim, fontSize: 11, letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 16, fontWeight: 600 }}>Quick Access</div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(210px, 1fr))", gap: 12 }}>
-                {SALE_PORTALS.slice(1).map(p => (
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(210px, 1fr))", gap: 12, marginBottom: 48 }}>
+                {SALE_PORTALS.map(p => (
                   <a key={p.label} href={p.url} target="_blank" rel="noopener noreferrer" style={{
                     display: "flex", alignItems: "center", gap: 12, padding: "16px 20px",
                     background: BRAND.bgCard, border: `1px solid ${BRAND.border}`,
@@ -1388,6 +1461,23 @@ function PropertiesPage({ setPage }) {
                     <ArrowRight size={12} color={BRAND.textDim} />
                   </a>
                 ))}
+              </div>
+            </Reveal>
+
+            {/* Trestle coming-soon callout */}
+            <Reveal delay={0.2}>
+              <div style={{ background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, padding: "32px 36px", display: "flex", alignItems: "center", gap: 24, flexWrap: "wrap", position: "relative", overflow: "hidden" }}>
+                <div style={{ position: "absolute", top: 0, left: 0, bottom: 0, width: 3, background: `linear-gradient(180deg, ${BRAND.gold}, ${BRAND.teal})` }} />
+                <div style={{ flex: 1, minWidth: 240 }}>
+                  <div style={{ fontSize: 10, color: BRAND.gold, letterSpacing: "0.2em", textTransform: "uppercase", fontWeight: 700, marginBottom: 6 }}>Coming Soon · IDX Integration</div>
+                  <div className="font-display" style={{ fontSize: 20, marginBottom: 6 }}>Live MLS Search via Trestle</div>
+                  <p style={{ color: BRAND.textMuted, fontSize: 13, lineHeight: 1.6 }}>
+                    Full HI Central MLS feed — every active listing on O'ahu, searchable by neighborhood, price, and type, displayed natively on this site. Awaiting Mel's IDX approval from HI Central MLS.
+                  </p>
+                </div>
+                <a href="mailto:mel@homesweethomehawaii.com?subject=IDX%20Trestle%20Setup" className="btn-outline" style={{ textDecoration: "none", fontSize: 11, padding: "12px 20px", whiteSpace: "nowrap", display: "inline-flex", alignItems: "center", gap: 6 }}>
+                  <ArrowRight size={12} /> Get Started
+                </a>
               </div>
             </Reveal>
           </div>
