@@ -1,4 +1,12 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
+
+declare global {
+  interface Window {
+    __selectedProperty: any;
+    __selectedNeighborhood: any;
+    __selectedPost: any;
+  }
+}
 import {
   Home as HomeIcon, Search, MapPin, Phone, Mail, Menu, X, ChevronDown, ChevronRight,
   ArrowRight, ArrowLeft, Star, Bed, Bath, Square, Calendar, Clock, User,
@@ -16,49 +24,55 @@ const { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Re
 
 const API_BASE = '/api';
 
-async function apiFetch(path, options = {}) {
+async function apiFetch(path: string, options: RequestInit & { headers?: Record<string, string> } = {}) {
   try {
     const url = API_BASE + path;
-    const res = await fetch(url, { headers: { 'Content-Type': 'application/json', ...options.headers }, ...options });
+    const { headers: extraHeaders, ...rest } = options;
+    const res = await fetch(url, { headers: { 'Content-Type': 'application/json', ...extraHeaders }, ...rest });
     if (!res.ok) throw new Error('API ' + res.status);
     return await res.json();
   } catch (err) {
-    console.warn('[API] ' + path + ' failed:', err.message);
+    console.warn('[API] ' + path + ' failed:', (err as Error).message);
     return null;
   }
 }
 
-function qs(params) {
-  const q = new URLSearchParams(Object.entries(params).filter(([,v]) => v != null && v !== '')).toString();
+function qs(params: Record<string, unknown>) {
+  const q = new URLSearchParams(
+    Object.entries(params).filter(([, v]) => v != null && v !== '').map(([k, v]) => [k, String(v)])
+  ).toString();
   return q ? '?' + q : '';
 }
 
 const api = {
-  getAgent:         ()           => apiFetch('/agent'),
-  getStats:         ()           => apiFetch('/stats'),
-  getProperties:    (params={})  => apiFetch('/properties' + qs(params)),
-  getProperty:      (id)         => apiFetch('/properties/' + id),
-  getRentals:       ()           => apiFetch('/rentals'),
-  getTrestleStatus: ()           => apiFetch('/listings/trestle'),
-  getTestimonials:  ()           => apiFetch('/testimonials'),
-  getNeighborhoods: ()           => apiFetch('/neighborhoods'),
-  getNeighborhood:  (slug)       => apiFetch('/neighborhoods/' + slug),
-  getBlogPosts:     (params={})  => apiFetch('/blog' + qs(params)),
-  getBlogPost:      (slug)       => apiFetch('/blog/' + slug),
-  getMarketData:    (params={})  => apiFetch('/market' + qs(params)),
-  getPageContent:   (slug)       => apiFetch('/pages/' + slug),
-  submitContact:    (data)       => apiFetch('/contact', { method: 'POST', body: JSON.stringify(data) }),
-  submitValuation:  (data)       => apiFetch('/home-valuation', { method: 'POST', body: JSON.stringify(data) }),
+  getAgent:         ()                            => apiFetch('/agent'),
+  getStats:         ()                            => apiFetch('/stats'),
+  getProperties:    (params: Record<string, unknown> = {}) => apiFetch('/properties' + qs(params)),
+  getProperty:      (id: string)                  => apiFetch('/properties/' + id),
+  getRentals:       ()                            => apiFetch('/rentals'),
+  getTrestleStatus: ()                            => apiFetch('/listings/trestle'),
+  getTestimonials:  ()                            => apiFetch('/testimonials'),
+  getNeighborhoods: ()                            => apiFetch('/neighborhoods'),
+  getNeighborhood:  (slug: string)                => apiFetch('/neighborhoods/' + slug),
+  getBlogPosts:     (params: Record<string, unknown> = {}) => apiFetch('/blog' + qs(params)),
+  getBlogPost:      (slug: string)                => apiFetch('/blog/' + slug),
+  getMarketData:    (params: Record<string, unknown> = {}) => apiFetch('/market' + qs(params)),
+  getPageContent:   (slug: string)                => apiFetch('/pages/' + slug),
+  submitContact:    (data: unknown)               => apiFetch('/contact', { method: 'POST', body: JSON.stringify(data) }),
+  submitValuation:  (data: unknown)               => apiFetch('/home-valuation', { method: 'POST', body: JSON.stringify(data) }),
 };
 
-function useApi(fetcher, fallback, deps = []) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function useApi(fetcher: () => Promise<any>, fallback: any, deps: React.DependencyList = []) {
   const [data, setData] = useState(fallback);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    fetcher().then(res => { if (!cancelled && res) setData(res); }).finally(() => { if (!cancelled) setLoading(false); });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    fetcher().then((res: any) => { if (!cancelled && res) setData(res); }).finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);
   return { data, loading };
 }
@@ -175,8 +189,8 @@ const FALLBACK_MARKET_DATA = [
 // CUSTOM HOOKS
 // ─────────────────────────────────────────────
 
-function useScrollReveal() {
-  const ref = useRef(null);
+function useScrollReveal(): [React.RefObject<Element | null>, boolean] {
+  const ref = useRef<Element>(null);
   const [visible, setVisible] = useState(false);
   useEffect(() => {
     const el = ref.current;
@@ -202,11 +216,11 @@ function useScrollY() {
 // REVEAL WRAPPER
 // ─────────────────────────────────────────────
 
-function Reveal({ children, delay = 0, direction = "up", className = "" }) {
+function Reveal({ children, delay = 0, direction = "up", className = "" }: { children: React.ReactNode; delay?: number; direction?: "up" | "down" | "left" | "right" | "none"; className?: string }) {
   const [ref, visible] = useScrollReveal();
-  const dirs = { up: "translate-y-12", down: "-translate-y-12", left: "translate-x-12", right: "-translate-x-12", none: "" };
+  const dirs: Record<string, string> = { up: "translate-y-12", down: "-translate-y-12", left: "translate-x-12", right: "-translate-x-12", none: "" };
   return (
-    <div ref={ref} className={className} style={{
+    <div ref={ref as React.RefObject<HTMLDivElement>} className={className} style={{
       opacity: visible ? 1 : 0,
       transform: visible ? "translate(0,0)" : undefined,
       transition: `opacity 0.8s cubic-bezier(0.22,1,0.36,1) ${delay}s, transform 0.8s cubic-bezier(0.22,1,0.36,1) ${delay}s`,
@@ -221,7 +235,7 @@ function Reveal({ children, delay = 0, direction = "up", className = "" }) {
 // ANIMATED COUNTER
 // ─────────────────────────────────────────────
 
-function Counter({ end, suffix = "", prefix = "", duration = 2000 }) {
+function Counter({ end, suffix = "", prefix = "", duration = 2000 }: { end: number | string; suffix?: string; prefix?: string; duration?: number }) {
   const [ref, visible] = useScrollReveal();
   const numEnd = typeof end === "number" ? end : parseInt(end as string);
   const [count, setCount] = useState(0);
@@ -238,7 +252,7 @@ function Counter({ end, suffix = "", prefix = "", duration = 2000 }) {
     }, 16);
     return () => clearInterval(timer);
   }, [visible, numEnd, duration, hasAnimated]);
-  return <span ref={ref}>{prefix}{isNaN(numEnd) ? end : count}{suffix}</span>;
+  return <span ref={ref as React.RefObject<HTMLSpanElement>}>{prefix}{isNaN(numEnd) ? end : count}{suffix}</span>;
 }
 
 // ─────────────────────────────────────────────
@@ -569,10 +583,10 @@ const GlobalStyles = () => (
 // NAVIGATION
 // ─────────────────────────────────────────────
 
-function Nav({ page, setPage }) {
+function Nav({ page, setPage }: { page: string; setPage: (p: string) => void }) {
   const scrollY = useScrollY();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [dropdown, setDropdown] = useState(null);
+  const [dropdown, setDropdown] = useState<number | null>(null);
   const isScrolled = scrollY > 60;
 
   const navItems = [
@@ -596,7 +610,7 @@ function Nav({ page, setPage }) {
     },
   ];
 
-  const go = (p) => { setPage(p); setMobileOpen(false); setDropdown(null); window.scrollTo({ top: 0, behavior: "smooth" }); };
+  const go = (p: string) => { setPage(p); setMobileOpen(false); setDropdown(null); window.scrollTo({ top: 0, behavior: "smooth" }); };
 
   return (
     <>
@@ -652,8 +666,8 @@ function Nav({ page, setPage }) {
                         background: "none", border: "none", color: BRAND.textMuted, cursor: "pointer",
                         fontSize: 12, letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "'DM Sans', sans-serif",
                         transition: "all 0.3s",
-                      }} onMouseEnter={e => { e.target.style.color = BRAND.gold; e.target.style.background = `${BRAND.gold}08`; }}
-                        onMouseLeave={e => { e.target.style.color = BRAND.textMuted; e.target.style.background = "none"; }}>
+                      }} onMouseEnter={e => { e.currentTarget.style.color = BRAND.gold; e.currentTarget.style.background = `${BRAND.gold}08`; }}
+                        onMouseLeave={e => { e.currentTarget.style.color = BRAND.textMuted; e.currentTarget.style.background = "none"; }}>
                         {child.label}
                       </button>
                     ))}
@@ -730,7 +744,7 @@ const OAHU_NEIGHBORHOODS = [
   { id: "north-shore", label: "North Shore", hint: "Haleiwa · Surf culture" },
 ];
 
-function MapSearchBar({ go }) {
+function MapSearchBar({ go }: { go: (p: string) => void }) {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -1349,7 +1363,7 @@ function NeighborhoodShowcase({ neighborhoods = [], onNavigate, onNavigateDetail
 // TESTIMONIAL CAROUSEL
 // ─────────────────────────────────────────────
 
-function TestimonialCarousel({ testimonials = [] }) {
+function TestimonialCarousel({ testimonials = [] }: { testimonials: any[] }) {
   const [idx, setIdx] = useState(0);
   if (!testimonials.length) return null;
   const t = testimonials[idx] || {};
@@ -1991,9 +2005,9 @@ function AboutPage({ setPage }) {
                 <div style={{ display: "flex", gap: 3, marginBottom: 14 }}>
                   {[...Array(t.rating)].map((_, j) => <Star key={j} size={13} fill={BRAND.teal} color={BRAND.teal} />)}
                 </div>
-                <p style={{ fontStyle: "italic", fontSize: 14, lineHeight: 1.7, color: BRAND.textMuted, flex: 1, marginBottom: 16 }}>"{t.quote || t.text}"</p>
+                <p style={{ fontStyle: "italic", fontSize: 14, lineHeight: 1.7, color: BRAND.textMuted, flex: 1, marginBottom: 16 }}>"{t.quote || (t as any).text}"</p>
                 <div style={{ borderTop: `1px solid ${BRAND.border}`, paddingTop: 14 }}>
-                  <div style={{ fontWeight: 600, fontSize: 13, color: BRAND.text }}>{t.clientName || t.name}</div>
+                  <div style={{ fontWeight: 600, fontSize: 13, color: BRAND.text }}>{t.clientName || (t as any).name}</div>
                   <div style={{ fontSize: 11, color: BRAND.textDim, textTransform: "uppercase", letterSpacing: "0.1em", marginTop: 2 }}>{t.transactionType}</div>
                 </div>
               </div>
@@ -2298,7 +2312,7 @@ function BlogPage({ setPage }) {
               border: `1px solid ${BRAND.border}`,
             }}>
               <div className="img-zoom blog-featured-hero" style={{ aspectRatio: "21/9", position: "relative" }}>
-                <img src={featured.images?.[0]?.url || featured.img} alt={featured.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                <img src={featured.images?.[0]?.url || (featured as any).img} alt={featured.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                 <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to right, rgba(10,10,10,0.92) 0%, rgba(10,10,10,0.75) 45%, rgba(10,10,10,0.2) 75%, transparent 100%)" }} />
                 <div style={{ position: "absolute", top: 0, left: 0, bottom: 0, display: "flex", flexDirection: "column", justifyContent: "center", padding: "40px 48px", maxWidth: 580 }}>
                   <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 16 }}>
@@ -2333,7 +2347,7 @@ function BlogPage({ setPage }) {
             <Reveal key={post.id} delay={i * 0.08} direction="up">
               <div className="card-hover" onClick={() => goPost(post)} style={{ cursor: "pointer", background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, overflow: "hidden", height: "100%", display: "flex", flexDirection: "column" }}>
                 <div className="img-zoom" style={{ aspectRatio: "16/10", position: "relative" }}>
-                  <img src={post.images?.[0]?.url || post.img} alt={post.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  <img src={post.images?.[0]?.url || (post as any).img} alt={post.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                   <div style={{ position: "absolute", top: 12, left: 12 }}>
                     <span style={{ background: `${BRAND.bg}DD`, backdropFilter: "blur(8px)", color: BRAND.teal, fontSize: 10, fontWeight: 600, padding: "5px 10px", letterSpacing: "0.1em", textTransform: "uppercase", border: `1px solid ${BRAND.border}` }}>{post.category}</span>
                   </div>
@@ -2942,7 +2956,7 @@ function SellersPage({ setPage }) {
             <h2 className="font-display" style={{ fontSize: 28, marginBottom: 8 }}>Cost of Selling in Hawai'i</h2>
             <p style={{ color: BRAND.textMuted, fontSize: 15, marginBottom: 28 }}>Know what to expect before you list. Every seller should see this table before pricing their home.</p>
             <div style={{ display: "grid", gap: 1, background: BRAND.border, borderRadius: 8, overflow: "hidden" }}>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr auto auto", gap: 0, background: BRAND.bgEl, padding: "12px 20px" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr auto auto", gap: 0, background: BRAND.bgElevated, padding: "12px 20px" }}>
                 <span style={{ fontSize: 11, color: BRAND.textDim, letterSpacing: "0.1em", textTransform: "uppercase" }}>Item</span>
                 <span style={{ fontSize: 11, color: BRAND.textDim, letterSpacing: "0.1em", textTransform: "uppercase" }}>Range</span>
                 <span style={{ fontSize: 11, color: BRAND.textDim, letterSpacing: "0.1em", textTransform: "uppercase", textAlign: "right", paddingLeft: 32 }}>Note</span>
@@ -3797,7 +3811,7 @@ function Footer({ setPage }) {
               { l: "About Mel", p: "about" }, { l: "Mortgage Calculator", p: "mortgage" },
             ].map((lk, i) => (
               <button key={i} onClick={() => go(lk.p)} style={{ display: "block", background: "none", border: "none", color: "rgba(255,255,255,0.55)", cursor: "pointer", fontSize: 13, marginBottom: 10, fontFamily: "'DM Sans'", padding: 0, transition: "color 0.3s" }}
-                onMouseEnter={e => e.target.style.color = "#fff"} onMouseLeave={e => e.target.style.color = "rgba(255,255,255,0.55)"}>{lk.l}</button>
+                onMouseEnter={e => (e.currentTarget as HTMLButtonElement).style.color = "#fff"} onMouseLeave={e => (e.currentTarget as HTMLButtonElement).style.color = "rgba(255,255,255,0.55)"}>{lk.l}</button>
             ))}
           </div>
 
@@ -3810,7 +3824,7 @@ function Footer({ setPage }) {
               { l: "Testimonials", p: "testimonials" },
             ].map((lk, i) => (
               <button key={i} onClick={() => go(lk.p)} style={{ display: "block", background: "none", border: "none", color: "rgba(255,255,255,0.55)", cursor: "pointer", fontSize: 13, marginBottom: 10, fontFamily: "'DM Sans'", padding: 0, transition: "color 0.3s" }}
-                onMouseEnter={e => e.target.style.color = "#fff"} onMouseLeave={e => e.target.style.color = "rgba(255,255,255,0.55)"}>{lk.l}</button>
+                onMouseEnter={e => (e.currentTarget as HTMLButtonElement).style.color = "#fff"} onMouseLeave={e => (e.currentTarget as HTMLButtonElement).style.color = "rgba(255,255,255,0.55)"}>{lk.l}</button>
             ))}
           </div>
 
@@ -3866,8 +3880,8 @@ function FloatingActions({ setPage }) {
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const endRef = useRef(null);
-  const inputRef = useRef(null);
+  const endRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
   useEffect(() => { if (chatOpen && inputRef.current) inputRef.current.focus(); }, [chatOpen]);
@@ -3979,7 +3993,7 @@ function FloatingActions({ setPage }) {
         @keyframes onlinePulse { 0%,100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.4); } 50% { box-shadow: 0 0 0 6px rgba(34,197,94,0); } }
         .contact-popup { position: fixed; bottom: 88px; right: 24px; z-index: 999; background: ${BRAND.bgCard}; border: 1px solid ${BRAND.border}; border-radius: 16px; padding: 20px; width: 260px; box-shadow: 0 16px 48px rgba(0,0,0,0.1); animation: chatSlideIn 0.3s ease; }
         .contact-popup a { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 10px; text-decoration: none; color: ${BRAND.text}; font-size: 14px; font-weight: 500; transition: background 0.2s; }
-        .contact-popup a:hover { background: ${BRAND.bgEl}; }
+        .contact-popup a:hover { background: ${BRAND.bgElevated}; }
         .chat-window { position: fixed; bottom: 164px; right: 24px; z-index: 999; width: 380px; max-width: calc(100vw - 48px); height: 520px; max-height: calc(100vh - 200px); background: ${BRAND.bgCard}; border: 1px solid ${BRAND.border}; border-radius: 16px; box-shadow: 0 24px 80px rgba(0,0,0,0.12); display: flex; flex-direction: column; overflow: hidden; animation: chatSlideIn 0.35s cubic-bezier(0.22,1,0.36,1); }
         @keyframes chatSlideIn { from { opacity: 0; transform: translateY(20px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
         @keyframes chatDot { 0%,100% { transform: translateY(0); opacity: 0.4; } 50% { transform: translateY(-4px); opacity: 1; } }
@@ -4032,13 +4046,13 @@ function FloatingActions({ setPage }) {
               <div key={i} style={{ display: "flex", justifyContent: msg.role === "user" ? "flex-end" : "flex-start" }}>
                 <div style={{
                   maxWidth: "85%", padding: "10px 14px", borderRadius: 14,
-                  ...(msg.role === "user" ? { background: BRAND.teal, color: "#fff", borderBottomRightRadius: 4 } : { background: BRAND.bgEl, color: BRAND.text, borderBottomLeftRadius: 4, border: `1px solid ${BRAND.border}` }),
+                  ...(msg.role === "user" ? { background: BRAND.teal, color: "#fff", borderBottomRightRadius: 4 } : { background: BRAND.bgElevated, color: BRAND.text, borderBottomLeftRadius: 4, border: `1px solid ${BRAND.border}` }),
                   fontSize: 13, lineHeight: 1.6, wordBreak: "break-word",
                 }}>{msg.content}</div>
               </div>
             ))}
             {loading && (
-              <div style={{ display: "flex", gap: 4, padding: "12px 18px", background: BRAND.bgEl, borderRadius: 14, borderBottomLeftRadius: 4, border: `1px solid ${BRAND.border}`, width: "fit-content" }}>
+              <div style={{ display: "flex", gap: 4, padding: "12px 18px", background: BRAND.bgElevated, borderRadius: 14, borderBottomLeftRadius: 4, border: `1px solid ${BRAND.border}`, width: "fit-content" }}>
                 {[0,1,2].map(i => <div key={i} style={{ width: 7, height: 7, borderRadius: "50%", background: BRAND.teal, animation: `chatDot 1.2s ease-in-out ${i*0.2}s infinite` }} />)}
               </div>
             )}
@@ -4055,8 +4069,8 @@ function FloatingActions({ setPage }) {
 
           <div style={{ padding: "10px 14px", borderTop: `1px solid ${BRAND.border}`, display: "flex", gap: 8, flexShrink: 0 }}>
             <input ref={inputRef} value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
-              placeholder="Ask about Hawai'i real estate..." style={{ flex: 1, padding: "9px 12px", borderRadius: 10, border: `1px solid ${BRAND.border}`, background: BRAND.bgEl, color: BRAND.text, fontSize: 13, outline: "none", fontFamily: "'DM Sans'" }} />
-            <button onClick={sendMessage} disabled={loading || !input.trim()} style={{ width: 38, height: 38, borderRadius: 10, border: "none", background: input.trim() ? BRAND.teal : BRAND.bgEl, color: input.trim() ? "#fff" : BRAND.textDim, cursor: input.trim() ? "pointer" : "default", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              placeholder="Ask about Hawai'i real estate..." style={{ flex: 1, padding: "9px 12px", borderRadius: 10, border: `1px solid ${BRAND.border}`, background: BRAND.bgElevated, color: BRAND.text, fontSize: 13, outline: "none", fontFamily: "'DM Sans'" }} />
+            <button onClick={sendMessage} disabled={loading || !input.trim()} style={{ width: 38, height: 38, borderRadius: 10, border: "none", background: input.trim() ? BRAND.teal : BRAND.bgElevated, color: input.trim() ? "#fff" : BRAND.textDim, cursor: input.trim() ? "pointer" : "default", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
               <Send size={15} />
             </button>
           </div>
