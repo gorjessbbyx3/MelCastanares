@@ -567,11 +567,17 @@ function Nav({ page, setPage }) {
         padding: isScrolled ? "12px 0" : "20px 0",
       }}>
         <div style={{ maxWidth: 1400, margin: "0 auto", padding: "0 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <div onClick={() => go("home")} style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: 12 }}>
-            <div style={{ width: 36, height: 36, border: `1px solid ${BRAND.gold}`, display: "flex", alignItems: "center", justifyContent: "center", transform: "rotate(45deg)" }}>
-              <span style={{ transform: "rotate(-45deg)", fontFamily: "'DM Serif Display', serif", fontSize: 16, color: BRAND.teal, fontWeight: 600 }}>M</span>
-            </div>
-            <span className="font-display" style={{ fontSize: 20, letterSpacing: "0.12em", textTransform: "uppercase", color: BRAND.text }}>Mel Castanares</span>
+          <div onClick={() => go("home")} style={{ cursor: "pointer", display: "flex", alignItems: "center" }}>
+            <img
+              src="/images/mel-logo.png"
+              alt="Mel Castanares Realtor"
+              style={{
+                height: 56,
+                width: "auto",
+                filter: isScrolled ? "none" : "invert(1) brightness(10)",
+                transition: "filter 0.5s cubic-bezier(0.22,1,0.36,1)",
+              }}
+            />
           </div>
 
           <nav style={{ display: "flex", alignItems: "center", gap: 28 }} className="hidden-mobile">
