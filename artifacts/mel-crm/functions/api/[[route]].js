@@ -1,213 +1,335 @@
-// Cloudflare Pages Function — CRM API
-// Env vars: CRM_PASSWORD (default: mel2024), DB (D1 binding)
+// Cloudflare Pages Function — Mel's CRM API
+// Env vars: CRM_PASSWORD, DB (D1), AI (Workers AI binding)
 
-function uuid() {
-  return crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2) + Date.now().toString(36);
-}
-
+function uuid() { return crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2) + Date.now().toString(36); }
 function now() { return new Date().toISOString(); }
 function today() { return new Date().toISOString().slice(0, 10); }
 
-// ── In-memory fallback (dev / no D1) ─────────────────────────────────
-const mem = { sessions: [], leads: [], tasks: [], commissions: [] };
+const mem = { sessions: [], leads: [], tasks: [], commissions: [], events: [], todos: [], files: [], contentIdeas: [] };
 
-// ── CORS helpers ──────────────────────────────────────────────────────
-function cors(headers = {}) {
-  return new Headers({ "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS", "Access-Control-Allow-Headers": "Content-Type,Authorization", ...headers });
-}
-function json(data, status = 200) {
-  return new Response(JSON.stringify(data), { status, headers: cors({ "Content-Type": "application/json" }) });
-}
+function cors(h = {}) { return new Headers({ "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS", "Access-Control-Allow-Headers": "Content-Type,Authorization", ...h }); }
+function json(data, status = 200) { return new Response(JSON.stringify(data), { status, headers: cors({ "Content-Type": "application/json" }) }); }
 function err(msg, status = 400) { return json({ error: msg }, status); }
 
-// ── Auth helpers ──────────────────────────────────────────────────────
 async function auth(request, env) {
-  const hdr = request.headers.get("Authorization") || "";
-  const token = hdr.replace("Bearer ", "").trim();
+  const token = (request.headers.get("Authorization") || "").replace("Bearer ", "").trim();
   if (!token) return false;
-  if (env.DB) {
-    const row = await env.DB.prepare("SELECT id FROM crm_sessions WHERE token=? AND expires_at>?").bind(token, now()).first();
-    return !!row;
-  }
+  if (env.DB) { const r = await env.DB.prepare("SELECT id FROM crm_sessions WHERE token=? AND expires_at>?").bind(token, now()).first(); return !!r; }
   return mem.sessions.some(s => s.token === token && s.expires_at > now());
 }
 
-// ── Handler ───────────────────────────────────────────────────────────
+// ── Mappers ──────────────────────────────────────────────────────────
+const dbToLead = r => ({ id:r.id, name:r.name||"", email:r.email||"", phone:r.phone||"", intent:r.intent||"buy", status:r.status||"new", source:r.source||"website", priceMin:r.price_min||0, priceMax:r.price_max||0, neighborhoods:r.neighborhoods||"", bedsMin:r.beds_min||0, bathsMin:r.baths_min||0, preApproval:r.pre_approval||"unknown", preApprovalAmount:r.pre_approval_amount||0, timeline:r.timeline||"", propertyAddress:r.property_address||"", estimatedValue:r.estimated_value||0, notes:r.notes||"", nextStep:r.next_step||"", nextStepDate:r.next_step_date||"", createdAt:r.created_at||now(), updatedAt:r.updated_at||now() });
+const dbToTask = r => ({ id:r.id, title:r.title||"", type:r.type||"follow-up", leadId:r.lead_id||"", leadName:r.lead_name||"", dueDate:r.due_date||"", dueTime:r.due_time||"", priority:r.priority||"medium", completed:r.completed===1||r.completed===true, notes:r.notes||"", createdAt:r.created_at||now() });
+const dbToComm = r => ({ id:r.id, leadId:r.lead_id||"", clientName:r.client_name||"", propertyAddress:r.property_address||"", salePrice:r.sale_price||0, commissionRate:r.commission_rate||3, commissionAmount:r.commission_amount||0, status:r.status||"pending", closeDate:r.close_date||"", notes:r.notes||"", createdAt:r.created_at||now() });
+const dbToEvent = r => ({ id:r.id, title:r.title||"", type:r.type||"appointment", date:r.date||"", time:r.time||"", endTime:r.end_time||"", leadId:r.lead_id||"", leadName:r.lead_name||"", location:r.location||"", notes:r.notes||"", createdAt:r.created_at||now() });
+const dbToTodo = r => ({ id:r.id, title:r.title||"", category:r.category||"general", completed:r.completed===1||r.completed===true, dueDate:r.due_date||"", createdAt:r.created_at||now() });
+const dbToFile = r => ({ id:r.id, name:r.name||"", category:r.category||"other", url:r.url||"", notes:r.notes||"", size:r.size||"", createdAt:r.created_at||now() });
+const dbToIdea = r => ({ id:r.id, text:r.text||"", topic:r.topic||"", pinned:r.pinned===1||r.pinned===true, createdAt:r.created_at||now() });
+
+// ── AI helpers ────────────────────────────────────────────────────────
+const AI_MODEL = "@cf/meta/llama-3.1-8b-instruct";
+
+async function runAI(env, messages, maxTokens = 1024) {
+  if (!env.AI) return null;
+  try {
+    const res = await env.AI.run(AI_MODEL, { messages, max_tokens: maxTokens });
+    return res.response || res.result?.response || "";
+  } catch (e) { console.error("AI error:", e); return null; }
+}
+
+// ── Main handler ──────────────────────────────────────────────────────
 export async function onRequest(ctx) {
   const { request, env } = ctx;
   const url = new URL(request.url);
-
-  // Find the /api prefix in the pathname
   const pathParts = url.pathname.split("/api/");
   const route = pathParts.length > 1 ? "/" + pathParts[pathParts.length - 1] : url.pathname;
+  const method = request.method.toUpperCase();
 
-  if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors() });
+  if (method === "OPTIONS") return new Response(null, { status: 204, headers: cors() });
 
-  // ── Auth: login ─────────────────────────────────────────────────────
-  if (route === "/auth/login" && request.method === "POST") {
+  // ── Auth ─────────────────────────────────────────────────────────────
+  if (route === "/auth/login" && method === "POST") {
     const { password } = await request.json().catch(() => ({}));
-    const correct = env.CRM_PASSWORD || "mel2024";
-    if (password !== correct) return err("Incorrect password", 401);
+    if (password !== (env.CRM_PASSWORD || "mel2024")) return err("Incorrect password", 401);
     const token = uuid() + uuid();
-    const expires = new Date(Date.now() + 30 * 86400 * 1000).toISOString();
-    if (env.DB) {
-      await env.DB.prepare("INSERT INTO crm_sessions (id,token,expires_at) VALUES (?,?,?)").bind(uuid(), token, expires).run();
-    } else {
-      mem.sessions.push({ token, expires_at: expires });
-    }
+    const expires = new Date(Date.now() + 30 * 86400000).toISOString();
+    if (env.DB) await env.DB.prepare("INSERT INTO crm_sessions (id,token,expires_at) VALUES (?,?,?)").bind(uuid(), token, expires).run();
+    else mem.sessions.push({ token, expires_at: expires });
     return json({ token });
   }
-
-  // ── Auth: verify ────────────────────────────────────────────────────
-  if (route === "/auth/verify" && request.method === "GET") {
-    const ok = await auth(request, env);
-    if (!ok) return err("Unauthorized", 401);
-    return json({ ok: true });
-  }
-
-  // ── Auth: logout ────────────────────────────────────────────────────
-  if (route === "/auth/logout" && request.method === "POST") {
-    const hdr = request.headers.get("Authorization") || "";
-    const token = hdr.replace("Bearer ", "").trim();
+  if (route === "/auth/verify" && method === "GET") { return (await auth(request, env)) ? json({ ok: true }) : err("Unauthorized", 401); }
+  if (route === "/auth/logout" && method === "POST") {
+    const token = (request.headers.get("Authorization") || "").replace("Bearer ", "").trim();
     if (env.DB) await env.DB.prepare("DELETE FROM crm_sessions WHERE token=?").bind(token).run();
     else mem.sessions = mem.sessions.filter(s => s.token !== token);
     return json({ ok: true });
   }
-
-  // ── Require auth for everything else ────────────────────────────────
   if (!(await auth(request, env))) return err("Unauthorized", 401);
 
-  // ── Stats ────────────────────────────────────────────────────────────
-  if (route === "/stats" && request.method === "GET") {
-    let totalLeads, activeLeads, tasksDueToday, closedComms, totalCommYTD;
+  // ── Stats ─────────────────────────────────────────────────────────────
+  if (route === "/stats" && method === "GET") {
+    const yr = new Date().getFullYear() + "-01-01";
     if (env.DB) {
-      const yr = new Date().getFullYear() + "-01-01";
-      totalLeads = (await env.DB.prepare("SELECT COUNT(*) as n FROM crm_leads").first()).n;
-      activeLeads = (await env.DB.prepare("SELECT COUNT(*) as n FROM crm_leads WHERE status NOT IN ('closed','lost')").first()).n;
-      tasksDueToday = (await env.DB.prepare("SELECT COUNT(*) as n FROM crm_tasks WHERE due_date=? AND completed=0").bind(today()).first()).n;
-      closedComms = (await env.DB.prepare("SELECT COUNT(*) as n FROM crm_commissions WHERE status='closed' AND close_date>=?").bind(yr).first()).n;
-      totalCommYTD = (await env.DB.prepare("SELECT COALESCE(SUM(commission_amount),0) as s FROM crm_commissions WHERE status='closed' AND close_date>=?").bind(yr).first()).s;
-    } else {
-      const yr = new Date().getFullYear() + "-01-01";
-      totalLeads = mem.leads.length;
-      activeLeads = mem.leads.filter(l => !["closed","lost"].includes(l.status)).length;
-      tasksDueToday = mem.tasks.filter(t => !t.completed && t.due_date === today()).length;
-      const closedYear = mem.commissions.filter(c => c.status === "closed" && c.close_date >= yr);
-      closedComms = closedYear.length;
-      totalCommYTD = closedYear.reduce((s, c) => s + (c.commission_amount || 0), 0);
+      const [tl, al, td, closedR, ytdR] = await Promise.all([
+        env.DB.prepare("SELECT COUNT(*) as n FROM crm_leads").first(),
+        env.DB.prepare("SELECT COUNT(*) as n FROM crm_leads WHERE status NOT IN ('closed','lost')").first(),
+        env.DB.prepare("SELECT COUNT(*) as n FROM crm_tasks WHERE due_date=? AND completed=0").bind(today()).first(),
+        env.DB.prepare("SELECT COUNT(*) as n FROM crm_commissions WHERE status='closed' AND close_date>=?").bind(yr).first(),
+        env.DB.prepare("SELECT COALESCE(SUM(commission_amount),0) as s FROM crm_commissions WHERE status='closed' AND close_date>=?").bind(yr).first(),
+      ]);
+      return json({ totalLeads: tl.n, activeLeads: al.n, tasksDueToday: td.n, closedCommissions: closedR.n, totalCommissionYTD: ytdR.s });
     }
-    return json({ totalLeads, activeLeads, tasksDueToday, closedCommissions: closedComms, totalCommissionYTD: totalCommYTD });
+    const closed = mem.commissions.filter(c => c.status === "closed" && c.close_date >= yr);
+    return json({ totalLeads: mem.leads.length, activeLeads: mem.leads.filter(l => !["closed","lost"].includes(l.status)).length, tasksDueToday: mem.tasks.filter(t => !t.completed && t.due_date === today()).length, closedCommissions: closed.length, totalCommissionYTD: closed.reduce((s, c) => s + (c.commission_amount || 0), 0) });
   }
 
-  // ── LEADS ────────────────────────────────────────────────────────────
-  if (route === "/leads") {
-    if (request.method === "GET") {
-      if (env.DB) {
-        const { results } = await env.DB.prepare("SELECT * FROM crm_leads ORDER BY created_at DESC").all();
-        return json(results.map(dbToLead));
-      }
-      return json([...mem.leads].sort((a, b) => b.created_at.localeCompare(a.created_at)).map(dbToLead));
-    }
-    if (request.method === "POST") {
-      const b = await request.json().catch(() => ({}));
-      const r = { id: uuid(), name: b.name || "", email: b.email || "", phone: b.phone || "", intent: b.intent || "buy", status: b.status || "new", source: b.source || "website", price_min: b.priceMin || 0, price_max: b.priceMax || 0, neighborhoods: b.neighborhoods || "", beds_min: b.bedsMin || 0, baths_min: b.bathsMin || 0, pre_approval: b.preApproval || "unknown", pre_approval_amount: b.preApprovalAmount || 0, timeline: b.timeline || "", property_address: b.propertyAddress || "", estimated_value: b.estimatedValue || 0, notes: b.notes || "", next_step: b.nextStep || "", next_step_date: b.nextStepDate || "", created_at: now(), updated_at: now() };
-      if (env.DB) await env.DB.prepare("INSERT INTO crm_leads (id,name,email,phone,intent,status,source,price_min,price_max,neighborhoods,beds_min,baths_min,pre_approval,pre_approval_amount,timeline,property_address,estimated_value,notes,next_step,next_step_date,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)").bind(r.id,r.name,r.email,r.phone,r.intent,r.status,r.source,r.price_min,r.price_max,r.neighborhoods,r.beds_min,r.baths_min,r.pre_approval,r.pre_approval_amount,r.timeline,r.property_address,r.estimated_value,r.notes,r.next_step,r.next_step_date,r.created_at,r.updated_at).run();
-      else mem.leads.push(r);
-      return json(dbToLead(r), 201);
-    }
+  // ── LEADS ─────────────────────────────────────────────────────────────
+  if (route === "/leads" && method === "GET") {
+    if (env.DB) { const { results } = await env.DB.prepare("SELECT * FROM crm_leads ORDER BY created_at DESC").all(); return json(results.map(dbToLead)); }
+    return json([...mem.leads].sort((a, b) => b.created_at.localeCompare(a.created_at)).map(dbToLead));
   }
-
-  const leadMatch = route.match(/^\/leads\/([^/]+)$/);
-  if (leadMatch) {
-    const id = leadMatch[1];
-    if (request.method === "PUT") {
+  if (route === "/leads" && method === "POST") {
+    const b = await request.json().catch(() => ({}));
+    const r = { id: uuid(), name: b.name||"", email: b.email||"", phone: b.phone||"", intent: b.intent||"buy", status: b.status||"new", source: b.source||"website", price_min: b.priceMin||0, price_max: b.priceMax||0, neighborhoods: b.neighborhoods||"", beds_min: b.bedsMin||0, baths_min: b.bathsMin||0, pre_approval: b.preApproval||"unknown", pre_approval_amount: b.preApprovalAmount||0, timeline: b.timeline||"", property_address: b.propertyAddress||"", estimated_value: b.estimatedValue||0, notes: b.notes||"", next_step: b.nextStep||"", next_step_date: b.nextStepDate||"", created_at: now(), updated_at: now() };
+    if (env.DB) await env.DB.prepare("INSERT INTO crm_leads (id,name,email,phone,intent,status,source,price_min,price_max,neighborhoods,beds_min,baths_min,pre_approval,pre_approval_amount,timeline,property_address,estimated_value,notes,next_step,next_step_date,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)").bind(r.id,r.name,r.email,r.phone,r.intent,r.status,r.source,r.price_min,r.price_max,r.neighborhoods,r.beds_min,r.baths_min,r.pre_approval,r.pre_approval_amount,r.timeline,r.property_address,r.estimated_value,r.notes,r.next_step,r.next_step_date,r.created_at,r.updated_at).run();
+    else mem.leads.push(r);
+    return json(dbToLead(r), 201);
+  }
+  const lm = route.match(/^\/leads\/([^/]+)$/);
+  if (lm) {
+    const id = lm[1];
+    if (method === "PUT") {
       const b = await request.json().catch(() => ({}));
-      const upd = { status: b.status, intent: b.intent, name: b.name, email: b.email, phone: b.phone, source: b.source, price_min: b.priceMin, price_max: b.priceMax, neighborhoods: b.neighborhoods, beds_min: b.bedsMin, baths_min: b.bathsMin, pre_approval: b.preApproval, pre_approval_amount: b.preApprovalAmount, timeline: b.timeline, property_address: b.propertyAddress, estimated_value: b.estimatedValue, notes: b.notes, next_step: b.nextStep, next_step_date: b.nextStepDate, updated_at: now() };
+      const upd = { name:b.name, email:b.email, phone:b.phone, intent:b.intent, status:b.status, source:b.source, price_min:b.priceMin, price_max:b.priceMax, neighborhoods:b.neighborhoods, beds_min:b.bedsMin, baths_min:b.bathsMin, pre_approval:b.preApproval, pre_approval_amount:b.preApprovalAmount, timeline:b.timeline, property_address:b.propertyAddress, estimated_value:b.estimatedValue, notes:b.notes, next_step:b.nextStep, next_step_date:b.nextStepDate, updated_at:now() };
       const fields = Object.entries(upd).filter(([,v]) => v !== undefined);
-      if (env.DB) { const sql = "UPDATE crm_leads SET " + fields.map(([k]) => `${k}=?`).join(",") + " WHERE id=?"; await env.DB.prepare(sql).bind(...fields.map(([,v]) => v), id).run(); const row = await env.DB.prepare("SELECT * FROM crm_leads WHERE id=?").bind(id).first(); return json(dbToLead(row)); }
+      if (env.DB) { await env.DB.prepare("UPDATE crm_leads SET " + fields.map(([k]) => `${k}=?`).join(",") + " WHERE id=?").bind(...fields.map(([,v]) => v), id).run(); return json(dbToLead(await env.DB.prepare("SELECT * FROM crm_leads WHERE id=?").bind(id).first())); }
       const i = mem.leads.findIndex(l => l.id === id); if (i < 0) return err("Not found", 404); fields.forEach(([k,v]) => { mem.leads[i][k] = v; }); return json(dbToLead(mem.leads[i]));
     }
-    if (request.method === "DELETE") {
-      if (env.DB) await env.DB.prepare("DELETE FROM crm_leads WHERE id=?").bind(id).run();
-      else mem.leads = mem.leads.filter(l => l.id !== id);
-      return json({ ok: true });
-    }
+    if (method === "DELETE") { if (env.DB) await env.DB.prepare("DELETE FROM crm_leads WHERE id=?").bind(id).run(); else mem.leads = mem.leads.filter(l => l.id !== id); return json({ ok: true }); }
   }
 
-  // ── TASKS ────────────────────────────────────────────────────────────
-  if (route === "/tasks") {
-    if (request.method === "GET") {
-      if (env.DB) { const { results } = await env.DB.prepare("SELECT * FROM crm_tasks ORDER BY due_date ASC, created_at DESC").all(); return json(results.map(dbToTask)); }
-      return json([...mem.tasks].sort((a, b) => (a.due_date || "").localeCompare(b.due_date || "")).map(dbToTask));
-    }
-    if (request.method === "POST") {
-      const b = await request.json().catch(() => ({}));
-      const r = { id: uuid(), title: b.title || "", type: b.type || "follow-up", lead_id: b.leadId || "", lead_name: b.leadName || "", due_date: b.dueDate || "", due_time: b.dueTime || "", priority: b.priority || "medium", completed: 0, notes: b.notes || "", created_at: now() };
-      if (env.DB) await env.DB.prepare("INSERT INTO crm_tasks (id,title,type,lead_id,lead_name,due_date,due_time,priority,completed,notes,created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)").bind(r.id,r.title,r.type,r.lead_id,r.lead_name,r.due_date,r.due_time,r.priority,r.completed,r.notes,r.created_at).run();
-      else mem.tasks.push(r);
-      return json(dbToTask(r), 201);
-    }
+  // ── TASKS ─────────────────────────────────────────────────────────────
+  if (route === "/tasks" && method === "GET") {
+    if (env.DB) { const { results } = await env.DB.prepare("SELECT * FROM crm_tasks ORDER BY due_date ASC, created_at DESC").all(); return json(results.map(dbToTask)); }
+    return json([...mem.tasks].sort((a,b)=>(a.due_date||"").localeCompare(b.due_date||"")).map(dbToTask));
   }
-
-  const taskMatch = route.match(/^\/tasks\/([^/]+)$/);
-  if (taskMatch) {
-    const id = taskMatch[1];
-    if (request.method === "PUT") {
+  if (route === "/tasks" && method === "POST") {
+    const b = await request.json().catch(() => ({}));
+    const r = { id:uuid(), title:b.title||"", type:b.type||"follow-up", lead_id:b.leadId||"", lead_name:b.leadName||"", due_date:b.dueDate||"", due_time:b.dueTime||"", priority:b.priority||"medium", completed:0, notes:b.notes||"", created_at:now() };
+    if (env.DB) await env.DB.prepare("INSERT INTO crm_tasks (id,title,type,lead_id,lead_name,due_date,due_time,priority,completed,notes,created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)").bind(r.id,r.title,r.type,r.lead_id,r.lead_name,r.due_date,r.due_time,r.priority,r.completed,r.notes,r.created_at).run();
+    else mem.tasks.push(r);
+    return json(dbToTask(r), 201);
+  }
+  const tm = route.match(/^\/tasks\/([^/]+)$/);
+  if (tm) {
+    const id = tm[1];
+    if (method === "PUT") {
       const b = await request.json().catch(() => ({}));
-      const upd = { title: b.title, type: b.type, lead_id: b.leadId, lead_name: b.leadName, due_date: b.dueDate, due_time: b.dueTime, priority: b.priority, completed: b.completed !== undefined ? (b.completed ? 1 : 0) : undefined, notes: b.notes };
+      const upd = { title:b.title, type:b.type, lead_id:b.leadId, lead_name:b.leadName, due_date:b.dueDate, due_time:b.dueTime, priority:b.priority, completed:b.completed!==undefined?(b.completed?1:0):undefined, notes:b.notes };
       const fields = Object.entries(upd).filter(([,v]) => v !== undefined);
-      if (env.DB) { const sql = "UPDATE crm_tasks SET " + fields.map(([k]) => `${k}=?`).join(",") + " WHERE id=?"; await env.DB.prepare(sql).bind(...fields.map(([,v]) => v), id).run(); const row = await env.DB.prepare("SELECT * FROM crm_tasks WHERE id=?").bind(id).first(); return json(dbToTask(row)); }
+      if (env.DB) { await env.DB.prepare("UPDATE crm_tasks SET " + fields.map(([k]) => `${k}=?`).join(",") + " WHERE id=?").bind(...fields.map(([,v]) => v), id).run(); return json(dbToTask(await env.DB.prepare("SELECT * FROM crm_tasks WHERE id=?").bind(id).first())); }
       const i = mem.tasks.findIndex(t => t.id === id); if (i < 0) return err("Not found", 404); fields.forEach(([k,v]) => { mem.tasks[i][k] = v; }); return json(dbToTask(mem.tasks[i]));
     }
-    if (request.method === "DELETE") {
-      if (env.DB) await env.DB.prepare("DELETE FROM crm_tasks WHERE id=?").bind(id).run();
-      else mem.tasks = mem.tasks.filter(t => t.id !== id);
-      return json({ ok: true });
-    }
+    if (method === "DELETE") { if (env.DB) await env.DB.prepare("DELETE FROM crm_tasks WHERE id=?").bind(id).run(); else mem.tasks = mem.tasks.filter(t => t.id !== id); return json({ ok: true }); }
   }
 
   // ── COMMISSIONS ───────────────────────────────────────────────────────
-  if (route === "/commissions") {
-    if (request.method === "GET") {
-      if (env.DB) { const { results } = await env.DB.prepare("SELECT * FROM crm_commissions ORDER BY created_at DESC").all(); return json(results.map(dbToComm)); }
-      return json([...mem.commissions].sort((a,b) => b.created_at.localeCompare(a.created_at)).map(dbToComm));
-    }
-    if (request.method === "POST") {
-      const b = await request.json().catch(() => ({}));
-      const r = { id: uuid(), lead_id: b.leadId || "", client_name: b.clientName || "", property_address: b.propertyAddress || "", sale_price: b.salePrice || 0, commission_rate: b.commissionRate || 3, commission_amount: b.commissionAmount || 0, status: b.status || "pending", close_date: b.closeDate || "", notes: b.notes || "", created_at: now() };
-      if (env.DB) await env.DB.prepare("INSERT INTO crm_commissions (id,lead_id,client_name,property_address,sale_price,commission_rate,commission_amount,status,close_date,notes,created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)").bind(r.id,r.lead_id,r.client_name,r.property_address,r.sale_price,r.commission_rate,r.commission_amount,r.status,r.close_date,r.notes,r.created_at).run();
-      else mem.commissions.push(r);
-      return json(dbToComm(r), 201);
-    }
+  if (route === "/commissions" && method === "GET") {
+    if (env.DB) { const { results } = await env.DB.prepare("SELECT * FROM crm_commissions ORDER BY created_at DESC").all(); return json(results.map(dbToComm)); }
+    return json([...mem.commissions].sort((a,b)=>b.created_at.localeCompare(a.created_at)).map(dbToComm));
   }
-
-  const commMatch = route.match(/^\/commissions\/([^/]+)$/);
-  if (commMatch) {
-    const id = commMatch[1];
-    if (request.method === "PUT") {
+  if (route === "/commissions" && method === "POST") {
+    const b = await request.json().catch(() => ({}));
+    const r = { id:uuid(), lead_id:b.leadId||"", client_name:b.clientName||"", property_address:b.propertyAddress||"", sale_price:b.salePrice||0, commission_rate:b.commissionRate||3, commission_amount:b.commissionAmount||0, status:b.status||"pending", close_date:b.closeDate||"", notes:b.notes||"", created_at:now() };
+    if (env.DB) await env.DB.prepare("INSERT INTO crm_commissions (id,lead_id,client_name,property_address,sale_price,commission_rate,commission_amount,status,close_date,notes,created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)").bind(r.id,r.lead_id,r.client_name,r.property_address,r.sale_price,r.commission_rate,r.commission_amount,r.status,r.close_date,r.notes,r.created_at).run();
+    else mem.commissions.push(r);
+    return json(dbToComm(r), 201);
+  }
+  const cm = route.match(/^\/commissions\/([^/]+)$/);
+  if (cm) {
+    const id = cm[1];
+    if (method === "PUT") {
       const b = await request.json().catch(() => ({}));
-      const upd = { lead_id: b.leadId, client_name: b.clientName, property_address: b.propertyAddress, sale_price: b.salePrice, commission_rate: b.commissionRate, commission_amount: b.commissionAmount, status: b.status, close_date: b.closeDate, notes: b.notes };
+      const upd = { lead_id:b.leadId, client_name:b.clientName, property_address:b.propertyAddress, sale_price:b.salePrice, commission_rate:b.commissionRate, commission_amount:b.commissionAmount, status:b.status, close_date:b.closeDate, notes:b.notes };
       const fields = Object.entries(upd).filter(([,v]) => v !== undefined);
-      if (env.DB) { const sql = "UPDATE crm_commissions SET " + fields.map(([k]) => `${k}=?`).join(",") + " WHERE id=?"; await env.DB.prepare(sql).bind(...fields.map(([,v]) => v), id).run(); const row = await env.DB.prepare("SELECT * FROM crm_commissions WHERE id=?").bind(id).first(); return json(dbToComm(row)); }
+      if (env.DB) { await env.DB.prepare("UPDATE crm_commissions SET " + fields.map(([k]) => `${k}=?`).join(",") + " WHERE id=?").bind(...fields.map(([,v]) => v), id).run(); return json(dbToComm(await env.DB.prepare("SELECT * FROM crm_commissions WHERE id=?").bind(id).first())); }
       const i = mem.commissions.findIndex(c => c.id === id); if (i < 0) return err("Not found", 404); fields.forEach(([k,v]) => { mem.commissions[i][k] = v; }); return json(dbToComm(mem.commissions[i]));
     }
-    if (request.method === "DELETE") {
-      if (env.DB) await env.DB.prepare("DELETE FROM crm_commissions WHERE id=?").bind(id).run();
-      else mem.commissions = mem.commissions.filter(c => c.id !== id);
-      return json({ ok: true });
+    if (method === "DELETE") { if (env.DB) await env.DB.prepare("DELETE FROM crm_commissions WHERE id=?").bind(id).run(); else mem.commissions = mem.commissions.filter(c => c.id !== id); return json({ ok: true }); }
+  }
+
+  // ── EVENTS ────────────────────────────────────────────────────────────
+  if (route === "/events" && method === "GET") {
+    if (env.DB) { const { results } = await env.DB.prepare("SELECT * FROM crm_events ORDER BY date ASC, time ASC").all(); return json(results.map(dbToEvent)); }
+    return json([...mem.events].sort((a,b)=>a.date.localeCompare(b.date)||a.time.localeCompare(b.time)).map(dbToEvent));
+  }
+  if (route === "/events" && method === "POST") {
+    const b = await request.json().catch(() => ({}));
+    const r = { id:uuid(), title:b.title||"", type:b.type||"appointment", date:b.date||"", time:b.time||"", end_time:b.endTime||"", lead_id:b.leadId||"", lead_name:b.leadName||"", location:b.location||"", notes:b.notes||"", created_at:now() };
+    if (env.DB) await env.DB.prepare("INSERT INTO crm_events (id,title,type,date,time,end_time,lead_id,lead_name,location,notes,created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)").bind(r.id,r.title,r.type,r.date,r.time,r.end_time,r.lead_id,r.lead_name,r.location,r.notes,r.created_at).run();
+    else mem.events.push(r);
+    return json(dbToEvent(r), 201);
+  }
+  const em = route.match(/^\/events\/([^/]+)$/);
+  if (em) {
+    const id = em[1];
+    if (method === "PUT") {
+      const b = await request.json().catch(() => ({}));
+      const upd = { title:b.title, type:b.type, date:b.date, time:b.time, end_time:b.endTime, lead_id:b.leadId, lead_name:b.leadName, location:b.location, notes:b.notes };
+      const fields = Object.entries(upd).filter(([,v]) => v !== undefined);
+      if (env.DB) { await env.DB.prepare("UPDATE crm_events SET " + fields.map(([k]) => `${k}=?`).join(",") + " WHERE id=?").bind(...fields.map(([,v]) => v), id).run(); return json(dbToEvent(await env.DB.prepare("SELECT * FROM crm_events WHERE id=?").bind(id).first())); }
+      const i = mem.events.findIndex(e => e.id === id); if (i < 0) return err("Not found", 404); fields.forEach(([k,v]) => { mem.events[i][k] = v; }); return json(dbToEvent(mem.events[i]));
     }
+    if (method === "DELETE") { if (env.DB) await env.DB.prepare("DELETE FROM crm_events WHERE id=?").bind(id).run(); else mem.events = mem.events.filter(e => e.id !== id); return json({ ok: true }); }
+  }
+
+  // ── TODOS ─────────────────────────────────────────────────────────────
+  if (route === "/todos" && method === "GET") {
+    if (env.DB) { const { results } = await env.DB.prepare("SELECT * FROM crm_todos ORDER BY completed ASC, created_at DESC").all(); return json(results.map(dbToTodo)); }
+    return json([...mem.todos].sort((a,b)=>a.completed-b.completed||b.created_at.localeCompare(a.created_at)).map(dbToTodo));
+  }
+  if (route === "/todos" && method === "POST") {
+    const b = await request.json().catch(() => ({}));
+    const r = { id:uuid(), title:b.title||"", category:b.category||"general", completed:0, due_date:b.dueDate||"", created_at:now() };
+    if (env.DB) await env.DB.prepare("INSERT INTO crm_todos (id,title,category,completed,due_date,created_at) VALUES (?,?,?,?,?,?)").bind(r.id,r.title,r.category,r.completed,r.due_date,r.created_at).run();
+    else mem.todos.push(r);
+    return json(dbToTodo(r), 201);
+  }
+  const tdm = route.match(/^\/todos\/([^/]+)$/);
+  if (tdm) {
+    const id = tdm[1];
+    if (method === "PUT") {
+      const b = await request.json().catch(() => ({}));
+      const upd = { title:b.title, category:b.category, completed:b.completed!==undefined?(b.completed?1:0):undefined, due_date:b.dueDate };
+      const fields = Object.entries(upd).filter(([,v]) => v !== undefined);
+      if (env.DB) { await env.DB.prepare("UPDATE crm_todos SET " + fields.map(([k]) => `${k}=?`).join(",") + " WHERE id=?").bind(...fields.map(([,v]) => v), id).run(); return json(dbToTodo(await env.DB.prepare("SELECT * FROM crm_todos WHERE id=?").bind(id).first())); }
+      const i = mem.todos.findIndex(t => t.id === id); if (i < 0) return err("Not found", 404); fields.forEach(([k,v]) => { mem.todos[i][k] = v; }); return json(dbToTodo(mem.todos[i]));
+    }
+    if (method === "DELETE") { if (env.DB) await env.DB.prepare("DELETE FROM crm_todos WHERE id=?").bind(id).run(); else mem.todos = mem.todos.filter(t => t.id !== id); return json({ ok: true }); }
+  }
+
+  // ── FILES ─────────────────────────────────────────────────────────────
+  if (route === "/files" && method === "GET") {
+    if (env.DB) { const { results } = await env.DB.prepare("SELECT * FROM crm_files ORDER BY created_at DESC").all(); return json(results.map(dbToFile)); }
+    return json([...mem.files].sort((a,b)=>b.created_at.localeCompare(a.created_at)).map(dbToFile));
+  }
+  if (route === "/files" && method === "POST") {
+    const b = await request.json().catch(() => ({}));
+    const r = { id:uuid(), name:b.name||"", category:b.category||"other", url:b.url||"", notes:b.notes||"", size:b.size||"", created_at:now() };
+    if (env.DB) await env.DB.prepare("INSERT INTO crm_files (id,name,category,url,notes,size,created_at) VALUES (?,?,?,?,?,?,?)").bind(r.id,r.name,r.category,r.url,r.notes,r.size,r.created_at).run();
+    else mem.files.push(r);
+    return json(dbToFile(r), 201);
+  }
+  const fm = route.match(/^\/files\/([^/]+)$/);
+  if (fm) {
+    const id = fm[1];
+    if (method === "PUT") {
+      const b = await request.json().catch(() => ({}));
+      const upd = { name:b.name, category:b.category, url:b.url, notes:b.notes, size:b.size };
+      const fields = Object.entries(upd).filter(([,v]) => v !== undefined);
+      if (env.DB) { await env.DB.prepare("UPDATE crm_files SET " + fields.map(([k]) => `${k}=?`).join(",") + " WHERE id=?").bind(...fields.map(([,v]) => v), id).run(); return json(dbToFile(await env.DB.prepare("SELECT * FROM crm_files WHERE id=?").bind(id).first())); }
+      const i = mem.files.findIndex(f => f.id === id); if (i < 0) return err("Not found", 404); fields.forEach(([k,v]) => { mem.files[i][k] = v; }); return json(dbToFile(mem.files[i]));
+    }
+    if (method === "DELETE") { if (env.DB) await env.DB.prepare("DELETE FROM crm_files WHERE id=?").bind(id).run(); else mem.files = mem.files.filter(f => f.id !== id); return json({ ok: true }); }
+  }
+
+  // ── CONTENT IDEAS ─────────────────────────────────────────────────────
+  if (route === "/content-ideas" && method === "GET") {
+    if (env.DB) { const { results } = await env.DB.prepare("SELECT * FROM crm_content_ideas WHERE pinned=1 ORDER BY created_at DESC").all(); return json(results.map(dbToIdea)); }
+    return json(mem.contentIdeas.filter(c => c.pinned).sort((a,b)=>b.created_at.localeCompare(a.created_at)).map(dbToIdea));
+  }
+  if (route === "/content-ideas" && method === "POST") {
+    const b = await request.json().catch(() => ({}));
+    const r = { id:uuid(), text:b.text||"", topic:b.topic||"", pinned:1, created_at:now() };
+    if (env.DB) await env.DB.prepare("INSERT INTO crm_content_ideas (id,text,topic,pinned,created_at) VALUES (?,?,?,?,?)").bind(r.id,r.text,r.topic,r.pinned,r.created_at).run();
+    else mem.contentIdeas.push(r);
+    return json(dbToIdea(r), 201);
+  }
+  const idm = route.match(/^\/content-ideas\/([^/]+)$/);
+  if (idm) {
+    const id = idm[1];
+    if (method === "DELETE") { if (env.DB) await env.DB.prepare("DELETE FROM crm_content_ideas WHERE id=?").bind(id).run(); else mem.contentIdeas = mem.contentIdeas.filter(c => c.id !== id); return json({ ok: true }); }
+  }
+
+  // ── AI: Content generation ────────────────────────────────────────────
+  if (route === "/ai/content" && method === "POST") {
+    const { topic } = await request.json().catch(() => ({}));
+    const prompt = topic || "Hawaii real estate tips for Oahu buyers and sellers";
+    const systemPrompt = `You are a social media expert for Mel Castanares, a REALTOR® in Honolulu, Oahu, Hawai'i (RS-84753, Dream Home Realty Hawai'i). Her Instagram is @mel.castanares.
+
+Generate exactly 4 engaging Instagram post captions for her. Each should:
+- Be ready to copy-paste
+- Include 1-2 relevant emojis
+- End with a call to action (DM, comment, or link in bio)
+- Include 3-5 hashtags at the end (#hawaiirealestate #oahurealtor etc.)
+- Be authentic and personable, not generic
+- Be 2-4 sentences max
+
+Topic: ${prompt}
+
+Return ONLY the 4 captions, separated by "|||" (three pipe characters). No numbering, no labels, no extra text.`;
+
+    const aiResponse = await runAI(env, [{ role: "user", content: systemPrompt }], 1200);
+    if (aiResponse) {
+      const ideas = aiResponse.split("|||").map(s => s.trim()).filter(Boolean).slice(0, 4);
+      return json({ ideas });
+    }
+    return json({ ideas: [
+      `🏡 Dreaming of owning a home in Oahu? The ${prompt.toLowerCase().includes("seller") ? "market" : "process"} might feel overwhelming, but I'm here to guide you every step of the way. DM me "HOME" to get started! #hawaiirealestate #oahurealtor #firsttimebuyer`,
+      `🌺 Local expertise matters. As an Oahu Realtor who lives and breathes this market, I know what it takes to find YOUR perfect home. Let's chat! 📲 Link in bio. #oahuhomes #honolulurealestate #alohastate`,
+      `💡 ${prompt.includes("tip") ? "Tip" : "Did you know"}? Understanding Hawaii's fee simple vs leasehold properties can save you thousands. Comment "INFO" and I'll explain! #hawaiirealestate #realestatetips #oahulife`,
+      `📊 Oahu market update: Homes are moving fast and inventory is tight. If you're thinking of buying or selling, NOW is the time to talk strategy. DM me today! 🤙 #oahurealtor #hawaiirealestate #mililani`,
+    ]});
+  }
+
+  // ── AI: Chat ──────────────────────────────────────────────────────────
+  if (route === "/ai/chat" && method === "POST") {
+    const { message, context } = await request.json().catch(() => ({}));
+    const systemPrompt = `You are Mel's real estate CRM assistant. Today is ${today()}.
+
+Mel Castanares is a REALTOR® (RS-84753) at Dream Home Realty Hawai'i in Oahu. Phone: (808) 285-8774. Instagram: @mel.castanares.
+
+Current data:
+- Total leads: ${context?.totalLeads ?? "unknown"}
+- Active leads: ${context?.activeLeadCount ?? "unknown"} — ${context?.activeLeads || "none"}
+- Overdue tasks: ${context?.overdueTasks || "none"}
+- Today's tasks: ${context?.todayTasks || "none"}
+- Upcoming calendar events: ${context?.events || "none"}
+
+You can help Mel with:
+1. Answering questions about her leads, tasks, and calendar
+2. Suggesting follow-up strategies for leads
+3. Instagram content ideas and hashtag suggestions
+4. Real estate market insights for Oahu
+5. Creating calendar events — if she asks to schedule something, reply with a JSON block at the end: {"action":"create_event","event":{"title":"...","type":"appointment|open-house|showing|closing|call|personal","date":"YYYY-MM-DD","time":"HH:MM","location":"..."}}
+
+Keep responses concise, warm, and actionable. Use 'Mahalo' or Aloha where natural.`;
+
+    const aiResponse = await runAI(env, [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: message }
+    ], 800);
+
+    if (aiResponse) {
+      // Try to extract action block
+      let action = undefined; let event = undefined;
+      const jsonMatch = aiResponse.match(/\{[\s\S]*"action"\s*:\s*"create_event"[\s\S]*\}/);
+      if (jsonMatch) {
+        try { const parsed = JSON.parse(jsonMatch[0]); action = parsed.action; event = parsed.event; } catch {}
+      }
+      const cleanMessage = aiResponse.replace(/\{[\s\S]*"action"\s*:\s*"create_event"[\s\S]*\}/, "").trim();
+      return json({ message: cleanMessage, action, event });
+    }
+
+    // Fallback (no AI binding)
+    const lower = message.toLowerCase();
+    if (lower.includes("lead") || lower.includes("contact")) return json({ message: `You currently have ${context?.totalLeads ?? 0} leads, with ${context?.activeLeadCount ?? 0} active in your pipeline. Your active leads include: ${context?.activeLeads || "none yet"}. Would you like to add a new lead or update someone's status?` });
+    if (lower.includes("task") || lower.includes("overdue")) return json({ message: `Today's tasks: ${context?.todayTasks || "none"}. Overdue: ${context?.overdueTasks || "none"}. Head to the Tasks page to check them off!` });
+    if (lower.includes("calendar") || lower.includes("event") || lower.includes("schedule")) return json({ message: `Your upcoming events: ${context?.events || "nothing scheduled yet"}. Head to the Calendar page to add or manage events!` });
+    if (lower.includes("instagram") || lower.includes("post") || lower.includes("content")) return json({ message: "Head to the Social page to generate Instagram content ideas with AI! Your best posting time is Saturday at 8am, and your top hashtags are #hawaiirealestate and #oahurealtor. 🌺" });
+    return json({ message: "Mahalo for reaching out! Deploy to Cloudflare Pages and add the AI binding to enable the full AI assistant. In the meantime, I can answer basic questions about your leads, tasks, and calendar!" });
   }
 
   return err("Not found", 404);
-}
-
-// ── DB → JS mappers ───────────────────────────────────────────────────
-function dbToLead(r) {
-  return { id: r.id, name: r.name || "", email: r.email || "", phone: r.phone || "", intent: r.intent || "buy", status: r.status || "new", source: r.source || "website", priceMin: r.price_min || 0, priceMax: r.price_max || 0, neighborhoods: r.neighborhoods || "", bedsMin: r.beds_min || 0, bathsMin: r.baths_min || 0, preApproval: r.pre_approval || "unknown", preApprovalAmount: r.pre_approval_amount || 0, timeline: r.timeline || "", propertyAddress: r.property_address || "", estimatedValue: r.estimated_value || 0, notes: r.notes || "", nextStep: r.next_step || "", nextStepDate: r.next_step_date || "", createdAt: r.created_at || now(), updatedAt: r.updated_at || now() };
-}
-function dbToTask(r) {
-  return { id: r.id, title: r.title || "", type: r.type || "follow-up", leadId: r.lead_id || "", leadName: r.lead_name || "", dueDate: r.due_date || "", dueTime: r.due_time || "", priority: r.priority || "medium", completed: r.completed === 1 || r.completed === true, notes: r.notes || "", createdAt: r.created_at || now() };
-}
-function dbToComm(r) {
-  return { id: r.id, leadId: r.lead_id || "", clientName: r.client_name || "", propertyAddress: r.property_address || "", salePrice: r.sale_price || 0, commissionRate: r.commission_rate || 3, commissionAmount: r.commission_amount || 0, status: r.status || "pending", closeDate: r.close_date || "", notes: r.notes || "", createdAt: r.created_at || now() };
 }
