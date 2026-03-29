@@ -53,33 +53,61 @@ function parseListings(html) {
     // Address parts
     const street = extractText(cell, "resultsCellAddress");
     const cityStateZip = extractText(cell, "resultsCellCityStateZip");
+
+    // Parse "Honolulu, HI 96813" → city, state, zip
+    const csvParts = cityStateZip.match(/^(.+),\s*([A-Z]{2})\s+(\d{5}(?:-\d{4})?)\s*$/);
+    const city = csvParts ? csvParts[1].trim() : cityStateZip;
+    const state = csvParts ? csvParts[2] : "HI";
+    const zip = csvParts ? csvParts[3] : "";
+
     const address = street || cityStateZip
       ? [street, cityStateZip].filter(Boolean).join(", ")
       : "";
 
-    // Stats
-    const beds = parseInt(extractText(cell, "resultsBeds") || "0", 10);
-    const baths = parseFloat(extractText(cell, "resultsBaths") || "0");
-    const sqft = parseInt((extractText(cell, "resultsSqFt") || "0").replace(/,/g, ""), 10);
+    // Stats — try multiple IDX class name variants
+    const beds = parseInt(extractText(cell, "resultsBeds") || extractText(cell, "Beds") || "0", 10);
+    const baths = parseFloat(extractText(cell, "resultsBaths") || extractText(cell, "Baths") || "0");
+    const sqft = parseInt((extractText(cell, "resultsSqFt") || extractText(cell, "SqFt") || "0").replace(/,/g, ""), 10);
 
     // MLS# and brokerage
     const mlsMatch = cell.match(/MLS[#:\s]+([A-Z0-9]+)/i);
-    const mlsNumber = mlsMatch?.[1] ?? listingId;
-    const brokerage = extractText(cell, "MLSCourtesy") || extractText(cell, "resultsCourtesy") || "";
+    const mlsNum = mlsMatch?.[1] ?? listingId;
+    const courtesy = extractText(cell, "MLSCourtesy") || extractText(cell, "resultsCourtesy") || "";
+
+    // Formatted price for display
+    const priceText = price >= 1000000
+      ? `$${(price / 1000000).toFixed(price >= 10000000 ? 1 : 2)}M`
+      : price >= 1000
+        ? `$${(price / 1000).toFixed(0)}K`
+        : price > 0 ? `$${price.toLocaleString()}` : "";
+
+    // Make listingUrl absolute
+    const absUrl = listingUrl.startsWith("http")
+      ? listingUrl
+      : listingUrl
+        ? `https://shopoahuproperties.idxbroker.com${listingUrl.startsWith("/") ? "" : "/"}${listingUrl}`
+        : "";
 
     if (!address && !price) continue;
 
     listings.push({
       id: listingId,
-      mlsNumber,
+      mlsNum,
+      mlsNumber: mlsNum,
       price,
-      address,
+      priceText,
+      address: street || address,
+      city,
+      state,
+      zip,
       beds,
       baths,
       sqft,
       photo,
-      listingUrl,
-      brokerage,
+      listingUrl: absUrl,
+      courtesy,
+      brokerage: courtesy,
+      status: "Active",
       idxId,
       lat,
       lng,
