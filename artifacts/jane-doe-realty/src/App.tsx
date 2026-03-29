@@ -1126,6 +1126,7 @@ function HomePage({ setPage }) {
               { label: "Browse O'ahu Listings", sub: "500+ active properties on HI Central MLS", page: "properties", img: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&q=80" },
               { label: "Available Rentals", sub: "Managed by Dream Home Realty", url: "https://dreamhomerlty.appfolio.com/listings/", img: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80" },
               { label: "Open Houses", sub: "This week on O'ahu", url: "https://propertysearch.hicentral.com/HBR/OpenHouses/?/Results/HotSheet/d///", img: "https://images.unsplash.com/photo-1507089947368-19c1da9775ae?w=800&q=80" },
+              { label: "Recently Listed on MLS", sub: "New O'ahu listings from HI Central", page: "properties", img: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&q=80" },
             ].map((item: any, i) => {
               const sharedStyle: React.CSSProperties = {
                 display: "block", position: "relative", overflow: "hidden",
