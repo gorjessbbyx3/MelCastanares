@@ -14,13 +14,23 @@ const CORS = {
   "Access-Control-Allow-Headers": "Content-Type",
 };
 
-function extractText(html, className) {
-  const re = new RegExp(
-    `class="IDX-${className}[^"]*"[^>]*>([\\s\\S]*?)<\\/(?:span|div)>`,
-    "i"
-  );
+// Extract the value text from a span with a given class (no nesting needed)
+function extractSpan(html, spanClass) {
+  const re = new RegExp(`class="IDX-${spanClass}[^"]*"[^>]*>([^<]*)`, "i");
   const m = html.match(re);
-  return m ? m[1].replace(/<[^>]+>/g, "").replace(/&[a-z#0-9]+;/g, " ").trim() : "";
+  return m ? m[1].replace(/&[a-z#0-9]+;/g, " ").trim() : "";
+}
+
+// Extract the value from inside an IDX field div:
+// <div class="IDX-field-X ..."><span class="IDX-label">Label</span><span class="IDX-text|IDX-resultsText">VALUE</span></div>
+function extractFieldValue(html, fieldClass) {
+  const fieldRe = new RegExp(`class="IDX-${fieldClass}[^"]*"[^>]*>([\\s\\S]*?)</div>`, "i");
+  const fieldMatch = html.match(fieldRe);
+  if (!fieldMatch) return "";
+  const inner = fieldMatch[1];
+  const valRe = /class="IDX-(?:resultsText|text)"[^>]*>([^<]*)/i;
+  const valMatch = inner.match(valRe);
+  return valMatch ? valMatch[1].replace(/&[a-z#0-9]+;/g, " ").trim() : "";
 }
 
 function extractAttr(html, attr) {
@@ -42,46 +52,52 @@ function parseListings(html) {
     const lng = cell.match(/data-lng="([^"]+)"/)?.[1] ?? "";
     const idxId = cell.match(/data-idxid="([^"]+)"/)?.[1] ?? "";
 
-    // Photo
+    // Photo — src is on the img tag
     const photoMatch = cell.match(/class="IDX-resultsPhotoImg[^"]*"[\s\S]*?src="([^"]+)"/);
     const photo = photoMatch?.[1] ?? "";
 
-    // Listing detail URL
-    const linkMatch = cell.match(/class="IDX-resultsPhotoLink[^"]*"[^>]*href="([^"]+)"/);
+    // Listing detail URL — from the photo or address link
+    const linkMatch = cell.match(/class="IDX-resultsPhotoLink[^"]*"[^>]*href="([^"]+)"/)
+      || cell.match(/class="IDX-resultsAddressLink[^"]*"[^>]*href="([^"]+)"/);
     const listingUrl = linkMatch?.[1] ?? "";
 
-    // Address parts
-    const street = extractText(cell, "resultsCellAddress");
-    const cityStateZip = extractText(cell, "resultsCellCityStateZip");
+    // Address — IDX Broker splits into individual span classes
+    const addrNum  = extractSpan(cell, "resultsAddressNumber");   // "7533 "
+    const addrDir  = extractSpan(cell, "resultsAddressDirection"); // "N " or ""
+    const addrName = extractSpan(cell, "resultsAddressName");      // "Kamaomao Place"
+    const addrUnit = extractSpan(cell, "resultsAddressUnitNumber");// "#904" or ""
+    const city     = extractSpan(cell, "resultsAddressCity");      // "Honolulu"
+    const state    = extractSpan(cell, "resultsAddressStateAbrv"); // "HI"
+    const zip      = extractSpan(cell, "resultsAddressZip");       // "96825"
 
-    // Parse "Honolulu, HI 96813" → city, state, zip
-    const csvParts = cityStateZip.match(/^(.+),\s*([A-Z]{2})\s+(\d{5}(?:-\d{4})?)\s*$/);
-    const city = csvParts ? csvParts[1].trim() : cityStateZip;
-    const state = csvParts ? csvParts[2] : "HI";
-    const zip = csvParts ? csvParts[3] : "";
+    const streetParts = [addrNum, addrDir, addrName, addrUnit].map(s => s.trim()).filter(Boolean);
+    const street = streetParts.join(" ");
+    const cityLine = [city, state].filter(Boolean).join(", ") + (zip ? ` ${zip}` : "");
+    const address = [street, cityLine].filter(Boolean).join(", ");
 
-    const address = street || cityStateZip
-      ? [street, cityStateZip].filter(Boolean).join(", ")
-      : "";
+    // Beds / baths / sqft — values live in IDX-resultsText or IDX-text inside the field div
+    const beds = parseInt(extractFieldValue(cell, "field-bedrooms") || "0", 10);
+    const baths = parseFloat(extractFieldValue(cell, "field-totalBaths") || extractFieldValue(cell, "field-fullBaths") || "0");
+    const sqftRaw = extractFieldValue(cell, "field-sqFt").replace(/,/g, "");
+    const sqft = parseInt(sqftRaw || "0", 10);
 
-    // Stats — try multiple IDX class name variants
-    const beds = parseInt(extractText(cell, "resultsBeds") || extractText(cell, "Beds") || "0", 10);
-    const baths = parseFloat(extractText(cell, "resultsBaths") || extractText(cell, "Baths") || "0");
-    const sqft = parseInt((extractText(cell, "resultsSqFt") || extractText(cell, "SqFt") || "0").replace(/,/g, ""), 10);
+    // Status
+    const status = extractFieldValue(cell, "field-propStatus") || "Active";
 
-    // MLS# and brokerage
-    const mlsMatch = cell.match(/MLS[#:\s]+([A-Z0-9]+)/i);
-    const mlsNum = mlsMatch?.[1] ?? listingId;
-    const courtesy = extractText(cell, "MLSCourtesy") || extractText(cell, "resultsCourtesy") || "";
+    // MLS# — embed in listing cell as IDX-field-listingID or fallback to id
+    const mlsNum = extractFieldValue(cell, "field-listingID") || listingId;
 
-    // Formatted price for display
+    // Courtesy — strip "Listing courtesy of" prefix if present
+    const courtesyRaw = extractSpan(cell, "MLSCourtesy");
+    const courtesy = courtesyRaw.replace(/^listing courtesy of\s*/i, "").trim();
+
+    // Formatted price (data-price is raw integer)
     const priceText = price >= 1000000
-      ? `$${(price / 1000000).toFixed(price >= 10000000 ? 1 : 2)}M`
+      ? `$${(price / 1000000).toFixed(price % 1000000 === 0 ? 1 : 2)}M`
       : price >= 1000
         ? `$${(price / 1000).toFixed(0)}K`
         : price > 0 ? `$${price.toLocaleString()}` : "";
 
-    // Make listingUrl absolute
     const absUrl = listingUrl.startsWith("http")
       ? listingUrl
       : listingUrl
@@ -96,7 +112,7 @@ function parseListings(html) {
       mlsNumber: mlsNum,
       price,
       priceText,
-      address: street || address,
+      address: street,
       city,
       state,
       zip,
@@ -107,7 +123,7 @@ function parseListings(html) {
       listingUrl: absUrl,
       courtesy,
       brokerage: courtesy,
-      status: "Active",
+      status,
       idxId,
       lat,
       lng,
