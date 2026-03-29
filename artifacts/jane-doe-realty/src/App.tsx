@@ -1812,9 +1812,10 @@ function ListingFramePage({ setPage }) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
-    const timer = setTimeout(() => { if (!loaded) setBlocked(true); }, 6000);
+    if (!url) { setBlocked(true); return; }
+    const timer = setTimeout(() => { if (!loaded) setBlocked(true); }, 4000);
     return () => clearTimeout(timer);
-  }, [loaded]);
+  }, [url, loaded]);
 
   const go = (pg: string) => { setPage(pg); window.scrollTo({ top: 0, behavior: "smooth" }); };
 
@@ -4056,9 +4057,9 @@ function Footer({ setPage }) {
 
 function FloatingActions({ setPage }) {
   const [chatOpen, setChatOpen] = useState(false);
-  const [dockMin, setDockMin] = useState(false);
+  const [contactOpen, setContactOpen] = useState(false);
   const [messages, setMessages] = useState([
-    { role: "assistant", content: "Aloha! 🌺 Welcome! I'm Mel's AI assistant — here to help with anything about O'ahu real estate, neighborhoods, buying, or selling. What brings you here today?" }
+    { role: "assistant", content: "Aloha! 🌺 I'm Mel's AI assistant. Ask me about buying or selling a home in Hawai'i, O'ahu neighborhoods, or anything real estate!" }
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -4067,16 +4068,6 @@ function FloatingActions({ setPage }) {
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
   useEffect(() => { if (chatOpen && inputRef.current) inputRef.current.focus(); }, [chatOpen]);
-
-  // Auto-open AI chat on first visit of the session
-  useEffect(() => {
-    let t: ReturnType<typeof setTimeout> | undefined;
-    if (!sessionStorage.getItem("mel_welcomed")) {
-      sessionStorage.setItem("mel_welcomed", "1");
-      t = setTimeout(() => setChatOpen(true), 2800);
-    }
-    return () => { if (t) clearTimeout(t); };
-  }, []);
 
   useEffect(() => {
     const handler = async (e: CustomEvent) => {
@@ -4095,6 +4086,7 @@ function FloatingActions({ setPage }) {
       setMessages(newMsgs);
       setInput("");
       setChatOpen(true);
+      setContactOpen(false);
       setLoading(true);
 
       try {
@@ -4169,85 +4161,60 @@ function FloatingActions({ setPage }) {
   return (
     <>
       <style>{`
-        @keyframes onlinePulse { 0%,100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.5); } 50% { box-shadow: 0 0 0 7px rgba(34,197,94,0); } }
-        @keyframes chatSlideIn { from { opacity: 0; transform: translateY(16px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        .float-btn { position: fixed; right: 24px; z-index: 1000; width: 56px; height: 56px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s; box-shadow: 0 6px 24px rgba(0,0,0,0.15); }
+        .float-btn:hover { transform: scale(1.08); }
+        .float-contact { bottom: 24px; background: ${BRAND.gold}; color: #fff; }
+        .float-contact:hover { box-shadow: 0 8px 32px ${BRAND.gold}44; }
+        .float-chat-wrap { position: fixed; right: 24px; bottom: 96px; z-index: 1000; }
+        .float-chat-wrap .float-btn { position: relative; right: auto; bottom: auto; background: linear-gradient(135deg, ${BRAND.teal}, ${BRAND.tealLight}); color: #fff; }
+        .float-chat-wrap .float-btn:hover { box-shadow: 0 8px 32px ${BRAND.teal}44; }
+        .online-dot { position: absolute; top: 2px; right: 2px; width: 13px; height: 13px; border-radius: 50%; background: #22C55E; border: 2px solid #fff; animation: onlinePulse 2s ease-in-out infinite; }
+        @keyframes onlinePulse { 0%,100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.4); } 50% { box-shadow: 0 0 0 6px rgba(34,197,94,0); } }
+        .contact-popup { position: fixed; bottom: 88px; right: 24px; z-index: 999; background: ${BRAND.bgCard}; border: 1px solid ${BRAND.border}; border-radius: 16px; padding: 20px; width: 260px; box-shadow: 0 16px 48px rgba(0,0,0,0.1); animation: chatSlideIn 0.3s ease; }
+        .contact-popup a { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 10px; text-decoration: none; color: ${BRAND.text}; font-size: 14px; font-weight: 500; transition: background 0.2s; }
+        .contact-popup a:hover { background: ${BRAND.bgElevated}; }
+        .chat-window { position: fixed; bottom: 164px; right: 24px; z-index: 999; width: 380px; max-width: calc(100vw - 48px); height: 520px; max-height: calc(100vh - 200px); background: ${BRAND.bgCard}; border: 1px solid ${BRAND.border}; border-radius: 16px; box-shadow: 0 24px 80px rgba(0,0,0,0.12); display: flex; flex-direction: column; overflow: hidden; animation: chatSlideIn 0.35s cubic-bezier(0.22,1,0.36,1); }
+        @keyframes chatSlideIn { from { opacity: 0; transform: translateY(20px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
         @keyframes chatDot { 0%,100% { transform: translateY(0); opacity: 0.4; } 50% { transform: translateY(-4px); opacity: 1; } }
-        @keyframes dockIn { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        @keyframes fPulse { 0%,100% { box-shadow: 0 4px 20px rgba(20,184,166,0.4); } 50% { box-shadow: 0 4px 20px rgba(20,184,166,0.4), 0 0 0 12px rgba(20,184,166,0); } }
-        .dock-btn-action { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 11px 8px; border-radius: 12px; font-weight: 600; font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.2s; text-decoration: none; border: none; }
-        .dock-btn-action:hover { filter: brightness(1.08); transform: translateY(-1px); }
       `}</style>
 
-      {/* ── Bottom Contact Dock ── */}
-      {!dockMin ? (
-        <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 1000, background: "rgba(255,255,255,0.97)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", borderTop: `1px solid ${BRAND.border}`, boxShadow: "0 -4px 30px rgba(0,0,0,0.09)", padding: "10px 16px 10px", animation: "dockIn 0.4s ease" }}>
-          <div style={{ maxWidth: 620, margin: "0 auto", display: "flex", gap: 8, alignItems: "center" }}>
+      {/* ── Gold contact button ── */}
+      <button className="float-btn float-contact" onClick={() => { setContactOpen(!contactOpen); setChatOpen(false); }} aria-label="Contact Mel">
+        <Phone size={22} />
+      </button>
 
-            {/* Call */}
-            <a href="tel:+18082858774" className="dock-btn-action" style={{ flex: 1, background: BRAND.teal, color: "#fff" }}>
-              <Phone size={15} /> Call
-            </a>
-
-            {/* Text */}
-            <a href="sms:+18082858774" className="dock-btn-action" style={{ flex: 1, background: `${BRAND.teal}14`, color: BRAND.teal, border: `1px solid ${BRAND.teal}28` }}>
-              <MessageCircle size={15} /> Text
-            </a>
-
-            {/* Email */}
-            <a href="mailto:mel@homesweethomehawaii.com" className="dock-btn-action" style={{ flex: 1, background: `${BRAND.gold}14`, color: BRAND.gold, border: `1px solid ${BRAND.gold}28` }}>
-              <Mail size={15} /> Email
-            </a>
-
-            {/* Ask AI — with online dot ON TOP */}
-            <div style={{ flex: 1, position: "relative" }}>
-              <button className="dock-btn-action" onClick={() => setChatOpen(c => !c)}
-                style={{ width: "100%", background: chatOpen ? BRAND.tealDark : `linear-gradient(135deg, ${BRAND.teal}, ${BRAND.tealLight})`, color: "#fff" }}>
-                {chatOpen ? <X size={15} /> : <MessageCircle size={15} />} Ask AI
-              </button>
-              {/* Online dot — positioned on top of the button */}
-              <div style={{ position: "absolute", top: -5, right: -5, width: 13, height: 13, borderRadius: "50%", background: "#22C55E", border: "2.5px solid #fff", animation: "onlinePulse 2s ease-in-out infinite", zIndex: 1, pointerEvents: "none" }} />
-            </div>
-
-            {/* Minimize chevron */}
-            <button onClick={() => setDockMin(true)} style={{ width: 40, height: 40, borderRadius: 10, border: `1px solid ${BRAND.border}`, background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, color: BRAND.textDim }}>
-              <ChevronDown size={17} />
-            </button>
-          </div>
-        </div>
-      ) : (
-        /* Minimized — single pulsing button bottom-right */
-        <div style={{ position: "fixed", bottom: 20, right: 20, zIndex: 1000 }}>
-          <div style={{ position: "relative" }}>
-            <button onClick={() => setDockMin(false)} aria-label="Open contact options"
-              style={{ width: 54, height: 54, borderRadius: "50%", border: "none", background: `linear-gradient(135deg, ${BRAND.teal}, ${BRAND.tealDark})`, color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", animation: "fPulse 2.5s ease-in-out infinite" }}>
-              <Phone size={22} />
-            </button>
-            {/* Online dot on top of minimized button */}
-            <div style={{ position: "absolute", top: -4, right: -4, width: 13, height: 13, borderRadius: "50%", background: "#22C55E", border: "2.5px solid #fff", animation: "onlinePulse 2s ease-in-out infinite", zIndex: 1 }} />
-          </div>
+      {/* ── Contact quick-actions popup ── */}
+      {contactOpen && (
+        <div className="contact-popup">
+          <div style={{ fontSize: 12, color: BRAND.textDim, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 8, paddingLeft: 16 }}>Quick Contact</div>
+          <a href="tel:+18082858774">
+            <div style={{ width: 36, height: 36, borderRadius: 10, background: `${BRAND.teal}15`, display: "flex", alignItems: "center", justifyContent: "center" }}><Phone size={16} color={BRAND.teal} /></div>
+            <div><div style={{ fontWeight: 600 }}>Call Mel</div><div style={{ fontSize: 12, color: BRAND.textDim }}>(808) 285-8774</div></div>
+          </a>
+          <a href="mailto:mel@homesweethomehawaii.com">
+            <div style={{ width: 36, height: 36, borderRadius: 10, background: `${BRAND.gold}15`, display: "flex", alignItems: "center", justifyContent: "center" }}><Mail size={16} color={BRAND.gold} /></div>
+            <div><div style={{ fontWeight: 600 }}>Email Mel</div><div style={{ fontSize: 12, color: BRAND.textDim }}>mel@homesweethome…</div></div>
+          </a>
+          <a href="https://www.instagram.com/mel.castanares?igsh=M2J5eTVqdnhyZ2sx" target="_blank" rel="noopener noreferrer">
+            <div style={{ width: 36, height: 36, borderRadius: 10, background: "rgba(214,41,118,0.1)", display: "flex", alignItems: "center", justifyContent: "center" }}><Instagram size={16} color="#D62976" /></div>
+            <div><div style={{ fontWeight: 600 }}>Instagram</div><div style={{ fontSize: 12, color: BRAND.textDim }}>@mel.castanares</div></div>
+          </a>
         </div>
       )}
 
-      {/* ── AI Chat Window ── */}
+      {/* ── Teal AI chat button with online dot ── */}
+      <div className="float-chat-wrap">
+        <div style={{ position: "relative" }}>
+          <button className="float-btn" onClick={() => { setChatOpen(!chatOpen); setContactOpen(false); }} aria-label="Chat with Mel's AI">
+            {chatOpen ? <X size={22} /> : <MessageCircle size={22} />}
+          </button>
+          <div className="online-dot" />
+        </div>
+      </div>
+
+      {/* ── AI Chat window ── */}
       {chatOpen && (
-        <div style={{
-          position: "fixed",
-          bottom: dockMin ? 84 : 76,
-          right: 16,
-          zIndex: 999,
-          width: 380,
-          maxWidth: "calc(100vw - 32px)",
-          height: 500,
-          maxHeight: "calc(100vh - 120px)",
-          background: BRAND.bgCard,
-          border: `1px solid ${BRAND.border}`,
-          borderRadius: 16,
-          boxShadow: "0 24px 80px rgba(0,0,0,0.14)",
-          display: "flex",
-          flexDirection: "column",
-          overflow: "hidden",
-          animation: "chatSlideIn 0.35s cubic-bezier(0.22,1,0.36,1)",
-        }}>
+        <div className="chat-window">
           {/* Header */}
           <div style={{ padding: "13px 16px", background: `linear-gradient(135deg, ${BRAND.teal}, ${BRAND.tealDark})`, color: "#fff", display: "flex", alignItems: "center", gap: 11, flexShrink: 0 }}>
             <img src="/images/mel-headshot.jpg" alt="Mel" style={{ width: 34, height: 34, borderRadius: "50%", objectFit: "cover", border: "2px solid rgba(255,255,255,0.3)" }} />
@@ -4282,7 +4249,6 @@ function FloatingActions({ setPage }) {
             <div ref={endRef} />
           </div>
 
-          {/* Quick prompts */}
           {messages.length <= 2 && (
             <div style={{ padding: "0 14px 6px", display: "flex", gap: 6, flexWrap: "wrap" }}>
               {["What neighborhoods?", "Down payment?", "About Mel"].map((q, i) => (
@@ -4291,14 +4257,10 @@ function FloatingActions({ setPage }) {
             </div>
           )}
 
-          {/* Input */}
           <div style={{ padding: "10px 14px", borderTop: `1px solid ${BRAND.border}`, display: "flex", gap: 8, flexShrink: 0 }}>
-            <input ref={inputRef} value={input} onChange={e => setInput(e.target.value)}
-              onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
-              placeholder="Ask about Hawai'i real estate..."
-              style={{ flex: 1, padding: "9px 12px", borderRadius: 10, border: `1px solid ${BRAND.border}`, background: BRAND.bgElevated, color: BRAND.text, fontSize: 13, outline: "none", fontFamily: "'DM Sans'" }} />
-            <button onClick={sendMessage} disabled={loading || !input.trim()}
-              style={{ width: 38, height: 38, borderRadius: 10, border: "none", background: input.trim() ? BRAND.teal : BRAND.bgElevated, color: input.trim() ? "#fff" : BRAND.textDim, cursor: input.trim() ? "pointer" : "default", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <input ref={inputRef} value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
+              placeholder="Ask about Hawai'i real estate..." style={{ flex: 1, padding: "9px 12px", borderRadius: 10, border: `1px solid ${BRAND.border}`, background: BRAND.bgElevated, color: BRAND.text, fontSize: 13, outline: "none", fontFamily: "'DM Sans'" }} />
+            <button onClick={sendMessage} disabled={loading || !input.trim()} style={{ width: 38, height: 38, borderRadius: 10, border: "none", background: input.trim() ? BRAND.teal : BRAND.bgElevated, color: input.trim() ? "#fff" : BRAND.textDim, cursor: input.trim() ? "pointer" : "default", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
               <Send size={15} />
             </button>
           </div>
