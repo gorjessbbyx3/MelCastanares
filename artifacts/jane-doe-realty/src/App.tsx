@@ -547,12 +547,18 @@ const GlobalStyles = () => (
       /* Floating action buttons: smaller on mobile */
       .fab-phone { width: 48px !important; height: 48px !important; }
       .fab-chat { width: 48px !important; height: 48px !important; }
+      /* Relocation timeline: 1 col on small mobile */
+      .grid-timeline { grid-template-columns: 1fr !important; }
+      /* Map search bottom bar: stack on mobile */
+      .map-search-actions { grid-template-columns: 1fr !important; }
     }
 
     /* ── TABLET ── */
     @media(max-width:768px) {
       /* Relocation / cost grids: 1 col on tablet */
       .grid-min-300 { grid-template-columns: 1fr !important; }
+      /* Relocation 4-step timeline: 2 cols on tablet */
+      .grid-timeline { grid-template-columns: repeat(2, 1fr) !important; }
       /* CTA band padding */
       .cta-band { padding: 40px 20px !important; }
     }
@@ -608,7 +614,7 @@ function Nav({ page, setPage }) {
               src="/images/mel-logo.png"
               alt="Mel Castanares Realtor"
               style={{
-                height: isScrolled ? 68 : 92,
+                height: isScrolled ? 88 : 120,
                 width: "auto",
                 filter: isScrolled ? "none" : "invert(1) brightness(10)",
                 transition: "height 0.5s cubic-bezier(0.22,1,0.36,1), filter 0.5s cubic-bezier(0.22,1,0.36,1)",
@@ -710,6 +716,196 @@ function Nav({ page, setPage }) {
 }
 
 // ─────────────────────────────────────────────
+// MAP SEARCH BAR (landing page location search)
+// ─────────────────────────────────────────────
+
+const OAHU_NEIGHBORHOODS = [
+  { id: "mililani", label: "Mililani", hint: "Best schools · Central O'ahu" },
+  { id: "ewa-beach", label: "Ewa Beach / Kapolei", hint: "New builds · Best value" },
+  { id: "pearl-city", label: "Pearl City / Aiea", hint: "Central access · Pearl Harbor views" },
+  { id: "kaneohe", label: "Kāne'ohe", hint: "Windward · Ko'olau mountains" },
+  { id: "kailua", label: "Kailua", hint: "Kailua Beach · Lanikai paradise" },
+  { id: "kaimuki", label: "Kaimuki", hint: "Diamond Head · Best food scene" },
+  { id: "hawaii-kai", label: "Hawai'i Kai", hint: "Marina living · Koko Head" },
+  { id: "north-shore", label: "North Shore", hint: "Haleiwa · Surf culture" },
+];
+
+function MapSearchBar({ go }) {
+  const [query, setQuery] = useState("");
+  const [open, setOpen] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const filtered = query.trim().length > 0
+    ? OAHU_NEIGHBORHOODS.filter(n =>
+        n.label.toLowerCase().includes(query.toLowerCase()) ||
+        n.hint.toLowerCase().includes(query.toLowerCase())
+      )
+    : OAHU_NEIGHBORHOODS;
+
+  const handleSelect = (id: string) => {
+    setQuery("");
+    setOpen(false);
+    go("neighborhoods");
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent("selectNeighborhood", { detail: { id } }));
+    }, 100);
+  };
+
+  return (
+    <section style={{ paddingTop: 0, paddingBottom: 0, position: "relative", zIndex: 10 }}>
+      <div className="section-pad" style={{ paddingTop: 0, paddingBottom: 0, maxWidth: 1100, margin: "0 auto" }}>
+        <div style={{
+          background: BRAND.bgCard,
+          border: `1px solid ${BRAND.border}`,
+          boxShadow: "0 8px 40px rgba(0,0,0,0.22)",
+          overflow: "hidden",
+          marginTop: -56,
+          position: "relative",
+          zIndex: 10,
+        }}>
+          {/* Search bar row */}
+          <div style={{ padding: "20px 24px 0", borderBottom: `1px solid ${BRAND.border}` }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+              <div style={{ color: BRAND.teal, fontSize: 10, letterSpacing: "0.25em", textTransform: "uppercase", fontWeight: 600 }}>Search by Location</div>
+              <div style={{ flex: 1, height: 1, background: BRAND.border }} />
+              <button onClick={() => go("properties")} style={{ background: "none", border: "none", cursor: "pointer", color: BRAND.textDim, fontSize: 11, fontFamily: "'DM Sans', sans-serif", display: "flex", alignItems: "center", gap: 4, padding: 0 }}>
+                All Listings <ArrowRight size={11} />
+              </button>
+            </div>
+            <div style={{ position: "relative", marginBottom: 0 }}>
+              <div style={{ display: "flex", alignItems: "stretch", gap: 0, border: `1px solid ${BRAND.border}`, background: BRAND.bgElevated }}>
+                <div style={{ display: "flex", alignItems: "center", paddingLeft: 16, color: BRAND.teal, flexShrink: 0 }}>
+                  <MapPin size={16} />
+                </div>
+                <input
+                  ref={inputRef}
+                  value={query}
+                  onChange={e => { setQuery(e.target.value); setOpen(true); }}
+                  onFocus={() => setOpen(true)}
+                  onBlur={() => setTimeout(() => setOpen(false), 180)}
+                  placeholder="Type a neighborhood, city, or area on O'ahu..."
+                  style={{
+                    flex: 1, border: "none", background: "transparent", outline: "none",
+                    padding: "16px 12px", fontSize: 14, color: BRAND.text,
+                    fontFamily: "'DM Sans', sans-serif",
+                  }}
+                />
+                <button
+                  onClick={() => { go("properties"); }}
+                  style={{
+                    background: BRAND.teal, border: "none", cursor: "pointer",
+                    padding: "0 24px", color: "#fff", fontSize: 11, fontWeight: 700,
+                    letterSpacing: "0.15em", textTransform: "uppercase",
+                    fontFamily: "'DM Sans', sans-serif", flexShrink: 0,
+                    display: "flex", alignItems: "center", gap: 8,
+                  }}
+                >
+                  <Search size={14} /> Search
+                </button>
+              </div>
+
+              {/* Suggestions dropdown */}
+              {open && filtered.length > 0 && (
+                <div style={{
+                  position: "absolute", top: "100%", left: 0, right: 0, zIndex: 100,
+                  background: BRAND.bgCard, border: `1px solid ${BRAND.border}`,
+                  borderTop: "none", boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
+                  maxHeight: 280, overflowY: "auto",
+                }}>
+                  {filtered.map(n => (
+                    <button
+                      key={n.id}
+                      onMouseDown={() => handleSelect(n.id)}
+                      style={{
+                        width: "100%", background: "none", border: "none", cursor: "pointer",
+                        padding: "12px 16px", display: "flex", alignItems: "center", gap: 12,
+                        textAlign: "left", borderBottom: `1px solid ${BRAND.border}`,
+                        fontFamily: "'DM Sans', sans-serif",
+                        transition: "background 0.15s",
+                      }}
+                      onMouseEnter={e => (e.currentTarget.style.background = BRAND.bgElevated)}
+                      onMouseLeave={e => (e.currentTarget.style.background = "none")}
+                    >
+                      <MapPin size={13} color={BRAND.teal} style={{ flexShrink: 0 }} />
+                      <div>
+                        <div style={{ fontSize: 13, fontWeight: 600, color: BRAND.text }}>{n.label}</div>
+                        <div style={{ fontSize: 11, color: BRAND.textMuted }}>{n.hint}</div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Embedded map */}
+          <div style={{ position: "relative", height: 300, overflow: "hidden" }}>
+            <iframe
+              src="https://maps.google.com/maps?width=100%25&height=300&hl=en&q=Oahu+Hawaii&t=&z=11&ie=UTF8&iwloc=&output=embed"
+              title="O'ahu Map"
+              style={{ width: "100%", height: "100%", border: "none", display: "block", filter: "saturate(0.85) contrast(0.95)" }}
+              loading="lazy"
+              allowFullScreen
+            />
+            {/* Overlay: neighborhood pills */}
+            <div style={{
+              position: "absolute", bottom: 0, left: 0, right: 0,
+              background: "linear-gradient(to top, rgba(27,42,51,0.92) 0%, transparent 100%)",
+              padding: "24px 20px 14px", display: "flex", gap: 8, flexWrap: "wrap", alignItems: "flex-end",
+            }}>
+              {OAHU_NEIGHBORHOODS.slice(0, 6).map(n => (
+                <button
+                  key={n.id}
+                  onClick={() => handleSelect(n.id)}
+                  style={{
+                    background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.25)",
+                    color: "#fff", fontSize: 11, fontWeight: 500, padding: "5px 14px",
+                    cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+                    backdropFilter: "blur(6px)", transition: "background 0.2s",
+                    letterSpacing: "0.03em",
+                  }}
+                  onMouseEnter={e => (e.currentTarget.style.background = "rgba(26,138,125,0.55)")}
+                  onMouseLeave={e => (e.currentTarget.style.background = "rgba(255,255,255,0.12)")}
+                >
+                  {n.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Bottom quick actions */}
+          <div className="map-search-actions" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", borderTop: `1px solid ${BRAND.border}` }}>
+            {[
+              { icon: <DollarSign size={16} />, title: "Home Valuation", desc: "What's your home worth?", page: "valuation" },
+              { icon: <Calendar size={16} />, title: "Mortgage Calculator", desc: "Estimate your payment", page: "mortgage" },
+              { icon: <MapPin size={16} />, title: "Neighborhoods", desc: "Explore O'ahu areas", page: "neighborhoods" },
+            ].map((item, i) => (
+              <button key={i} onClick={() => go(item.page)} style={{
+                background: "none", border: "none", cursor: "pointer",
+                padding: "18px 20px",
+                borderRight: i < 2 ? `1px solid ${BRAND.border}` : "none",
+                display: "flex", alignItems: "center", gap: 12,
+                transition: "background 0.2s", textAlign: "left",
+              }}
+                onMouseEnter={e => (e.currentTarget.style.background = BRAND.bgElevated)}
+                onMouseLeave={e => (e.currentTarget.style.background = "none")}
+              >
+                <div style={{ width: 36, height: 36, borderRadius: "50%", background: `${BRAND.teal}18`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, color: BRAND.teal }}>{item.icon}</div>
+                <div>
+                  <div style={{ fontWeight: 600, fontSize: 13, color: BRAND.text, marginBottom: 1 }}>{item.title}</div>
+                  <div style={{ fontSize: 11, color: BRAND.textMuted }}>{item.desc}</div>
+                </div>
+                <ArrowRight size={12} style={{ color: BRAND.teal, marginLeft: "auto", flexShrink: 0 }} />
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─────────────────────────────────────────────
 // HOME PAGE
 // ─────────────────────────────────────────────
 
@@ -800,51 +996,8 @@ function HomePage({ setPage }) {
         </div>
       </section>
 
-      {/* QUICK LINKS — floating action bar */}
-      <section style={{ paddingTop: 0, paddingBottom: 0, position: "relative", zIndex: 10 }}>
-        <div className="section-pad" style={{ paddingTop: 0, paddingBottom: 0, maxWidth: 1100, margin: "0 auto" }}>
-          <div className="ql-bar" style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(3, 1fr)",
-              background: BRAND.bgCard,
-              border: `1px solid ${BRAND.border}`,
-              boxShadow: "0 8px 40px rgba(0,0,0,0.22)",
-              overflow: "hidden",
-              marginTop: -56,
-              position: "relative",
-              zIndex: 10,
-            }}>
-              {[
-                { icon: <Search size={20} />, title: "Home Search", desc: "Browse O'ahu listings", page: "properties" },
-                { icon: <DollarSign size={20} />, title: "Home Valuation", desc: "What's your home worth?", page: "valuation" },
-                { icon: <Calendar size={20} />, title: "Mortgage Calculator", desc: "Estimate payments instantly", page: "mortgage" },
-              ].map((item, i) => (
-                <button key={i} onClick={() => go(item.page)} style={{
-                  background: "none", border: "none", cursor: "pointer",
-                  padding: "28px 32px",
-                  borderRight: i < 2 ? `1px solid ${BRAND.border}` : "none",
-                  display: "flex", alignItems: "center", gap: 16,
-                  transition: "background 0.2s",
-                  textAlign: "left",
-                }}
-                  onMouseEnter={e => (e.currentTarget.style.background = BRAND.bgElevated)}
-                  onMouseLeave={e => (e.currentTarget.style.background = "none")}
-                >
-                  <div style={{
-                    width: 44, height: 44, borderRadius: "50%",
-                    background: `${BRAND.teal}18`, display: "flex", alignItems: "center", justifyContent: "center",
-                    flexShrink: 0, color: BRAND.teal,
-                  }}>{item.icon}</div>
-                  <div>
-                    <div style={{ fontWeight: 600, fontSize: 14, color: BRAND.text, marginBottom: 2 }}>{item.title}</div>
-                    <div style={{ fontSize: 12, color: BRAND.textMuted }}>{item.desc}</div>
-                  </div>
-                  <ArrowRight size={14} style={{ color: BRAND.teal, marginLeft: "auto", flexShrink: 0 }} />
-                </button>
-              ))}
-            </div>
-        </div>
-      </section>
+      {/* MAP SEARCH — search by location with interactive O'ahu map */}
+      <MapSearchBar go={go} />
 
       {/* MEET MEL — cinematic split */}
       <section style={{ background: BRAND.bgLight, borderTop: `1px solid ${BRAND.border}`, borderBottom: `1px solid ${BRAND.border}`, paddingTop: 80, paddingBottom: 80 }}>
@@ -970,32 +1123,39 @@ function HomePage({ setPage }) {
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 20 }}>
             {[
-              { label: "Search All MLS Listings", sub: "Updated daily from O'ahu MLS", url: "https://www.dreamhomerealtyhawaii.com/property-search", img: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&q=80" },
+              { label: "Browse O'ahu Listings", sub: "500+ active properties on HI Central MLS", page: "properties", img: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&q=80" },
               { label: "Available Rentals", sub: "Managed by Dream Home Realty", url: "https://dreamhomerlty.appfolio.com/listings/", img: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80" },
               { label: "Open Houses", sub: "This week on O'ahu", url: "https://propertysearch.hicentral.com/HBR/OpenHouses/?/Results/HotSheet/d///", img: "https://images.unsplash.com/photo-1507089947368-19c1da9775ae?w=800&q=80" },
-            ].map((item, i) => (
-              <Reveal key={item.label} delay={i * 0.07} direction="up">
-                <a href={item.url} target="_blank" rel="noopener noreferrer" style={{
-                  display: "block", position: "relative", overflow: "hidden",
-                  aspectRatio: "4/3", textDecoration: "none",
-                  boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
-                  transition: "transform 0.25s, box-shadow 0.25s",
-                }}
-                onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.transform = "translateY(-4px)"; (e.currentTarget as HTMLAnchorElement).style.boxShadow = "0 16px 48px rgba(0,0,0,0.2)"; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.transform = "translateY(0)"; (e.currentTarget as HTMLAnchorElement).style.boxShadow = "0 4px 20px rgba(0,0,0,0.1)"; }}>
-                  {/* Background photo */}
+            ].map((item: any, i) => {
+              const sharedStyle: React.CSSProperties = {
+                display: "block", position: "relative", overflow: "hidden",
+                aspectRatio: "4/3", textDecoration: "none", cursor: "pointer",
+                boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+                transition: "transform 0.25s, box-shadow 0.25s",
+              };
+              const onEnter = (e: any) => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.boxShadow = "0 16px 48px rgba(0,0,0,0.2)"; };
+              const onLeave = (e: any) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 4px 20px rgba(0,0,0,0.1)"; };
+              const inner = (
+                <>
                   <img src={item.img} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
-                  {/* Dark gradient */}
                   <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(5,5,5,0.85) 0%, rgba(5,5,5,0.2) 60%, transparent 100%)" }} />
-                  {/* Text */}
                   <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "20px 22px" }}>
                     <div style={{ color: "#fff", fontWeight: 700, fontSize: 15, fontFamily: "'DM Serif Display', Georgia, serif", marginBottom: 4, lineHeight: 1.2 }}>{item.label}</div>
                     <div style={{ color: "rgba(255,255,255,0.65)", fontSize: 11 }}>{item.sub}</div>
                     <div style={{ color: BRAND.gold, fontSize: 11, fontWeight: 600, marginTop: 8 }}>View ↗</div>
                   </div>
-                </a>
-              </Reveal>
-            ))}
+                </>
+              );
+              return (
+                <Reveal key={item.label} delay={i * 0.07} direction="up">
+                  {item.page ? (
+                    <div style={sharedStyle} onClick={() => go(item.page)} onMouseEnter={onEnter} onMouseLeave={onLeave}>{inner}</div>
+                  ) : (
+                    <a href={item.url} target="_blank" rel="noopener noreferrer" style={sharedStyle} onMouseEnter={onEnter} onMouseLeave={onLeave}>{inner}</a>
+                  )}
+                </Reveal>
+              );
+            })}
           </div>
         )}
       </section>
@@ -1286,6 +1446,22 @@ function PropertiesPage({ setPage }) {
       .finally(() => setRentalsLoading(false));
   }, []);
 
+  // ── IDX Broker listings (For Sale) ──
+  const [idxListings, setIdxListings] = useState<any[]>([]);
+  const [idxLoading, setIdxLoading] = useState(true);
+  const [idxError, setIdxError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/listings/idx")
+      .then(r => r.json())
+      .then((data: any) => {
+        if (data?.error && !data.listings?.length) setIdxError(data.error);
+        else setIdxListings(data?.listings || []);
+      })
+      .catch((e: any) => setIdxError(e?.message || "Failed to load"))
+      .finally(() => setIdxLoading(false));
+  }, []);
+
   // Client-side filter on rentals
   const filteredRentals = useMemo(() => {
     let list = [...rentals];
@@ -1297,7 +1473,6 @@ function PropertiesPage({ setPage }) {
   }, [rentals, searchCity, filter]);
 
   const SALE_PORTALS = [
-    { label: "Dream Home Realty Search", url: "https://www.dreamhomerealtyhawaii.com/property-search", icon: <HomeIcon size={14} /> },
     { label: "Open Houses on O'ahu", url: "https://propertysearch.hicentral.com/HBR/OpenHouses/?/Results/HotSheet/d///", icon: <Calendar size={14} /> },
     { label: "Zillow – O'ahu", url: "https://www.zillow.com/honolulu-county-hi/", icon: <Search size={14} /> },
     { label: "Realtor.com – O'ahu", url: "https://www.realtor.com/realestateandhomes-search/Honolulu_HI", icon: <MapPin size={14} /> },
@@ -1380,61 +1555,137 @@ function PropertiesPage({ setPage }) {
         {/* ── FOR SALE TAB ── */}
         {tab === "sale" && (
           <div>
-            {/* ── FOR SALE: Portal links + Trestle coming-soon ── */}
-            <Reveal>
-              <div style={{ background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, padding: "48px 40px", textAlign: "center", marginBottom: 40, position: "relative", overflow: "hidden" }}>
-                <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${BRAND.teal}, ${BRAND.gold})` }} />
-                <div style={{ color: BRAND.teal, fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 12, fontWeight: 600 }}>O'ahu MLS</div>
-                <h2 className="font-display" style={{ fontSize: "clamp(24px, 4vw, 36px)", marginBottom: 14 }}>Find Your Home on O'ahu</h2>
-                <p style={{ color: BRAND.textMuted, fontSize: 15, lineHeight: 1.7, maxWidth: 520, margin: "0 auto 28px" }}>
-                  Browse every active listing on O'ahu through the portals below — updated live from HI Central MLS. When you're ready, reach out to Mel and she'll guide you through the ones that fit.
-                </p>
-                <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
-                  <a href="https://www.dreamhomerealtyhawaii.com/property-search" target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ textDecoration: "none", fontSize: 13, padding: "14px 28px", display: "inline-flex", alignItems: "center", gap: 8 }}>
-                    <Search size={15} /> Search Dream Home Listings ↗
-                  </a>
-                  <a href="tel:+18082858774" className="btn-outline" style={{ textDecoration: "none", fontSize: 13, padding: "14px 28px", display: "inline-flex", alignItems: "center", gap: 8 }}>
-                    <Phone size={15} /> Call Mel · (808) 285-8774
-                  </a>
+            {/* Loading skeleton */}
+            {idxLoading && (
+              <div>
+                <div style={{ maxWidth: 360, margin: "0 auto 20px", background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, borderRadius: 4, height: 6, overflow: "hidden" }}>
+                  <div className="ai-loading-bar" style={{ height: "100%", background: `linear-gradient(90deg, ${BRAND.teal}, ${BRAND.gold})`, borderRadius: 4 }} />
+                </div>
+                <p style={{ color: BRAND.textMuted, fontSize: 14, textAlign: "center", marginBottom: 40 }}>Loading O'ahu listings from HI Central MLS...</p>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: 24 }}>
+                  {[1,2,3,4,5,6].map(i => (
+                    <div key={i} style={{ background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, height: 320, borderRadius: 2 }} className="shimmer" />
+                  ))}
                 </div>
               </div>
-            </Reveal>
+            )}
 
-            <Reveal delay={0.1}>
-              <div style={{ color: BRAND.textDim, fontSize: 11, letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 16, fontWeight: 600 }}>Search Portals</div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(210px, 1fr))", gap: 12, marginBottom: 48 }}>
-                {SALE_PORTALS.map(p => (
-                  <a key={p.label} href={p.url} target="_blank" rel="noopener noreferrer" style={{
-                    display: "flex", alignItems: "center", gap: 12, padding: "16px 20px",
-                    background: BRAND.bgCard, border: `1px solid ${BRAND.border}`,
-                    textDecoration: "none", color: BRAND.text, fontSize: 13, fontWeight: 500,
-                    transition: "border-color 0.2s, box-shadow 0.2s",
-                  }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = BRAND.gold; (e.currentTarget as HTMLAnchorElement).style.boxShadow = `0 4px 16px rgba(0,0,0,0.08)`; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = BRAND.border; (e.currentTarget as HTMLAnchorElement).style.boxShadow = "none"; }}>
-                    <span style={{ color: BRAND.teal }}>{p.icon}</span>
-                    <span style={{ flex: 1 }}>{p.label}</span>
-                    <ArrowRight size={12} color={BRAND.textDim} />
-                  </a>
-                ))}
-              </div>
-            </Reveal>
-
-            <Reveal delay={0.2}>
-              <div style={{ background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, padding: "32px 36px", display: "flex", alignItems: "center", gap: 24, flexWrap: "wrap", position: "relative", overflow: "hidden" }}>
-                <div style={{ position: "absolute", top: 0, left: 0, bottom: 0, width: 3, background: `linear-gradient(180deg, ${BRAND.gold}, ${BRAND.teal})` }} />
-                <div style={{ flex: 1, minWidth: 240 }}>
-                  <div style={{ fontSize: 10, color: BRAND.gold, letterSpacing: "0.2em", textTransform: "uppercase", fontWeight: 700, marginBottom: 6 }}>Coming Soon · IDX Integration</div>
-                  <div className="font-display" style={{ fontSize: 20, marginBottom: 6 }}>Live MLS Search — Right Here</div>
-                  <p style={{ color: BRAND.textMuted, fontSize: 13, lineHeight: 1.6 }}>
-                    Full HI Central MLS listings — searchable by neighborhood, price, and type, displayed natively on this site. This is ready to activate the moment Mel receives her IDX approval from HI Central MLS.
+            {/* Error fallback */}
+            {!idxLoading && idxError && (
+              <Reveal>
+                <div style={{ background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, padding: "48px 40px", textAlign: "center", marginBottom: 40, position: "relative", overflow: "hidden" }}>
+                  <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${BRAND.teal}, ${BRAND.gold})` }} />
+                  <div style={{ color: BRAND.teal, fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 12, fontWeight: 600 }}>O'ahu MLS</div>
+                  <h2 className="font-display" style={{ fontSize: "clamp(24px, 4vw, 36px)", marginBottom: 14 }}>Browse O'ahu MLS Listings</h2>
+                  <p style={{ color: BRAND.textMuted, fontSize: 15, lineHeight: 1.7, maxWidth: 520, margin: "0 auto 28px" }}>
+                    Live listings temporarily unavailable. Browse below or call Mel directly.
                   </p>
+                  <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+                    <a href="tel:+18082858774" className="btn-primary" style={{ textDecoration: "none", fontSize: 13, padding: "14px 28px", display: "inline-flex", alignItems: "center", gap: 8 }}>
+                      <Phone size={15} /> Call Mel · (808) 285-8774
+                    </a>
+                  </div>
                 </div>
-                <a href="mailto:mel@homesweethomehawaii.com?subject=IDX%20Approval%20Needed" className="btn-outline" style={{ textDecoration: "none", fontSize: 11, padding: "12px 20px", whiteSpace: "nowrap", display: "inline-flex", alignItems: "center", gap: 6 }}>
-                  <ArrowRight size={12} /> Get IDX Approved
-                </a>
-              </div>
-            </Reveal>
+                <div style={{ color: BRAND.textDim, fontSize: 11, letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 16, fontWeight: 600 }}>Search Portals</div>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(210px, 1fr))", gap: 12, marginBottom: 48 }}>
+                  {SALE_PORTALS.map(p => (
+                    <a key={p.label} href={p.url} target="_blank" rel="noopener noreferrer" style={{
+                      display: "flex", alignItems: "center", gap: 12, padding: "16px 20px",
+                      background: BRAND.bgCard, border: `1px solid ${BRAND.border}`,
+                      textDecoration: "none", color: BRAND.text, fontSize: 13, fontWeight: 500,
+                      transition: "border-color 0.2s, box-shadow 0.2s",
+                    }}
+                    onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = BRAND.gold; }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = BRAND.border; }}>
+                      <span style={{ color: BRAND.teal }}>{p.icon}</span>
+                      <span style={{ flex: 1 }}>{p.label}</span>
+                      <ArrowRight size={12} color={BRAND.textDim} />
+                    </a>
+                  ))}
+                </div>
+              </Reveal>
+            )}
+
+            {/* IDX Listings grid */}
+            {!idxLoading && !idxError && idxListings.length > 0 && (
+              <>
+                <div style={{ background: `${BRAND.teal}0F`, border: `1px solid ${BRAND.teal}30`, padding: "12px 18px", marginBottom: 28, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <div style={{ width: 8, height: 8, borderRadius: "50%", background: BRAND.teal }} />
+                    <span style={{ fontSize: 13, color: BRAND.teal, fontWeight: 600 }}>
+                      {idxListings.length} active listings · O'ahu MLS · HI Central
+                    </span>
+                  </div>
+                  <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+                    {SALE_PORTALS.map(p => (
+                      <a key={p.label} href={p.url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, color: BRAND.textDim, fontWeight: 500, textDecoration: "none", display: "flex", alignItems: "center", gap: 4 }}>
+                        {p.icon} {p.label} <ArrowRight size={10} />
+                      </a>
+                    ))}
+                  </div>
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: 24 }}>
+                  {idxListings.map((p, i) => (
+                    <Reveal key={p.mlsNum} delay={i * 0.04} direction="up">
+                      <a
+                        href={p.listingUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ display: "block", textDecoration: "none", color: "inherit" }}
+                      >
+                        <div className="card-hover shimmer" style={{ background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, overflow: "hidden", cursor: "pointer" }}>
+                          {/* Photo */}
+                          <div style={{ position: "relative", aspectRatio: "16/10", overflow: "hidden", background: BRAND.bgElevated }}>
+                            {p.photo ? (
+                              <img src={p.photo} alt={p.address} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} loading="lazy" />
+                            ) : (
+                              <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: BRAND.textDim, fontSize: 12 }}>No Photo</div>
+                            )}
+                            {/* Status badge */}
+                            <div style={{ position: "absolute", top: 12, left: 12, background: p.status?.toLowerCase().includes("active") ? BRAND.teal : BRAND.gold, color: "#fff", fontSize: 9, fontWeight: 700, padding: "4px 10px", letterSpacing: "0.1em", textTransform: "uppercase" }}>
+                              {p.status || "Active"}
+                            </div>
+                          </div>
+                          {/* Details */}
+                          <div style={{ padding: "18px 20px 14px" }}>
+                            <div className="font-display" style={{ fontSize: 22, color: BRAND.gold, marginBottom: 4 }}>{p.priceText}</div>
+                            <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 4, color: BRAND.text }}>{p.address}</div>
+                            <div style={{ fontSize: 12, color: BRAND.textMuted, marginBottom: 12 }}>{p.city}, {p.state} {p.zip}</div>
+                            <div style={{ display: "flex", gap: 16, fontSize: 12, color: BRAND.textDim, marginBottom: 14 }}>
+                              {p.beds && <span><strong style={{ color: BRAND.text }}>{p.beds}</strong> bd</span>}
+                              {p.baths && <span><strong style={{ color: BRAND.text }}>{p.baths}</strong> ba</span>}
+                              {p.sqft && <span><strong style={{ color: BRAND.text }}>{parseInt(p.sqft).toLocaleString()}</strong> sqft</span>}
+                            </div>
+                            {/* Attribution — required per MLS rules */}
+                            <div style={{ borderTop: `1px solid ${BRAND.border}`, paddingTop: 10, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                              <div style={{ fontSize: 10, color: BRAND.textDim, lineHeight: 1.4 }}>
+                                {p.courtesy && <div style={{ fontWeight: 500 }}>Courtesy of {p.courtesy}</div>}
+                                <div>MLS# {p.mlsNum}</div>
+                              </div>
+                              <div style={{ fontSize: 10, color: BRAND.teal, fontWeight: 600, display: "flex", alignItems: "center", gap: 4, whiteSpace: "nowrap" }}>
+                                View Listing <ArrowRight size={10} />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </a>
+                    </Reveal>
+                  ))}
+                </div>
+              </>
+            )}
+
+            {!idxLoading && !idxError && idxListings.length === 0 && (
+              <Reveal>
+                <div style={{ background: BRAND.bgCard, border: `1px dashed ${BRAND.border}`, padding: "60px 40px", textAlign: "center" }}>
+                  <h3 className="font-display" style={{ fontSize: 26, marginBottom: 10 }}>No Listings Available Right Now</h3>
+                  <p style={{ color: BRAND.textMuted, fontSize: 14, marginBottom: 24 }}>Check back shortly or call Mel for the latest O'ahu listings.</p>
+                  <a href="tel:+18082858774" className="btn-outline" style={{ textDecoration: "none", fontSize: 11, display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 24px" }}>
+                    <Phone size={13} /> Call Mel · (808) 285-8774
+                  </a>
+                </div>
+              </Reveal>
+            )}
           </div>
         )}
 
@@ -3366,7 +3617,7 @@ function RelocationPage({ setPage }) {
             <p style={{ color: BRAND.textMuted, fontSize: 15, maxWidth: 560, margin: "0 auto" }}>Relocations that go smoothly are planned 6 months out. Here's how to sequence it.</p>
           </div>
         </Reveal>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 20, marginBottom: 72 }}>
+        <div className="grid-timeline" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 20, marginBottom: 72 }}>
           {timeline.map((t, i) => (
             <Reveal key={i} delay={i * 0.08}>
               <div style={{ background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, borderTop: `3px solid ${t.color}`, padding: 28, borderRadius: 12 }}>
