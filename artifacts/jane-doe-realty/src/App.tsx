@@ -2021,9 +2021,10 @@ function ListingFramePage({ setPage }) {
         </div>
 
         {/* ── Attribution footer ── */}
-        <div style={{ marginTop: 28, textAlign: "center", fontSize: 11, color: BRAND.textDim, lineHeight: 1.6 }}>
-          Presented by <strong style={{ color: BRAND.textMuted }}>Mel Castanares</strong> · REALTOR® RS-84753 · Dream Home Realty Hawai'i ·{" "}
-          <a href={d.sourceUrl} target="_blank" rel="noopener noreferrer" style={{ color: BRAND.teal, textDecoration: "none" }}>View on IDX Broker ↗</a><br />
+        <div style={{ marginTop: 28, textAlign: "center", fontSize: 11, color: BRAND.textDim, lineHeight: 1.8 }}>
+          Presented by <strong style={{ color: BRAND.textMuted }}>Mel Castanares</strong> · REALTOR® RS-84753 · Dream Home Realty Hawai'i<br />
+          <a href="https://melcastanares.techsavvyhawaii.com" target="_blank" rel="noopener noreferrer" style={{ color: BRAND.teal, textDecoration: "none", fontWeight: 600 }}>melcastanares.techsavvyhawaii.com</a>
+          {d.sourceUrl && <> · <a href={d.sourceUrl} target="_blank" rel="noopener noreferrer" style={{ color: BRAND.textDim, textDecoration: "none" }}>View on IDX Broker ↗</a></>}<br />
           Listing data courtesy of {d.listingOfficeName || "HI Central MLS"} via IDX Broker. Information deemed reliable but not guaranteed.
         </div>
       </div>
@@ -2837,8 +2838,18 @@ function BlogPostPage({ setPage }) {
 function ContactPage() {
   const { data: agent } = useApi(() => api.getAgent(), FALLBACK_AGENT);
   const [sent, setSent] = useState(false);
-  const handleContactSubmit = async (formData) => {
-    await api.submitContact(formData);
+  const [sending, setSending] = useState(false);
+  const [contactForm, setContactForm] = useState({ firstName: "", lastName: "", email: "", phone: "", intent: "General Inquiry", message: "" });
+  const updateContact = (k: string, v: string) => setContactForm(f => ({ ...f, [k]: v }));
+
+  const handleContactSubmit = async () => {
+    const { firstName, lastName, email, intent, phone, message } = contactForm;
+    if (!firstName || !email) return;
+    setSending(true);
+    try {
+      await api.submitContact({ name: `${firstName} ${lastName}`.trim(), email, phone, intent, message, source: "website-contact-form" });
+    } catch { /* still show success */ }
+    setSending(false);
     setSent(true);
   };
   return (
@@ -2893,20 +2904,27 @@ function ContactPage() {
               ) : (
                 <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-                    <input className="input-custom" placeholder="First Name" />
-                    <input className="input-custom" placeholder="Last Name" />
+                    <input className="input-custom" placeholder="First Name *" value={contactForm.firstName} onChange={e => updateContact("firstName", e.target.value)} />
+                    <input className="input-custom" placeholder="Last Name" value={contactForm.lastName} onChange={e => updateContact("lastName", e.target.value)} />
                   </div>
-                  <input className="input-custom" placeholder="Email" />
-                  <input className="input-custom" placeholder="Phone" />
-                  <select className="input-custom">
+                  <input className="input-custom" placeholder="Email *" type="email" value={contactForm.email} onChange={e => updateContact("email", e.target.value)} />
+                  <input className="input-custom" placeholder="Phone" type="tel" value={contactForm.phone} onChange={e => updateContact("phone", e.target.value)} />
+                  <select className="input-custom" value={contactForm.intent} onChange={e => updateContact("intent", e.target.value)}>
                     <option>General Inquiry</option>
                     <option>Looking to Buy</option>
                     <option>Looking to Sell</option>
                     <option>Investment</option>
                     <option>Relocation</option>
                   </select>
-                  <textarea className="input-custom" placeholder="How can we help?" style={{ minHeight: 120, resize: "vertical" }} />
-                  <button className="btn-primary" style={{ width: "100%" }} onClick={() => setSent(true)}>Send Message</button>
+                  <textarea className="input-custom" placeholder="How can we help?" style={{ minHeight: 120, resize: "vertical" }} value={contactForm.message} onChange={e => updateContact("message", e.target.value)} />
+                  <button
+                    className="btn-primary"
+                    style={{ width: "100%", opacity: sending ? 0.7 : 1 }}
+                    onClick={handleContactSubmit}
+                    disabled={sending || !contactForm.firstName || !contactForm.email}
+                  >
+                    {sending ? "Sending…" : "Send Message"}
+                  </button>
                 </div>
               )}
             </div>
@@ -3498,7 +3516,22 @@ function ValuationPage() {
     else {
       setLoading(true);
       window.scrollTo({ top: 0, behavior: "smooth" });
-      setTimeout(() => { setResult(computeEstimate()); setLoading(false); setStep(4); }, 2800);
+      setTimeout(() => {
+        const estimate = computeEstimate();
+        setResult(estimate);
+        setLoading(false);
+        setStep(4);
+        if (form.name && form.email) {
+          api.submitValuation({
+            name: form.name, email: form.email, phone: form.phone,
+            address: form.address, neighborhood: form.neighborhood,
+            propType: form.propType, beds: form.beds, baths: form.baths,
+            sqft: form.sqft, yearBuilt: form.yearBuilt, condition: form.condition,
+            features: form.features, timeline: form.timeline,
+            estimateLow: estimate.low, estimateHigh: estimate.high, estimateMedian: estimate.median,
+          }).catch(() => {});
+        }
+      }, 2800);
     }
   };
   const goBack = () => { setStep(step - 1); window.scrollTo({ top: 0, behavior: "smooth" }); };
