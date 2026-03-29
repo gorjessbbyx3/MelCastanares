@@ -167,14 +167,14 @@ const TRESTLE_CONFIG = {
 
 router.get("/listings/trestle", async (_req, res) => {
   if (!TRESTLE_CONFIG.connected) {
-    res.json({ connected: false, listings: [], count: 0, ...TRESTLE_CONFIG });
+    res.json({ ...TRESTLE_CONFIG, connected: false, listings: [], count: 0 });
     return;
   }
 
   const clientId = process.env.TRESTLE_CLIENT_ID;
   const clientSecret = process.env.TRESTLE_CLIENT_SECRET;
   if (!clientId || !clientSecret) {
-    res.status(503).json({ connected: false, error: "Trestle credentials not configured", ...TRESTLE_CONFIG });
+    res.status(503).json({ ...TRESTLE_CONFIG, connected: false, error: "Trestle credentials not configured" });
     return;
   }
 
