@@ -5,6 +5,7 @@ declare global {
     __selectedProperty: any;
     __selectedNeighborhood: any;
     __selectedPost: any;
+    __iframeUrl: string;
   }
 }
 import {
@@ -1653,11 +1654,14 @@ function PropertiesPage({ setPage }) {
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: 24 }}>
                   {idxListings.map((p, i) => (
                     <Reveal key={p.mlsNum} delay={i * 0.04} direction="up">
-                      <a
-                        href={p.listingUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{ display: "block", textDecoration: "none", color: "inherit" }}
+                      <div
+                        onClick={() => {
+                          window.__iframeUrl = p.listingUrl;
+                          window.__selectedProperty = p;
+                          setPage("listing-frame");
+                          window.scrollTo({ top: 0, behavior: "smooth" });
+                        }}
+                        style={{ display: "block", textDecoration: "none", color: "inherit", cursor: "pointer" }}
                       >
                         <div className="card-hover shimmer" style={{ background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, overflow: "hidden", cursor: "pointer" }}>
                           {/* Photo */}
@@ -1694,7 +1698,7 @@ function PropertiesPage({ setPage }) {
                             </div>
                           </div>
                         </div>
-                      </a>
+                      </div>
                     </Reveal>
                   ))}
                 </div>
@@ -1791,6 +1795,167 @@ function PropertiesPage({ setPage }) {
             )}
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
+// LISTING IFRAME FRAME
+// ─────────────────────────────────────────────
+
+function ListingFramePage({ setPage }) {
+  const url = window.__iframeUrl;
+  const p = window.__selectedProperty;
+  const [loaded, setLoaded] = useState(false);
+  const [blocked, setBlocked] = useState(false);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+
+  useEffect(() => {
+    const timer = setTimeout(() => { if (!loaded) setBlocked(true); }, 6000);
+    return () => clearTimeout(timer);
+  }, [loaded]);
+
+  const go = (pg: string) => { setPage(pg); window.scrollTo({ top: 0, behavior: "smooth" }); };
+
+  const CLIP_PX = 120;
+
+  const barStyle: React.CSSProperties = {
+    background: "#FDFAF6",
+    borderBottom: "1px solid #E5DDD0",
+    padding: "12px 20px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
+    boxShadow: "0 1px 6px rgba(0,0,0,0.06)",
+    flexShrink: 0,
+    flexWrap: "wrap",
+  };
+
+  const logoStyle: React.CSSProperties = {
+    height: 44,
+    width: "auto",
+    display: "block",
+  };
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", height: "100vh", background: "#F8F4EE", fontFamily: "'DM Sans', sans-serif", paddingBottom: 72 }}>
+
+      {/* ── Top branded bar ── */}
+      <div style={barStyle}>
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          <button
+            onClick={() => go("properties")}
+            style={{ background: "none", border: "1px solid #D4C9BA", color: "#6B5C48", cursor: "pointer", padding: "7px 13px", borderRadius: 6, fontSize: 12, display: "flex", alignItems: "center", gap: 6, fontFamily: "'DM Sans', sans-serif", fontWeight: 500 }}
+          >
+            <ArrowLeft size={13} /> Back to Listings
+          </button>
+          <div style={{ width: 1, height: 30, background: "#E5DDD0", flexShrink: 0 }} />
+          <img src="/images/mel-logo.png" alt="Mel Castanares" style={logoStyle} />
+          <div>
+            <div style={{ fontWeight: 700, fontSize: 14, color: "#2C2218", letterSpacing: "0.01em" }}>Mel Castanares</div>
+            <div style={{ fontSize: 11, color: "#9B8670", letterSpacing: "0.03em" }}>REALTOR® RS-84753 · Dream Home Realty Hawai'i</div>
+          </div>
+        </div>
+        <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+          <a
+            href="tel:+18082858774"
+            style={{ fontSize: 13, color: "#3A7A5A", fontWeight: 600, textDecoration: "none", display: "flex", alignItems: "center", gap: 5, whiteSpace: "nowrap" }}
+          >
+            <Phone size={13} /> (808) 285-8774
+          </a>
+          <button
+            onClick={() => go("contact")}
+            style={{ background: "#3A7A5A", color: "#fff", border: "none", borderRadius: 6, padding: "9px 18px", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.05em", textTransform: "uppercase", whiteSpace: "nowrap" }}
+          >
+            Schedule a Showing
+          </button>
+        </div>
+      </div>
+
+      {/* ── Property summary strip ── */}
+      {p && (
+        <div style={{ background: "#F3ECE0", borderBottom: "1px solid #E5DDD0", padding: "9px 20px", flexShrink: 0 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
+            <div>
+              <div style={{ fontWeight: 600, fontSize: 14, color: "#2C2218" }}>{p.address || p.title}</div>
+              <div style={{ fontSize: 11, color: "#9B8670" }}>
+                {[p.city, p.state, p.zip].filter(Boolean).join(", ")}
+                {(p.beds || p.bedrooms) ? ` · ${p.beds || p.bedrooms} bd` : ""}
+                {(p.baths || p.bathrooms) ? ` · ${p.baths || p.bathrooms} ba` : ""}
+                {p.sqft ? ` · ${parseInt(p.sqft).toLocaleString()} sqft` : ""}
+              </div>
+            </div>
+            <div style={{ fontSize: 20, fontWeight: 700, color: "#2C2218", fontFamily: "'DM Serif Display', serif" }}>
+              {p.priceText || (p.price ? `$${Number(p.price).toLocaleString()}` : "")}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Iframe / Blocked fallback ── */}
+      {blocked ? (
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16, padding: 40, textAlign: "center" }}>
+          <div style={{ fontSize: 48 }}>🏡</div>
+          <h3 style={{ fontSize: 20, fontWeight: 700, color: "#2C2218", margin: 0 }}>Listing Opens in a New Tab</h3>
+          <p style={{ color: "#9B8670", fontSize: 14, maxWidth: 420, lineHeight: 1.65, margin: 0 }}>
+            This listing is hosted on HI Central MLS. Click below to view the full details — then come back to contact Mel directly.
+          </p>
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center", marginTop: 8 }}>
+            {url && (
+              <a
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ background: "#3A7A5A", color: "#fff", padding: "12px 28px", borderRadius: 8, textDecoration: "none", fontWeight: 700, fontSize: 14, display: "flex", alignItems: "center", gap: 8 }}
+              >
+                View Full Listing <ArrowRight size={14} />
+              </a>
+            )}
+            <button
+              onClick={() => go("contact")}
+              style={{ background: "none", border: "1px solid #D4C9BA", color: "#6B5C48", cursor: "pointer", padding: "12px 24px", borderRadius: 8, fontSize: 13, fontWeight: 600, fontFamily: "'DM Sans', sans-serif" }}
+            >
+              Contact Mel Instead
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div style={{ flex: 1, overflow: "hidden", position: "relative" }}>
+          {/* Loading spinner */}
+          {!loaded && (
+            <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "#F8F4EE", zIndex: 10, gap: 14 }}>
+              <div style={{ width: 38, height: 38, border: "3px solid #E5DDD0", borderTopColor: "#3A7A5A", borderRadius: "50%", animation: "spin 0.75s linear infinite" }} />
+              <div style={{ fontSize: 13, color: "#9B8670" }}>Loading listing…</div>
+            </div>
+          )}
+          <iframe
+            ref={iframeRef}
+            src={url}
+            title="Property Listing"
+            style={{
+              width: "100%",
+              height: `calc(100% + ${CLIP_PX}px)`,
+              marginTop: -CLIP_PX,
+              border: "none",
+              display: "block",
+            }}
+            onLoad={() => setLoaded(true)}
+            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
+          />
+        </div>
+      )}
+
+      {/* ── Bottom attribution strip ── */}
+      <div style={{ background: "#F3ECE0", borderTop: "1px solid #E5DDD0", padding: "11px 20px", textAlign: "center", flexShrink: 0 }}>
+        <div style={{ fontSize: 11, color: "#9B8670", lineHeight: 1.5 }}>
+          Presented by{" "}
+          <strong style={{ color: "#2C2218" }}>Mel Castanares</strong> · REALTOR® RS-84753 ·{" "}
+          <strong style={{ color: "#2C2218" }}>Dream Home Realty Hawai'i</strong> ·{" "}
+          <a href="tel:+18082858774" style={{ color: "#3A7A5A", textDecoration: "none" }}>(808) 285-8774</a> ·{" "}
+          <a href="mailto:mel@homesweethomehawaii.com" style={{ color: "#3A7A5A", textDecoration: "none" }}>mel@homesweethomehawaii.com</a>
+        </div>
       </div>
     </div>
   );
@@ -4154,6 +4319,7 @@ const PAGE_ROUTES: Record<string, string> = {
   about: "/about",
   properties: "/listings",
   "property-detail": "/listings/detail",
+  "listing-frame": "/listings/view",
   neighborhoods: "/neighborhoods",
   market: "/market-insights",
   blog: "/resources",
@@ -4342,6 +4508,7 @@ export default function App() {
       case "home": return <HomePage setPage={setPage} />;
       case "properties": return <PropertiesPage setPage={setPage} />;
       case "property-detail": return <PropertyDetailPage setPage={setPage} />;
+      case "listing-frame": return <ListingFramePage setPage={setPage} />;
       case "about": return <AboutPage setPage={setPage} />;
       case "neighborhoods": return <NeighborhoodsPage setPage={setPage} />;
       case "neighborhood-detail": return <NeighborhoodDetailPage setPage={setPage} />;
@@ -4358,6 +4525,17 @@ export default function App() {
       default: return <HomePage setPage={setPage} />;
     }
   };
+
+  // Listing frame: full-screen off-white viewer — no Nav/Footer wrapper
+  if (page === "listing-frame") {
+    return (
+      <>
+        <GlobalStyles />
+        <ListingFramePage setPage={setPage} />
+        <FloatingActions setPage={setPage} />
+      </>
+    );
+  }
 
   return (
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", background: BRAND.bg, color: BRAND.text, fontFamily: "'DM Sans', sans-serif" }}>
