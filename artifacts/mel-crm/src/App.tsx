@@ -6,9 +6,15 @@ import {
   Plus, Trash2, Edit3, Phone, Mail, Home, MapPin, Calendar, Clock,
   ChevronRight, Search, X, AlertCircle, TrendingUp, Star, Filter,
   BarChart2, Building2, Megaphone, CheckCircle2, Circle, Target,
-  ArrowRight, ExternalLink, RefreshCw, Menu, XCircle
+  ArrowRight, ExternalLink, RefreshCw, Menu, XCircle,
+  Instagram, FolderOpen, ListTodo, MessageSquare
 } from "lucide-react";
 import { api, type Lead, type Task, type Commission, type Stats } from "./lib/api";
+import SocialPage from "./pages/SocialPage";
+import CalendarPage from "./pages/CalendarPage";
+import TodosPage from "./pages/TodosPage";
+import FilesPage from "./pages/FilesPage";
+import AIChatPage from "./pages/AIChatPage";
 
 // ─── BRAND ───────────────────────────────────────────────────────────
 const C = {
@@ -232,6 +238,13 @@ const NAV = [
   { href: "/contacts", label: "Contacts", icon: Users },
   { href: "/tasks", label: "Tasks", icon: CheckSquare },
   { href: "/commissions", label: "Commissions", icon: DollarSign },
+  { section: "Tools" },
+  { href: "/social", label: "Social", icon: Instagram },
+  { href: "/calendar", label: "Calendar", icon: Calendar },
+  { href: "/todos", label: "Todos", icon: ListTodo },
+  { href: "/files", label: "Files", icon: FolderOpen },
+  { href: "/ai-chat", label: "AI Chat", icon: MessageSquare },
+  { section: "Account" },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
@@ -256,7 +269,11 @@ function Sidebar({ mobile, onClose }: { mobile?: boolean; onClose?: () => void }
         </div>
       </div>
       <nav style={{ flex: 1, padding: "12px 10px", overflowY: "auto" }}>
-        {NAV.map(({ href, label, icon: Icon }) => {
+        {NAV.map((item, i) => {
+          if ("section" in item) {
+            return <div key={i} style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "rgba(255,255,255,0.25)", padding: "12px 12px 4px", marginTop: 4 }}>{item.section}</div>;
+          }
+          const { href, label, icon: Icon } = item as { href: string; label: string; icon: React.ComponentType<{ size: number; color?: string }> };
           const active = href === "/" ? loc === "/" : loc.startsWith(href);
           return (
             <Link key={href} href={href} onClick={onClose}>
@@ -283,7 +300,7 @@ function Sidebar({ mobile, onClose }: { mobile?: boolean; onClose?: () => void }
 function Shell({ children }: { children: React.ReactNode }) {
   const [loc] = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const pageTitle = NAV.find(n => n.href === "/" ? loc === "/" : loc.startsWith(n.href))?.label ?? "Dashboard";
+  const pageTitle = (NAV.filter(n => "href" in n) as { href: string; label: string; icon: React.ComponentType<{ size: number }> }[]).find(n => n.href === "/" ? loc === "/" : loc.startsWith(n.href))?.label ?? "Dashboard";
 
   return (
     <div style={{ display: "flex", height: "100vh", overflow: "hidden" }}>
@@ -996,6 +1013,11 @@ function ProtectedApp() {
       {loc.startsWith("/contacts") && <ContactsPage />}
       {loc.startsWith("/tasks") && <TasksPage />}
       {loc.startsWith("/commissions") && <CommissionsPage />}
+      {loc.startsWith("/social") && <SocialPage />}
+      {loc.startsWith("/calendar") && <CalendarPage />}
+      {loc.startsWith("/todos") && <TodosPage />}
+      {loc.startsWith("/files") && <FilesPage />}
+      {loc.startsWith("/ai-chat") && <AIChatPage />}
       {loc.startsWith("/settings") && <SettingsPage />}
     </Shell>
   );
