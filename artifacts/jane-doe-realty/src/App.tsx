@@ -607,10 +607,10 @@ function Nav({ page, setPage }) {
               src="/images/mel-logo.png"
               alt="Mel Castanares Realtor"
               style={{
-                height: 56,
+                height: isScrolled ? 68 : 92,
                 width: "auto",
                 filter: isScrolled ? "none" : "invert(1) brightness(10)",
-                transition: "filter 0.5s cubic-bezier(0.22,1,0.36,1)",
+                transition: "height 0.5s cubic-bezier(0.22,1,0.36,1), filter 0.5s cubic-bezier(0.22,1,0.36,1)",
               }}
             />
           </div>
