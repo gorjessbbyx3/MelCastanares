@@ -1805,157 +1805,226 @@ function PropertiesPage({ setPage }) {
 // ─────────────────────────────────────────────
 
 function ListingFramePage({ setPage }) {
-  const url = window.__iframeUrl;
   const p = window.__selectedProperty;
-  const [loaded, setLoaded] = useState(false);
-  const [blocked, setBlocked] = useState(false);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
-
-  useEffect(() => {
-    if (!url) { setBlocked(true); return; }
-    const timer = setTimeout(() => { if (!loaded) setBlocked(true); }, 4000);
-    return () => clearTimeout(timer);
-  }, [url, loaded]);
-
   const go = (pg: string) => { setPage(pg); window.scrollTo({ top: 0, behavior: "smooth" }); };
 
-  const CLIP_PX = 120;
+  const [detail, setDetail] = useState<any>(null);
+  const [loadErr, setLoadErr] = useState(false);
+  const [photoIdx, setPhotoIdx] = useState(0);
 
-  const barStyle: React.CSSProperties = {
-    background: "#FDFAF6",
-    borderBottom: "1px solid #E5DDD0",
-    padding: "12px 20px",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 12,
-    boxShadow: "0 1px 6px rgba(0,0,0,0.06)",
-    flexShrink: 0,
-    flexWrap: "wrap",
-  };
+  useEffect(() => {
+    if (!p?.idxId || !p?.id) { setLoadErr(true); return; }
+    const apiBase = import.meta.env.BASE_URL?.replace(/\/$/, "") || "";
+    fetch(`${apiBase}/api/listings/detail?idxId=${encodeURIComponent(p.idxId)}&listingId=${encodeURIComponent(p.id)}`)
+      .then(r => r.ok ? r.json() : Promise.reject(r.status))
+      .then(data => { setDetail(data); setPhotoIdx(0); })
+      .catch(() => setLoadErr(true));
+  }, [p?.id]);
 
-  const logoStyle: React.CSSProperties = {
-    height: 44,
-    width: "auto",
-    display: "block",
-  };
+  const photos: string[] = detail?.photos || (p?.photo ? [p.photo] : []);
+  const hasPrev = photoIdx > 0;
+  const hasNext = photoIdx < photos.length - 1;
 
-  return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100vh", background: "#F8F4EE", fontFamily: "'DM Sans', sans-serif", paddingBottom: 72 }}>
-
-      {/* ── Top branded bar ── */}
-      <div style={barStyle}>
-        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-          <button
-            onClick={() => go("properties")}
-            style={{ background: "none", border: "1px solid #D4C9BA", color: "#6B5C48", cursor: "pointer", padding: "7px 13px", borderRadius: 6, fontSize: 12, display: "flex", alignItems: "center", gap: 6, fontFamily: "'DM Sans', sans-serif", fontWeight: 500 }}
-          >
-            <ArrowLeft size={13} /> Back to Listings
-          </button>
-          <div style={{ width: 1, height: 30, background: "#E5DDD0", flexShrink: 0 }} />
-          <img src="/images/mel-logo.png" alt="Mel Castanares" style={logoStyle} />
-          <div>
-            <div style={{ fontWeight: 700, fontSize: 14, color: "#2C2218", letterSpacing: "0.01em" }}>Mel Castanares</div>
-            <div style={{ fontSize: 11, color: "#9B8670", letterSpacing: "0.03em" }}>REALTOR® RS-84753 · Dream Home Realty Hawai'i</div>
-          </div>
-        </div>
-        <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
-          <a
-            href="tel:+18082858774"
-            style={{ fontSize: 13, color: "#3A7A5A", fontWeight: 600, textDecoration: "none", display: "flex", alignItems: "center", gap: 5, whiteSpace: "nowrap" }}
-          >
-            <Phone size={13} /> (808) 285-8774
-          </a>
-          <button
-            onClick={() => go("contact")}
-            style={{ background: "#3A7A5A", color: "#fff", border: "none", borderRadius: 6, padding: "9px 18px", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.05em", textTransform: "uppercase", whiteSpace: "nowrap" }}
-          >
-            Schedule a Showing
-          </button>
+  const topBar = (
+    <div style={{ background: "#FDFAF6", borderBottom: "1px solid #E5DDD0", padding: "12px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, boxShadow: "0 1px 6px rgba(0,0,0,0.06)", flexWrap: "wrap", position: "sticky", top: 0, zIndex: 50 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+        <button onClick={() => go("properties")} style={{ background: "none", border: "1px solid #D4C9BA", color: "#6B5C48", cursor: "pointer", padding: "7px 13px", borderRadius: 6, fontSize: 12, display: "flex", alignItems: "center", gap: 6, fontFamily: "'DM Sans', sans-serif", fontWeight: 500 }}>
+          <ArrowLeft size={13} /> Back to Listings
+        </button>
+        <div style={{ width: 1, height: 30, background: "#E5DDD0", flexShrink: 0 }} />
+        <img src="/images/mel-logo.png" alt="Mel Castanares" style={{ height: 40, width: "auto" }} />
+        <div>
+          <div style={{ fontWeight: 700, fontSize: 13, color: "#2C2218" }}>Mel Castanares</div>
+          <div style={{ fontSize: 10, color: "#9B8670" }}>REALTOR® RS-84753 · Dream Home Realty Hawai'i</div>
         </div>
       </div>
+      <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+        <a href="tel:+18082858774" style={{ fontSize: 13, color: "#3A7A5A", fontWeight: 600, textDecoration: "none", display: "flex", alignItems: "center", gap: 5, whiteSpace: "nowrap" }}>
+          <Phone size={13} /> (808) 285-8774
+        </a>
+        <button onClick={() => go("contact")} style={{ background: "#3A7A5A", color: "#fff", border: "none", borderRadius: 6, padding: "9px 18px", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.05em", textTransform: "uppercase", whiteSpace: "nowrap" }}>
+          Schedule a Showing
+        </button>
+      </div>
+    </div>
+  );
 
-      {/* ── Property summary strip ── */}
-      {p && (
-        <div style={{ background: "#F3ECE0", borderBottom: "1px solid #E5DDD0", padding: "9px 20px", flexShrink: 0 }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
-            <div>
-              <div style={{ fontWeight: 600, fontSize: 14, color: "#2C2218" }}>{p.address || p.title}</div>
-              <div style={{ fontSize: 11, color: "#9B8670" }}>
-                {[p.city, p.state, p.zip].filter(Boolean).join(", ")}
-                {(p.beds || p.bedrooms) ? ` · ${p.beds || p.bedrooms} bd` : ""}
-                {(p.baths || p.bathrooms) ? ` · ${p.baths || p.bathrooms} ba` : ""}
-                {p.sqft ? ` · ${parseInt(p.sqft).toLocaleString()} sqft` : ""}
-              </div>
-            </div>
-            <div style={{ fontSize: 20, fontWeight: 700, color: "#2C2218", fontFamily: "'DM Serif Display', serif" }}>
-              {p.priceText || (p.price ? `$${Number(p.price).toLocaleString()}` : "")}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── Iframe / Blocked fallback ── */}
-      {blocked ? (
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16, padding: 40, textAlign: "center" }}>
+  if (!p || loadErr) {
+    return (
+      <div style={{ minHeight: "100vh", background: "#F8F4EE", fontFamily: "'DM Sans', sans-serif" }}>
+        {topBar}
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 60, gap: 16, textAlign: "center" }}>
           <div style={{ fontSize: 48 }}>🏡</div>
-          <h3 style={{ fontSize: 20, fontWeight: 700, color: "#2C2218", margin: 0 }}>Listing Opens in a New Tab</h3>
-          <p style={{ color: "#9B8670", fontSize: 14, maxWidth: 420, lineHeight: 1.65, margin: 0 }}>
-            This listing is hosted on HI Central MLS. Click below to view the full details — then come back to contact Mel directly.
-          </p>
+          <h3 style={{ fontSize: 20, fontWeight: 700, color: "#2C2218", margin: 0 }}>Listing details unavailable</h3>
+          <p style={{ color: "#9B8670", fontSize: 14, maxWidth: 380, lineHeight: 1.65, margin: 0 }}>We couldn't load this listing right now. View it directly on IDX or contact Mel.</p>
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center", marginTop: 8 }}>
-            {url && (
-              <a
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ background: "#3A7A5A", color: "#fff", padding: "12px 28px", borderRadius: 8, textDecoration: "none", fontWeight: 700, fontSize: 14, display: "flex", alignItems: "center", gap: 8 }}
-              >
-                View Full Listing <ArrowRight size={14} />
-              </a>
-            )}
-            <button
-              onClick={() => go("contact")}
-              style={{ background: "none", border: "1px solid #D4C9BA", color: "#6B5C48", cursor: "pointer", padding: "12px 24px", borderRadius: 8, fontSize: 13, fontWeight: 600, fontFamily: "'DM Sans', sans-serif" }}
-            >
-              Contact Mel Instead
-            </button>
+            {p?.listingUrl && <a href={p.listingUrl} target="_blank" rel="noopener noreferrer" style={{ background: "#3A7A5A", color: "#fff", padding: "12px 24px", borderRadius: 8, textDecoration: "none", fontWeight: 700, fontSize: 14 }}>View on MLS ↗</a>}
+            <button onClick={() => go("contact")} style={{ background: "none", border: "1px solid #D4C9BA", color: "#6B5C48", cursor: "pointer", padding: "12px 24px", borderRadius: 8, fontSize: 13, fontWeight: 600, fontFamily: "'DM Sans', sans-serif" }}>Contact Mel</button>
           </div>
         </div>
-      ) : (
-        <div style={{ flex: 1, overflow: "hidden", position: "relative" }}>
-          {/* Loading spinner */}
-          {!loaded && (
-            <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "#F8F4EE", zIndex: 10, gap: 14 }}>
-              <div style={{ width: 38, height: 38, border: "3px solid #E5DDD0", borderTopColor: "#3A7A5A", borderRadius: "50%", animation: "spin 0.75s linear infinite" }} />
-              <div style={{ fontSize: 13, color: "#9B8670" }}>Loading listing…</div>
+      </div>
+    );
+  }
+
+  if (!detail) {
+    return (
+      <div style={{ minHeight: "100vh", background: "#F8F4EE", fontFamily: "'DM Sans', sans-serif" }}>
+        {topBar}
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "60vh", gap: 14 }}>
+          <div style={{ width: 40, height: 40, border: "3px solid #E5DDD0", borderTopColor: "#3A7A5A", borderRadius: "50%", animation: "spin 0.75s linear infinite" }} />
+          <div style={{ fontSize: 13, color: "#9B8670" }}>Loading listing details…</div>
+        </div>
+      </div>
+    );
+  }
+
+  const d = detail;
+  const statusColor = d.status?.toLowerCase().includes("active") ? BRAND.teal : BRAND.gold;
+  const sectionHead = (title: string) => (
+    <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: BRAND.textMuted, borderBottom: `1px solid ${BRAND.border}`, paddingBottom: 8, marginBottom: 16 }}>{title}</div>
+  );
+
+  const featureSections: Record<string, string> = { interior: "Interior", exterior: "Exterior & Lot", utilities: "Utilities", community: "Community", details: "Listing Details" };
+
+  return (
+    <div style={{ minHeight: "100vh", background: "#F8F4EE", fontFamily: "'DM Sans', sans-serif" }}>
+      {topBar}
+
+      {/* ── Photo gallery ── */}
+      {photos.length > 0 && (
+        <div style={{ background: "#1a1a1a", position: "relative" }}>
+          <div style={{ position: "relative", width: "100%", maxHeight: "60vh", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <img
+              src={photos[photoIdx]}
+              alt={`${d.address} — photo ${photoIdx + 1}`}
+              style={{ width: "100%", maxHeight: "60vh", objectFit: "cover", display: "block" }}
+            />
+            {hasPrev && (
+              <button onClick={() => setPhotoIdx(i => i - 1)} style={{ position: "absolute", left: 16, top: "50%", transform: "translateY(-50%)", background: "rgba(0,0,0,0.5)", border: "none", color: "#fff", width: 40, height: 40, borderRadius: "50%", cursor: "pointer", fontSize: 18, display: "flex", alignItems: "center", justifyContent: "center" }}>‹</button>
+            )}
+            {hasNext && (
+              <button onClick={() => setPhotoIdx(i => i + 1)} style={{ position: "absolute", right: 16, top: "50%", transform: "translateY(-50%)", background: "rgba(0,0,0,0.5)", border: "none", color: "#fff", width: 40, height: 40, borderRadius: "50%", cursor: "pointer", fontSize: 18, display: "flex", alignItems: "center", justifyContent: "center" }}>›</button>
+            )}
+            {photos.length > 1 && (
+              <div style={{ position: "absolute", bottom: 14, right: 16, background: "rgba(0,0,0,0.55)", color: "#fff", fontSize: 12, padding: "4px 10px", borderRadius: 20 }}>{photoIdx + 1} / {photos.length}</div>
+            )}
+          </div>
+          {photos.length > 1 && (
+            <div style={{ display: "flex", gap: 4, padding: "6px 8px", overflowX: "auto", background: "#111" }}>
+              {photos.map((ph, i) => (
+                <img
+                  key={i}
+                  src={ph}
+                  alt={`thumb ${i + 1}`}
+                  onClick={() => setPhotoIdx(i)}
+                  style={{ height: 52, width: 78, objectFit: "cover", cursor: "pointer", flexShrink: 0, opacity: i === photoIdx ? 1 : 0.5, border: i === photoIdx ? `2px solid ${BRAND.gold}` : "2px solid transparent", transition: "opacity 0.15s, border-color 0.15s" }}
+                />
+              ))}
             </div>
           )}
-          <iframe
-            ref={iframeRef}
-            src={url}
-            title="Property Listing"
-            style={{
-              width: "100%",
-              height: `calc(100% + ${CLIP_PX}px)`,
-              marginTop: -CLIP_PX,
-              border: "none",
-              display: "block",
-            }}
-            onLoad={() => setLoaded(true)}
-            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
-          />
         </div>
       )}
 
-      {/* ── Bottom attribution strip ── */}
-      <div style={{ background: "#F3ECE0", borderTop: "1px solid #E5DDD0", padding: "11px 20px", textAlign: "center", flexShrink: 0 }}>
-        <div style={{ fontSize: 11, color: "#9B8670", lineHeight: 1.5 }}>
-          Presented by{" "}
-          <strong style={{ color: "#2C2218" }}>Mel Castanares</strong> · REALTOR® RS-84753 ·{" "}
-          <strong style={{ color: "#2C2218" }}>Dream Home Realty Hawai'i</strong> ·{" "}
-          <a href="tel:+18082858774" style={{ color: "#3A7A5A", textDecoration: "none" }}>(808) 285-8774</a> ·{" "}
-          <a href="mailto:mel@homesweethomehawaii.com" style={{ color: "#3A7A5A", textDecoration: "none" }}>mel@homesweethomehawaii.com</a>
+      <div style={{ maxWidth: 900, margin: "0 auto", padding: "32px 20px 80px" }}>
+
+        {/* ── Price + address ── */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 16, marginBottom: 8 }}>
+          <div>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8, flexWrap: "wrap" }}>
+              <span style={{ background: statusColor, color: "#fff", fontSize: 10, fontWeight: 700, padding: "4px 12px", letterSpacing: "0.1em", textTransform: "uppercase" }}>{d.status}</span>
+              {d.propSubType && <span style={{ fontSize: 12, color: BRAND.textMuted }}>{d.propSubType}</span>}
+              {d.subdivision && <span style={{ fontSize: 12, color: BRAND.textMuted }}>· {d.subdivision}</span>}
+            </div>
+            <h1 className="font-display" style={{ fontSize: "clamp(22px, 4vw, 36px)", color: BRAND.text, margin: "0 0 6px" }}>{d.address}</h1>
+            <p style={{ color: BRAND.textMuted, fontSize: 15, margin: 0 }}>{d.city}, {d.state} {d.zip}</p>
+          </div>
+          <div>
+            <div className="font-display" style={{ fontSize: "clamp(28px, 5vw, 44px)", color: BRAND.gold, textAlign: "right" }}>{d.priceFormatted}</div>
+            {d.taxAnnualAmount ? <div style={{ fontSize: 11, color: BRAND.textMuted, textAlign: "right" }}>Est. ${d.taxAnnualAmount.toLocaleString()}/yr taxes</div> : null}
+            {d.associationFee ? <div style={{ fontSize: 11, color: BRAND.textMuted, textAlign: "right" }}>HOA: ${d.associationFee}/mo</div> : null}
+          </div>
+        </div>
+
+        {/* ── Key stats bar ── */}
+        <div style={{ display: "flex", gap: 0, background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, marginBottom: 32, flexWrap: "wrap" }}>
+          {[
+            { label: "Beds", value: d.bedrooms },
+            { label: "Total Baths", value: d.totalBaths },
+            { label: "Sq Ft", value: d.sqft },
+            { label: "Acres", value: d.acres },
+            { label: "Year Built", value: d.yearBuilt },
+          ].filter(s => s.value).map((s, i) => (
+            <div key={i} style={{ flex: "1 1 80px", padding: "14px 16px", borderRight: `1px solid ${BRAND.border}`, textAlign: "center", minWidth: 80 }}>
+              <div style={{ fontSize: 20, fontWeight: 700, color: BRAND.text, fontFamily: "'DM Serif Display', serif" }}>{s.value}</div>
+              <div style={{ fontSize: 10, color: BRAND.textMuted, letterSpacing: "0.08em", textTransform: "uppercase", marginTop: 2 }}>{s.label}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* ── Description ── */}
+        {d.description && (
+          <div style={{ marginBottom: 36 }}>
+            {sectionHead("Description")}
+            <p style={{ color: BRAND.text, fontSize: 15, lineHeight: 1.75, margin: 0 }}>{d.description}</p>
+          </div>
+        )}
+
+        {/* ── Feature sections ── */}
+        {Object.entries(featureSections).map(([key, label]) => {
+          const items = d.features?.[key];
+          if (!items?.length) return null;
+          return (
+            <div key={key} style={{ marginBottom: 32 }}>
+              {sectionHead(label)}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "8px 24px" }}>
+                {items.map((item: any, i: number) => (
+                  <div key={i} style={{ display: "flex", justifyContent: "space-between", gap: 8, borderBottom: `1px solid ${BRAND.border}`, paddingBottom: 6 }}>
+                    <span style={{ fontSize: 12, color: BRAND.textMuted }}>{item.label}</span>
+                    <span style={{ fontSize: 12, color: BRAND.text, fontWeight: 500, textAlign: "right", maxWidth: "60%" }}>{String(item.value)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+
+        {/* ── MLS attribution ── */}
+        <div style={{ marginBottom: 36 }}>
+          {sectionHead("Listing Information")}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "8px 24px" }}>
+            {[
+              { label: "MLS#", value: d.listingId },
+              { label: "IDX ID", value: d.idxId },
+              { label: "Listing Agent", value: d.listingAgentName },
+              { label: "Agent Phone", value: d.listingAgentPhone },
+              { label: "Listing Office", value: d.listingOfficeName },
+            ].filter(r => r.value).map((r, i) => (
+              <div key={i} style={{ display: "flex", justifyContent: "space-between", gap: 8, borderBottom: `1px solid ${BRAND.border}`, paddingBottom: 6 }}>
+                <span style={{ fontSize: 12, color: BRAND.textMuted }}>{r.label}</span>
+                <span style={{ fontSize: 12, color: BRAND.text, fontWeight: 500, textAlign: "right" }}>{String(r.value)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ── Contact Mel CTA ── */}
+        <div style={{ background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, padding: "32px 28px", textAlign: "center" }}>
+          <div className="font-display" style={{ fontSize: 22, color: BRAND.text, marginBottom: 8 }}>Interested in this property?</div>
+          <p style={{ color: BRAND.textMuted, fontSize: 14, marginBottom: 24, lineHeight: 1.65 }}>
+            Mel Castanares is your local O'ahu expert. Reach out to schedule a showing, ask questions, or get a free buyer consultation.
+          </p>
+          <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+            <a href="tel:+18082858774" style={{ background: BRAND.teal, color: "#fff", padding: "12px 24px", borderRadius: 6, textDecoration: "none", fontWeight: 700, fontSize: 13, display: "flex", alignItems: "center", gap: 8 }}><Phone size={14} /> Call Mel</a>
+            <a href="sms:+18082858774" style={{ background: "#F3ECE0", color: BRAND.text, padding: "12px 24px", borderRadius: 6, textDecoration: "none", fontWeight: 700, fontSize: 13, border: `1px solid ${BRAND.border}` }}>Text Mel</a>
+            <button onClick={() => go("contact")} style={{ background: "none", border: `1px solid ${BRAND.gold}`, color: BRAND.gold, cursor: "pointer", padding: "12px 24px", borderRadius: 6, fontSize: 13, fontWeight: 700, fontFamily: "'DM Sans', sans-serif" }}>Schedule a Showing</button>
+          </div>
+        </div>
+
+        {/* ── Attribution footer ── */}
+        <div style={{ marginTop: 28, textAlign: "center", fontSize: 11, color: BRAND.textDim, lineHeight: 1.6 }}>
+          Presented by <strong style={{ color: BRAND.textMuted }}>Mel Castanares</strong> · REALTOR® RS-84753 · Dream Home Realty Hawai'i ·{" "}
+          <a href={d.sourceUrl} target="_blank" rel="noopener noreferrer" style={{ color: BRAND.teal, textDecoration: "none" }}>View on IDX Broker ↗</a><br />
+          Listing data courtesy of {d.listingOfficeName || "HI Central MLS"} via IDX Broker. Information deemed reliable but not guaranteed.
         </div>
       </div>
     </div>
