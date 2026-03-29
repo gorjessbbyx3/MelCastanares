@@ -904,8 +904,9 @@ function HomePage({ setPage }) {
                   borderRadius: 12, padding: "14px 20px",
                   border: `1px solid rgba(255,255,255,0.1)`,
                 }}>
-                  <div style={{ color: "#fff", fontWeight: 600, fontSize: 16, marginBottom: 2 }}>Mel Castanares</div>
-                  <div style={{ color: BRAND.gold, fontSize: 11, letterSpacing: "0.15em", textTransform: "uppercase" }}>REALTOR® · RS-84753 · Dream Home Realty Hawai'i</div>
+                  <div style={{ color: "#fff", fontWeight: 600, fontSize: 16, marginBottom: 4 }}>Mel Castanares</div>
+                  <div style={{ color: BRAND.gold, fontSize: 10, letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 2 }}>REALTOR® · RS-84753</div>
+                  <div style={{ color: "rgba(255,255,255,0.65)", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase" }}>Dream Home Realty Hawai'i</div>
                 </div>
               </div>
             </Reveal>
@@ -3473,7 +3474,7 @@ function Footer({ setPage }) {
               <img src="/images/mel-headshot.jpg" alt="Mel" style={{ width: 48, height: 48, borderRadius: "50%", objectFit: "cover", border: "2px solid rgba(255,255,255,0.15)" }} />
               <div>
                 <div style={{ fontWeight: 600, fontSize: 16 }}>Mel Castanares</div>
-                <div style={{ fontSize: 12, color: "rgba(255,255,255,0.5)" }}>REALTOR® | RS-#####</div>
+                <div style={{ fontSize: 12, color: "rgba(255,255,255,0.5)" }}>REALTOR® | RS-84753</div>
               </div>
             </div>
             <p style={{ color: "rgba(255,255,255,0.55)", fontSize: 13, lineHeight: 1.7, marginBottom: 20 }}>
@@ -3538,7 +3539,7 @@ function Footer({ setPage }) {
         {/* Bottom bar */}
         <div className="footer-bottom" style={{ maxWidth: 1400, margin: "0 auto", marginTop: 48, paddingTop: 24, borderTop: "1px solid rgba(255,255,255,0.08)", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
           <p style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", letterSpacing: "0.05em" }}>
-            © {new Date().getFullYear()} Mel Castanares | Dream Home Realty Hawai'i LLC | RB-23566
+            © {new Date().getFullYear()} Mel Castanares | Dream Home Realty Hawai'i LLC | RS-84753
           </p>
           <div style={{ display: "flex", gap: 16, alignItems: "center", flexWrap: "wrap" }}>
             <a href="https://www.dreamhomerealtyhawaii.com" target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", textDecoration: "none" }}>dreamhomerealtyhawaii.com</a>
@@ -3749,58 +3750,86 @@ const ROUTE_PAGES: Record<string, string> = Object.fromEntries(
   Object.entries(PAGE_ROUTES).map(([k, v]) => [v, k])
 );
 
-const PAGE_META: Record<string, { title: string; description: string }> = {
+const BASE_URL = "https://melcastanares.techsavvyhawaii.com";
+
+const PAGE_META: Record<string, { title: string; description: string; image?: string; imageAlt?: string }> = {
   home: {
     title: "Mel Castanares | O'ahu REALTOR® | Mililani & Central Oahu Real Estate",
     description: "Mel Castanares (RS-84753) is an O'ahu-born REALTOR® at Dream Home Realty Hawai'i. Specializing in Mililani, Waipahu, Kapolei, and Central Oahu. Call (808) 285-8774.",
+    image: `${BASE_URL}/images/hero-diamondhead.jpg`,
+    imageAlt: "Diamond Head, O'ahu — Mel Castanares Real Estate",
   },
   about: {
     title: "About Mel Castanares | O'ahu Mama REALTOR® | License RS-84753",
     description: "Meet Mel Castanares — O'ahu-born REALTOR®, property management expert, and mama who guides families through buying, selling, and investing in Hawai'i real estate.",
+    image: `${BASE_URL}/images/mel-headshot.jpg`,
+    imageAlt: "Mel Castanares, O'ahu REALTOR® at Dream Home Realty Hawai'i",
   },
   properties: {
     title: "O'ahu Homes for Sale & Rent | Listings | Mel Castanares Real Estate",
     description: "Browse active homes for sale and rent across O'ahu. From Mililani family homes to Kāne'ohe rentals. Contact Mel Castanares at (808) 285-8774.",
+    image: `${BASE_URL}/images/hero-diamondhead.jpg`,
+    imageAlt: "O'ahu homes for sale — Mel Castanares Real Estate listings",
   },
   neighborhoods: {
     title: "O'ahu Neighborhoods Guide | Mililani, Kailua, Ewa Beach & More | Mel Castanares",
     description: "Explore O'ahu neighborhoods with local insights on schools, parks, commutes, and home prices. Mel's specialty: Central & West O'ahu — Mililani, Kapolei, Pearl City.",
+    image: `${BASE_URL}/images/hero-diamondhead.jpg`,
+    imageAlt: "O'ahu neighborhoods — Mililani, Kapolei, Kailua, Ewa Beach",
   },
   market: {
     title: "O'ahu Real Estate Market Trends 2026 | Mel Castanares",
     description: "Current O'ahu real estate market data: median prices, inventory levels, days on market, and Mel's honest analysis of what it means for buyers and sellers.",
+    image: `${BASE_URL}/images/hero-diamondhead.jpg`,
+    imageAlt: "O'ahu real estate market data 2026",
   },
   blog: {
     title: "Hawai'i Real Estate Resources & Blog | Mel Castanares",
     description: "Honest real estate advice for O'ahu buyers, sellers, and investors. Market updates, first-time buyer guides, neighborhood comparisons, and more.",
+    image: `${BASE_URL}/images/mel-headshot.jpg`,
+    imageAlt: "Mel Castanares — Hawai'i real estate blog and resources",
   },
   contact: {
     title: "Contact Mel Castanares | O'ahu REALTOR® | (808) 285-8774",
     description: "Get in touch with Mel Castanares, REALTOR® RS-84753 at Dream Home Realty Hawai'i. Phone: (808) 285-8774. Office: 95-1249 Meheula Parkway, Mililani, HI.",
+    image: `${BASE_URL}/images/mel-headshot.jpg`,
+    imageAlt: "Contact Mel Castanares, O'ahu REALTOR®",
   },
   buyers: {
     title: "Buyer's Guide | Buying a Home in O'ahu | Mel Castanares",
     description: "Your step-by-step guide to buying a home in Hawai'i with Mel Castanares. From pre-approval to closing — honest, family-focused guidance.",
+    image: `${BASE_URL}/images/hero-diamondhead.jpg`,
+    imageAlt: "Buying a home in O'ahu, Hawai'i — Mel Castanares guide",
   },
   sellers: {
     title: "Seller's Guide | Sell Your O'ahu Home | Mel Castanares",
     description: "Strategic home selling on O'ahu with Mel Castanares. Professional marketing, accurate pricing, and fierce negotiation to maximize your return.",
+    image: `${BASE_URL}/images/hero-diamondhead.jpg`,
+    imageAlt: "Selling your O'ahu home with Mel Castanares",
   },
   valuation: {
     title: "Free Home Valuation | What's Your O'ahu Home Worth? | Mel Castanares",
     description: "Get a free, no-obligation home valuation from Mel Castanares. Accurate O'ahu home values based on real comparable sales and current market conditions.",
+    image: `${BASE_URL}/images/mel-headshot.jpg`,
+    imageAlt: "Free O'ahu home valuation — Mel Castanares REALTOR®",
   },
   mortgage: {
     title: "O'ahu Mortgage Calculator | Estimate Your Payment | Mel Castanares",
     description: "Calculate your monthly mortgage payment for an O'ahu home. Includes principal, interest, property tax, insurance, and HOA — plus Mel's lender recommendations.",
+    image: `${BASE_URL}/images/hero-diamondhead.jpg`,
+    imageAlt: "O'ahu mortgage calculator — estimate your home payment",
   },
   relocation: {
     title: "Relocating to Hawai'i | O'ahu Relocation Guide | Mel Castanares",
     description: "Everything you need to know about moving to O'ahu. Cost of living, schools, logistics, and local tips from Mel Castanares who has helped dozens of families relocate.",
+    image: `${BASE_URL}/images/hero-diamondhead.jpg`,
+    imageAlt: "Relocating to O'ahu, Hawai'i — complete guide by Mel Castanares",
   },
   testimonials: {
     title: "Client Reviews | What Mel's Clients Say | Mel Castanares REALTOR®",
     description: "Read real client reviews and testimonials for Mel Castanares, O'ahu REALTOR®. From first-time buyers to seasoned investors — 100% client satisfaction.",
+    image: `${BASE_URL}/images/mel-headshot.jpg`,
+    imageAlt: "Mel Castanares client testimonials — O'ahu REALTOR® reviews",
   },
 };
 
@@ -3831,27 +3860,46 @@ export default function App() {
     }
     descEl.content = meta.description;
 
-    // og:title + og:description
+    // og:title + twitter:title
     ["og:title", "twitter:title"].forEach(prop => {
       let el = document.querySelector(`meta[property="${prop}"]`) as HTMLMetaElement | null;
       if (!el) { el = document.createElement("meta"); el.setAttribute("property", prop); document.head.appendChild(el); }
       el.content = meta.title;
     });
+
+    // og:description + twitter:description
     ["og:description", "twitter:description"].forEach(prop => {
       let el = document.querySelector(`meta[property="${prop}"]`) as HTMLMetaElement | null;
       if (!el) { el = document.createElement("meta"); el.setAttribute("property", prop); document.head.appendChild(el); }
       el.content = meta.description;
     });
 
-    // og:url
-    let urlEl = document.querySelector('meta[property="og:url"]') as HTMLMetaElement | null;
-    if (!urlEl) { urlEl = document.createElement("meta"); urlEl.setAttribute("property", "og:url"); document.head.appendChild(urlEl); }
-    urlEl.content = `https://melcastanares.techsavvyhawaii.com${path}`;
+    // og:url + twitter:url
+    const pageUrl = `${BASE_URL}${path}`;
+    ["og:url", "twitter:url"].forEach(prop => {
+      let el = document.querySelector(`meta[property="${prop}"]`) as HTMLMetaElement | null;
+      if (!el) { el = document.createElement("meta"); el.setAttribute("property", prop); document.head.appendChild(el); }
+      el.content = pageUrl;
+    });
+
+    // og:image + twitter:image — per-page
+    const imgUrl = meta.image || `${BASE_URL}/images/hero-diamondhead.jpg`;
+    const imgAlt = meta.imageAlt || "Mel Castanares, O'ahu REALTOR® at Dream Home Realty Hawai'i";
+    ["og:image", "twitter:image"].forEach(prop => {
+      let el = document.querySelector(`meta[property="${prop}"]`) as HTMLMetaElement | null;
+      if (!el) { el = document.createElement("meta"); el.setAttribute("property", prop); document.head.appendChild(el); }
+      el.content = imgUrl;
+    });
+    ["og:image:alt", "twitter:image:alt"].forEach(prop => {
+      let el = document.querySelector(`meta[property="${prop}"]`) as HTMLMetaElement | null;
+      if (!el) { el = document.createElement("meta"); el.setAttribute("property", prop); document.head.appendChild(el); }
+      el.content = imgAlt;
+    });
 
     // Canonical link
     let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
     if (!canonical) { canonical = document.createElement("link"); canonical.rel = "canonical"; document.head.appendChild(canonical); }
-    canonical.href = `https://melcastanares.techsavvyhawaii.com${path}`;
+    canonical.href = pageUrl;
 
     // Scroll to top
     window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
