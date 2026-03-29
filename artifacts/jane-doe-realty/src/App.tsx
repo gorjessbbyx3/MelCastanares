@@ -1959,20 +1959,20 @@ function BlogPage({ setPage }) {
             }}>
               <div className="img-zoom" style={{ aspectRatio: "21/9", position: "relative" }}>
                 <img src={featured.images?.[0]?.url || featured.img} alt={featured.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to right, rgba(10,10,10,0.95) 0%, rgba(10,10,10,0.7) 40%, transparent 70%)" }} />
-                <div style={{ position: "absolute", top: 0, left: 0, bottom: 0, display: "flex", flexDirection: "column", justifyContent: "center", padding: "40px 48px", maxWidth: 560 }}>
+                <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to right, rgba(10,10,10,0.92) 0%, rgba(10,10,10,0.75) 45%, rgba(10,10,10,0.2) 75%, transparent 100%)" }} />
+                <div style={{ position: "absolute", top: 0, left: 0, bottom: 0, display: "flex", flexDirection: "column", justifyContent: "center", padding: "40px 48px", maxWidth: 580 }}>
                   <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 16 }}>
-                    <span style={{ background: BRAND.teal, color: BRAND.bg, fontSize: 10, fontWeight: 700, padding: "4px 10px", letterSpacing: "0.1em", textTransform: "uppercase" }}>Featured</span>
-                    <span style={{ color: BRAND.teal, fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase" }}>{featured.category}</span>
+                    <span style={{ background: BRAND.teal, color: "#fff", fontSize: 10, fontWeight: 700, padding: "4px 10px", letterSpacing: "0.1em", textTransform: "uppercase" }}>Featured</span>
+                    <span style={{ color: BRAND.tealLight, fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase" }}>{featured.category}</span>
                   </div>
-                  <h2 className="font-display" style={{ fontSize: "clamp(24px, 3vw, 36px)", marginBottom: 16, lineHeight: 1.2, color: BRAND.text }}>{featured.title}</h2>
-                  <p style={{ color: BRAND.textMuted, fontSize: 14, lineHeight: 1.7, marginBottom: 20 }}>{featured.excerpt}</p>
+                  <h2 className="font-display" style={{ fontSize: "clamp(24px, 3vw, 38px)", marginBottom: 16, lineHeight: 1.2, color: "#ffffff" }}>{featured.title}</h2>
+                  <p style={{ color: "rgba(255,255,255,0.78)", fontSize: 15, lineHeight: 1.75, marginBottom: 24 }}>{featured.excerpt}</p>
                   <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-                    <span style={{ color: BRAND.text, fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", fontWeight: 600, display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{ color: "#fff", fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase", fontWeight: 600, display: "flex", alignItems: "center", gap: 8 }}>
                       Read Article <ArrowRight size={14} />
                     </span>
-                    <span style={{ color: BRAND.textDim, fontSize: 11 }}>•</span>
-                    <span style={{ color: BRAND.textDim, fontSize: 11, display: "flex", alignItems: "center", gap: 4 }}><Clock size={12} /> {featured.readTime} min read</span>
+                    <span style={{ color: "rgba(255,255,255,0.4)", fontSize: 11 }}>•</span>
+                    <span style={{ color: "rgba(255,255,255,0.55)", fontSize: 11, display: "flex", alignItems: "center", gap: 4 }}><Clock size={12} /> {featured.readTime} min read</span>
                   </div>
                 </div>
               </div>
