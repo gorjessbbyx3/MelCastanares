@@ -618,7 +618,7 @@ function Nav({ page, setPage }) {
           </div>
 
           <nav style={{ display: "flex", alignItems: "center", gap: 28 }} className="hidden-mobile">
-            <a href="tel:8082858774" style={{
+            <a href="tel:+18082858774" style={{
               display: "flex", alignItems: "center", gap: 6, textDecoration: "none",
               color: BRAND.textMuted, fontSize: 11, letterSpacing: "0.1em", fontFamily: "'DM Sans', sans-serif",
               transition: "color 0.3s",
@@ -1254,6 +1254,10 @@ function PropertyCard({ property: p, onClick }) {
           {(p.bathrooms > 0 || p.type !== "land") && <span style={{ display: "flex", alignItems: "center", gap: 6 }}><Bath size={14} color={BRAND.teal} />{p.bathrooms || "—"}</span>}
           <span style={{ display: "flex", alignItems: "center", gap: 6 }}><Square size={14} color={BRAND.teal} />{p.sqft.toLocaleString()} {p.type === "land" ? "sq ft lot" : "sq ft"}</span>
         </div>
+        <div style={{ marginTop: 14, display: "flex", alignItems: "center", gap: 6, color: BRAND.teal, fontSize: 12, fontWeight: 600 }}>
+          <MessageCircle size={13} />
+          Ask Mel about this property →
+        </div>
       </div>
     </div>
   );
@@ -1457,7 +1461,7 @@ function PropertiesPage({ setPage }) {
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: 24, marginBottom: 48 }}>
                   {filteredSales.map((p, i) => (
                     <Reveal key={p.id} delay={Math.min(i * 0.05, 0.4)} direction="up">
-                      <PropertyCard property={p} onClick={() => window.open(p.listingUrl, "_blank")} />
+                      <PropertyCard property={p} onClick={() => window.dispatchEvent(new CustomEvent("openChatWithProperty", { detail: p }))} />
                     </Reveal>
                   ))}
                 </div>
@@ -1538,7 +1542,7 @@ function PropertiesPage({ setPage }) {
                     <Reveal key={p.id} delay={Math.min(i * 0.05, 0.4)} direction="up">
                       <div style={{ position: "relative" }}>
                         <div style={{ position: "absolute", top: 12, left: 12, zIndex: 2, background: BRAND.gold, color: BRAND.bg, fontSize: 9, fontWeight: 700, padding: "4px 10px", letterSpacing: "0.15em", textTransform: "uppercase" }}>Sold</div>
-                        <PropertyCard property={{ ...p, status: "sold" }} onClick={() => window.open(p.listingUrl, "_blank")} />
+                        <PropertyCard property={{ ...p, status: "sold" }} onClick={() => window.dispatchEvent(new CustomEvent("openChatWithProperty", { detail: { ...p, status: "sold" } }))} />
                       </div>
                     </Reveal>
                   ))}
@@ -1623,7 +1627,7 @@ function PropertiesPage({ setPage }) {
                     <Reveal key={p.id} delay={i * 0.08} direction="up">
                       <PropertyCard
                         property={p}
-                        onClick={() => { window.open(p.listingUrl || "https://dreamhomerlty.appfolio.com/listings/", "_blank"); }}
+                        onClick={() => window.dispatchEvent(new CustomEvent("openChatWithProperty", { detail: { ...p, status: "rental" } }))}
                       />
                     </Reveal>
                   ))}
@@ -3622,7 +3626,7 @@ function Footer({ setPage }) {
           </p>
           <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
             <button className="btn-primary" onClick={() => go("contact")} style={{ background: "#fff", color: BRAND.teal, borderRadius: 8 }}>Get in Touch</button>
-            <a href="tel:8082858774" className="btn-outline" style={{ borderColor: "rgba(255,255,255,0.35)", color: "#fff", borderRadius: 8, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8 }}>
+            <a href="tel:+18082858774" className="btn-outline" style={{ borderColor: "rgba(255,255,255,0.35)", color: "#fff", borderRadius: 8, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8 }}>
               <Phone size={14} /> (808) 285-8774
             </a>
           </div>
@@ -3684,7 +3688,7 @@ function Footer({ setPage }) {
           <div>
             <h4 style={{ fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)", marginBottom: 20 }}>Contact</h4>
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-              <a href="tel:8082858774" style={{ display: "flex", alignItems: "center", gap: 10, color: "rgba(255,255,255,0.65)", fontSize: 13, textDecoration: "none" }}>
+              <a href="tel:+18082858774" style={{ display: "flex", alignItems: "center", gap: 10, color: "rgba(255,255,255,0.65)", fontSize: 13, textDecoration: "none" }}>
                 <div style={{ width: 32, height: 32, borderRadius: 8, background: `${BRAND.teal}22`, display: "flex", alignItems: "center", justifyContent: "center" }}><Phone size={14} color={BRAND.tealLight} /></div>
                 (808) 285-8774
               </a>
@@ -3737,6 +3741,52 @@ function FloatingActions({ setPage }) {
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
   useEffect(() => { if (chatOpen && inputRef.current) inputRef.current.focus(); }, [chatOpen]);
+
+  useEffect(() => {
+    const handler = async (e: CustomEvent) => {
+      const p = e.detail;
+      const addr = p.address || p.title || "this property";
+      const price = p.price ? `$${Number(p.price).toLocaleString()}` : "";
+      const beds = p.beds ? `${p.beds} bed` : "";
+      const baths = p.baths ? `${p.baths} bath` : "";
+      const details = [price, beds, baths].filter(Boolean).join(" · ");
+      const status = p.status === "sold" ? "recently sold" : p.status === "rental" ? "rental" : "for sale";
+      const prompt = `I'm interested in ${addr}${details ? ` (${details})` : ""} — it's listed as ${status}. Can you tell me more about this area and how I can schedule a showing with Mel?`;
+
+      const userMsg = { role: "user", content: prompt };
+      const resetMessages = [{ role: "assistant", content: "Aloha! 🌺 I'm Mel's AI assistant. Ask me about buying or selling a home in Hawai'i, O'ahu neighborhoods, or anything real estate!" }];
+      const newMsgs = [...resetMessages, userMsg];
+      setMessages(newMsgs);
+      setInput("");
+      setChatOpen(true);
+      setContactOpen(false);
+      setLoading(true);
+
+      try {
+        const controller = new AbortController();
+        setTimeout(() => controller.abort(), 15000);
+        const res = await fetch("https://mel-ai-chat.gorjessbbyx3.workers.dev", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ messages: newMsgs }),
+          signal: controller.signal,
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setMessages(prev => [...prev, { role: "assistant", content: data.response || "Great question! Reach Mel directly at (808) 285-8774 for details on this property." }]);
+        } else {
+          throw new Error("API error");
+        }
+      } catch {
+        const statusTxt = p.status === "sold" ? "recently sold" : p.status === "rental" ? "rental" : "for sale";
+        setMessages(prev => [...prev, { role: "assistant", content: `Great choice! ${addr} is ${statusTxt}${price ? ` at ${price}` : ""}. I'd love to connect you with Mel — she can arrange a showing and answer any questions. Call her at (808) 285-8774 or send a message through the Contact page! 🏡` }]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    window.addEventListener("openChatWithProperty", handler as EventListener);
+    return () => window.removeEventListener("openChatWithProperty", handler as EventListener);
+  }, []);
 
   const CHAT_URL = "https://mel-ai-chat.gorjessbbyx3.workers.dev";
 
@@ -3813,7 +3863,7 @@ function FloatingActions({ setPage }) {
       {contactOpen && (
         <div className="contact-popup">
           <div style={{ fontSize: 12, color: BRAND.textDim, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 8, paddingLeft: 16 }}>Quick Contact</div>
-          <a href="tel:8082858774">
+          <a href="tel:+18082858774">
             <div style={{ width: 36, height: 36, borderRadius: 10, background: `${BRAND.teal}15`, display: "flex", alignItems: "center", justifyContent: "center" }}><Phone size={16} color={BRAND.teal} /></div>
             <div><div style={{ fontWeight: 600 }}>Call Mel</div><div style={{ fontSize: 12, color: BRAND.textDim }}>(808) 285-8774</div></div>
           </a>
