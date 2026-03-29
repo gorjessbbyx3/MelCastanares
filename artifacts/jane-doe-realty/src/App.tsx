@@ -2325,55 +2325,142 @@ function ContactPage() {
 function BuyersPage({ setPage }) {
   const go = (p) => { setPage(p); window.scrollTo({ top: 0, behavior: "smooth" }); };
   const steps = [
-    { num: "01", title: "Discovery Call", desc: "We start with a conversation about your goals, timeline, budget, and lifestyle preferences to create a personalized search strategy.", icon: "🤙" },
-    { num: "02", title: "Pre-Approval", desc: "Mel connects you with trusted lenders to secure pre-approval, giving you a competitive edge in Hawai'i's market.", icon: "💰" },
-    { num: "03", title: "Curated Showings", desc: "No scrolling through hundreds of listings. Mel hand-picks properties that match your criteria and arranges private showings.", icon: "🏡" },
-    { num: "04", title: "Offer & Negotiation", desc: "When you find the one, Mel crafts a strategic offer and negotiates terms that protect your interests.", icon: "📝" },
-    { num: "05", title: "Close & Celebrate", desc: "From inspections to closing, Mel coordinates every detail so you can focus on planning your move to paradise.", icon: "🎉" },
+    { num: "01", title: "Discovery Call", desc: "Before anything else, Mel listens. You'll talk through your goals, timeline, must-haves, neighborhoods, and what 'home' actually means to your family. This shapes everything that follows.", detail: "30–60 min call. No forms. No pressure. Just a real conversation." },
+    { num: "02", title: "Lender Introduction", desc: "Mel connects you with trusted O'ahu lenders — people she's vetted personally. Getting pre-approved before you tour homes is non-negotiable in this market. It shows sellers you're serious and tells you exactly what you can spend.", detail: "VA, FHA, conventional, and jumbo loan options available. Hawai'i-specific programs too." },
+    { num: "03", title: "Curated Home Search", desc: "No Zillow rabbit holes. Mel hand-selects properties that actually match your criteria and sets up real-time MLS alerts so you hear about new listings before they hit the public portals. She knows when a listing is overpriced and when it's a deal.", detail: "You'll get a private portal with Mel's honest notes on every home." },
+    { num: "04", title: "Private Showings", desc: "Mel tours homes with you in person — not an assistant, not a showing coordinator. She knows what to look for: deferred maintenance, flood zone issues, HOA red flags, and the things sellers don't put in the listing description.", detail: "She'll tell you when to walk away as clearly as when to write an offer." },
+    { num: "05", title: "Strategic Offer", desc: "When you find the right home, Mel builds an offer strategy based on recent comps, days on market, seller motivation, and current competition. She's not just filling in a price — she's thinking three moves ahead.", detail: "Escalation clauses, appraisal gaps, contingency strategy — she handles it all." },
+    { num: "06", title: "Inspection & Due Diligence", desc: "Mel attends your inspection. She reviews the report with you, identifies what's serious vs. cosmetic, and negotiates repair credits or price reductions based on findings. This is where buyers leave money on the table — Mel doesn't let that happen.", detail: "Typical O'ahu inspection period: 10 business days." },
+    { num: "07", title: "Escrow & Coordination", desc: "From accepted offer to closing, there are roughly 30–50 tasks to track across escrow, lender, title, HOA, and seller. Mel project-manages the entire process and keeps you updated without overwhelming you.", detail: "Typical O'ahu escrow: 30–45 days. Mel proactively catches issues before they become delays." },
+    { num: "08", title: "Keys & Beyond", desc: "Closing day is just the beginning of Mel's commitment. She has contractor referrals, property management contacts, and is always a phone call away if questions come up after the keys are in your hand.", detail: "Her clients call her for years after closing. That's the relationship she builds." },
+  ];
+
+  const facts = [
+    { label: "Median O'ahu Home Price", value: "$1.05M", sub: "Single-family (2025)" },
+    { label: "Median Condo Price", value: "$510K", sub: "O'ahu island-wide" },
+    { label: "Property Tax Rate", value: "~0.35%", sub: "One of lowest in the US" },
+    { label: "Avg Days on Market", value: "28 days", sub: "Well-priced homes" },
+    { label: "Typical Down Payment", value: "5–20%", sub: "VA = 0% for eligible buyers" },
+    { label: "Closing Costs", value: "1.5–3%", sub: "Of purchase price" },
+  ];
+
+  const programs = [
+    { title: "VA Loan", tag: "Military", desc: "0% down, no PMI, competitive rates. Hawai'i has one of the highest rates of VA loan usage in the country. Mel works with several VA-specialized lenders on island.", color: BRAND.teal },
+    { title: "FHA Loan", tag: "First-Time", desc: "3.5% down with credit scores as low as 580. Great for buyers building credit. Note: O'ahu's loan limits are higher than the mainland — $1,209,750 for single-family in 2025.", color: BRAND.gold },
+    { title: "HHFDC Programs", tag: "State Program", desc: "Hawaii Housing Finance and Development Corporation offers down payment assistance and below-market rate loans for qualifying first-time buyers with income limits.", color: BRAND.coral },
+    { title: "Conventional 3%", tag: "Conventional", desc: "Fannie Mae HomeReady and Freddie Mac Home Possible allow as little as 3% down for qualifying buyers — often with lower MI rates than FHA.", color: "#8B5CF6" },
+  ];
+
+  const faqs = [
+    { q: "How long does buying a home in Hawai'i take?", a: "From first conversation to keys, typically 60–120 days. Pre-approval (1–2 weeks) + home search (varies widely, 2 weeks to 3 months) + escrow (30–45 days). A competitive, well-prepared buyer can compress this significantly." },
+    { q: "Can I buy a vacation home or short-term rental?", a: "Yes, but STR regulations vary significantly by neighborhood and Oahu county zoning. Mel knows which areas allow short-term rentals and which don't — this is critical before you buy." },
+    { q: "Should I waive the inspection contingency?", a: "In most cases, no. Mel will advise you based on the specific home and market conditions. There are situations where it makes sense and situations where it's too risky. She'll be direct with you about which is which." },
+    { q: "Do I need to be on island to buy?", a: "Not necessarily. Mel has worked with military and mainland buyers who completed their purchase remotely — video tours, DocuSign, and good communication make it work. She'll be your eyes and ears on the ground." },
   ];
 
   return (
     <div style={{ paddingTop: 120 }}>
-      {/* Cinematic Hero */}
       <section style={{ position: "relative", padding: "100px 24px 120px", overflow: "hidden" }}>
         <img src="/images/mel-showing.jpg" alt="Mel showing a home" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
-        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, rgba(27,42,51,0.85) 0%, rgba(26,138,125,0.6) 100%)" }} />
-        <div style={{ position: "relative", zIndex: 1, maxWidth: 700, margin: "0 auto", textAlign: "center" }}>
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, rgba(27,42,51,0.9) 0%, rgba(26,138,125,0.55) 100%)" }} />
+        <div style={{ position: "relative", zIndex: 1, maxWidth: 720, margin: "0 auto", textAlign: "center" }}>
           <Reveal>
-            <div style={{ color: "#fff", fontSize: 11, letterSpacing: "0.35em", textTransform: "uppercase", marginBottom: 16, fontWeight: 500, opacity: 0.8 }}>Your Journey</div>
-            <h1 className="font-display" style={{ fontSize: "clamp(40px, 7vw, 68px)", marginBottom: 20, color: "#fff", lineHeight: 1.05 }}>
-              Finding Home<br/>Should Feel Like <span style={{ fontStyle: "italic", color: BRAND.goldLight }}>This</span>
+            <div style={{ color: "#fff", fontSize: 11, letterSpacing: "0.35em", textTransform: "uppercase", marginBottom: 16, fontWeight: 500, opacity: 0.7 }}>Complete Buyer's Guide</div>
+            <h1 className="font-display" style={{ fontSize: "clamp(40px, 7vw, 70px)", marginBottom: 20, color: "#fff", lineHeight: 1.05 }}>
+              Buying a Home<br/>in Hawai'i — <span style={{ fontStyle: "italic", color: BRAND.goldLight }}>The Real Guide</span>
             </h1>
-            <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 17, lineHeight: 1.7, maxWidth: 520, margin: "0 auto" }}>
-              Not stressful. Not confusing. Just exciting — the way it's supposed to be. Here's how Mel makes it happen.
+            <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 17, lineHeight: 1.7, maxWidth: 560, margin: "0 auto 32px" }}>
+              Not a checklist of obvious advice. The actual things Mel wishes every buyer knew before their first showing — so you can compete, negotiate, and close with confidence.
             </p>
+            <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+              <button className="btn-primary" onClick={() => go("contact")} style={{ background: "#fff", color: BRAND.teal }}>Talk to Mel First</button>
+              <button className="btn-outline" onClick={() => go("mortgage")} style={{ borderColor: "rgba(255,255,255,0.4)", color: "#fff" }}>Run the Numbers</button>
+            </div>
           </Reveal>
         </div>
       </section>
 
-      {/* Steps as cards with numbers */}
+      {/* Market Reality */}
       <div className="section-pad">
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 24, marginBottom: 56 }}>
+        <Reveal>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 16, marginBottom: 72 }}>
+            {facts.map((f, i) => (
+              <div key={i} style={{ background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, padding: "24px 20px", borderRadius: 12, textAlign: "center" }}>
+                <div className="font-display" style={{ fontSize: 26, color: BRAND.teal, marginBottom: 4 }}>{f.value}</div>
+                <div style={{ fontSize: 12, color: BRAND.text, fontWeight: 600, marginBottom: 4 }}>{f.label}</div>
+                <div style={{ fontSize: 11, color: BRAND.textDim }}>{f.sub}</div>
+              </div>
+            ))}
+          </div>
+        </Reveal>
+
+        {/* 8-step process */}
+        <Reveal>
+          <div style={{ textAlign: "center", marginBottom: 48 }}>
+            <div style={{ color: BRAND.teal, fontSize: 11, letterSpacing: "0.25em", textTransform: "uppercase", marginBottom: 10, fontWeight: 500 }}>How It Works</div>
+            <h2 className="font-display" style={{ fontSize: "clamp(28px, 4vw, 44px)" }}>Mel's 8-Step Buying Process</h2>
+          </div>
+        </Reveal>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 20, marginBottom: 72 }}>
           {steps.map((step, i) => (
-            <Reveal key={i} delay={i * 0.1} direction="up">
-              <div className="card-hover" style={{ background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, padding: 32, height: "100%", borderRadius: 12, position: "relative", overflow: "hidden" }}>
-                <div style={{ position: "absolute", top: -12, right: -8, fontSize: 80, fontFamily: "'DM Serif Display', serif", color: BRAND.teal, opacity: 0.06, lineHeight: 1 }}>{step.num}</div>
-                <div style={{ fontSize: 32, marginBottom: 16 }}>{step.icon}</div>
-                <div style={{ color: BRAND.teal, fontSize: 11, letterSpacing: "0.15em", textTransform: "uppercase", fontWeight: 700, marginBottom: 8 }}>Step {step.num}</div>
-                <h3 className="font-display" style={{ fontSize: 24, marginBottom: 12 }}>{step.title}</h3>
-                <p style={{ color: BRAND.textMuted, fontSize: 14, lineHeight: 1.7 }}>{step.desc}</p>
+            <Reveal key={i} delay={i * 0.07} direction="up">
+              <div className="card-hover" style={{ background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, padding: 28, height: "100%", borderRadius: 12, position: "relative", overflow: "hidden" }}>
+                <div style={{ position: "absolute", top: -10, right: -6, fontSize: 72, fontFamily: "'DM Serif Display', serif", color: BRAND.teal, opacity: 0.05, lineHeight: 1, fontStyle: "italic" }}>{step.num}</div>
+                <div style={{ color: BRAND.teal, fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", fontWeight: 700, marginBottom: 8 }}>Step {step.num}</div>
+                <h3 className="font-display" style={{ fontSize: 20, marginBottom: 10 }}>{step.title}</h3>
+                <p style={{ color: BRAND.textMuted, fontSize: 14, lineHeight: 1.7, marginBottom: 12 }}>{step.desc}</p>
+                <div style={{ borderTop: `1px solid ${BRAND.border}`, paddingTop: 12, fontSize: 12, color: BRAND.teal, fontStyle: "italic" }}>{step.detail}</div>
               </div>
             </Reveal>
           ))}
         </div>
 
-        {/* CTA band */}
+        {/* Loan Programs */}
         <Reveal>
-          <div style={{ background: `linear-gradient(135deg, ${BRAND.teal}, ${BRAND.tealDark})`, padding: "48px 40px", borderRadius: 16, textAlign: "center", color: "#fff" }}>
-            <h2 className="font-display" style={{ fontSize: 32, marginBottom: 12 }}>Ready to Start?</h2>
-            <p style={{ opacity: 0.8, fontSize: 15, marginBottom: 24, maxWidth: 480, margin: "0 auto 24px" }}>Every journey starts with a conversation. Mel's here to answer your questions — no pressure, no obligations.</p>
+          <div style={{ textAlign: "center", marginBottom: 32 }}>
+            <div style={{ color: BRAND.teal, fontSize: 11, letterSpacing: "0.25em", textTransform: "uppercase", marginBottom: 10, fontWeight: 500 }}>Financing</div>
+            <h2 className="font-display" style={{ fontSize: "clamp(26px, 4vw, 40px)", marginBottom: 8 }}>Loan Programs Available in Hawai'i</h2>
+            <p style={{ color: BRAND.textMuted, fontSize: 15, maxWidth: 560, margin: "0 auto" }}>Mel will connect you with the right lender for your situation. Here's what's available.</p>
+          </div>
+        </Reveal>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 20, marginBottom: 72 }}>
+          {programs.map((p, i) => (
+            <Reveal key={i} delay={i * 0.08} direction="up">
+              <div style={{ background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, borderTop: `3px solid ${p.color}`, padding: 28, borderRadius: 12 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
+                  <h3 className="font-display" style={{ fontSize: 20 }}>{p.title}</h3>
+                  <span style={{ fontSize: 10, padding: "3px 10px", borderRadius: 100, background: `${p.color}18`, color: p.color, fontWeight: 700, letterSpacing: "0.1em", whiteSpace: "nowrap" }}>{p.tag}</span>
+                </div>
+                <p style={{ color: BRAND.textMuted, fontSize: 14, lineHeight: 1.7 }}>{p.desc}</p>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+
+        {/* FAQ */}
+        <Reveal>
+          <div style={{ textAlign: "center", marginBottom: 32 }}>
+            <div style={{ color: BRAND.teal, fontSize: 11, letterSpacing: "0.25em", textTransform: "uppercase", marginBottom: 10, fontWeight: 500 }}>Common Questions</div>
+            <h2 className="font-display" style={{ fontSize: "clamp(26px, 4vw, 40px)" }}>Things Buyers Ask Mel</h2>
+          </div>
+        </Reveal>
+        <div style={{ maxWidth: 780, margin: "0 auto 72px" }}>
+          {faqs.map((faq, i) => (
+            <Reveal key={i} delay={i * 0.08}>
+              <div style={{ borderBottom: `1px solid ${BRAND.border}`, padding: "28px 0" }}>
+                <h3 className="font-display" style={{ fontSize: 18, marginBottom: 12, color: BRAND.text }}>{faq.q}</h3>
+                <p style={{ color: BRAND.textMuted, fontSize: 15, lineHeight: 1.75 }}>{faq.a}</p>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+
+        <Reveal>
+          <div style={{ background: `linear-gradient(135deg, ${BRAND.teal}, ${BRAND.tealDark})`, padding: "56px 40px", borderRadius: 16, textAlign: "center", color: "#fff" }}>
+            <h2 className="font-display" style={{ fontSize: 36, marginBottom: 12 }}>Ready to Find Your Home?</h2>
+            <p style={{ opacity: 0.85, fontSize: 16, marginBottom: 28, maxWidth: 500, margin: "0 auto 28px", lineHeight: 1.7 }}>Start with a conversation. Mel will tell you exactly where the opportunities are right now and what to expect for your budget and timeline.</p>
             <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
-              <button className="btn-primary" onClick={() => go("contact")} style={{ background: "#fff", color: BRAND.teal }}>Let's Talk</button>
+              <button className="btn-primary" onClick={() => go("contact")} style={{ background: "#fff", color: BRAND.teal }}>Schedule a Discovery Call</button>
               <button className="btn-outline" onClick={() => go("mortgage")} style={{ borderColor: "rgba(255,255,255,0.4)", color: "#fff" }}>Mortgage Calculator</button>
             </div>
           </div>
@@ -2390,56 +2477,156 @@ function BuyersPage({ setPage }) {
 function SellersPage({ setPage }) {
   const go = (p) => { setPage(p); window.scrollTo({ top: 0, behavior: "smooth" }); };
   const steps = [
-    { num: "01", title: "Market Analysis", desc: "Mel provides a comprehensive comparative market analysis so you know your home's true value in today's market.", icon: "📊" },
-    { num: "02", title: "Strategic Pricing", desc: "Using data and market expertise, Mel positions your property to attract serious buyers while maximizing your return.", icon: "🎯" },
-    { num: "03", title: "Luxury Marketing", desc: "Professional photography, videography, drone footage, staging, and targeted digital campaigns to showcase your property.", icon: "📸" },
-    { num: "04", title: "Showings & Offers", desc: "Mel handles all inquiries, conducts showings, and presents offers with clear analysis so you can make informed decisions.", icon: "🔑" },
-    { num: "05", title: "Negotiation & Close", desc: "From offer acceptance through escrow, Mel negotiates fiercely on your behalf and manages every detail to closing.", icon: "🎉" },
+    { num: "01", title: "Pricing Strategy", desc: "Mel runs a full comparative market analysis — not a Zestimate, not a guess. She'll show you exactly what similar homes have sold for in the last 60–90 days, what's sitting on market and why, and where your home fits in the current landscape.", detail: "Pricing 5% too high can cost you 15% on the final number. Mel gets this right." },
+    { num: "02", title: "Pre-Listing Prep", desc: "Mel walks through your home with a buyer's eye and tells you exactly what to fix, what to skip, and what to stage. She knows what O'ahu buyers scrutinize in person — and what they walk past without noticing.", detail: "Her contractor network means fast turnarounds on high-impact repairs at fair prices." },
+    { num: "03", title: "Professional Photography & Video", desc: "Every listing gets professional photography. Qualifying homes get aerial drone footage and a walkthrough video. This is non-negotiable — the first showing happens online, and your photos either earn the in-person visit or they don't.", detail: "Drone footage, twilight shots, and virtual tours available on qualifying properties." },
+    { num: "04", title: "MLS + Digital Launch", desc: "Your home goes live on MLS, Zillow, Realtor.com, Redfin, and all major portals. Mel also runs targeted social media ads to buyers actively looking in your price range and neighborhood — not just waiting for them to find you.", detail: "Email blast to Mel's active buyer database on launch day." },
+    { num: "05", title: "Showings & Open Houses", desc: "Mel coordinates all showings, collects buyer feedback after every tour, and adjusts strategy in real time. If there's an open house, she runs it herself — not an assistant — because she knows how to sell the lifestyle, not just the square footage.", detail: "Showing feedback shared with you within 24 hours of every tour." },
+    { num: "06", title: "Offer Review & Negotiation", desc: "Multiple offers? Mel walks you through each one with a net sheet so you can see what you actually take home from each — not just the headline price. She negotiates repair credits, closing cost contributions, and timelines to maximize your position.", detail: "Mel reviews contract terms others gloss over. The best offer isn't always the highest price." },
+    { num: "07", title: "Escrow to Close", desc: "Once under contract, Mel project-manages the entire escrow: lender coordination, inspection response, appraisal, title, and the final walkthrough. Most transactions have at least one hiccup — Mel catches them early and keeps the deal alive.", detail: "Typical O'ahu escrow: 30–45 days. You'll know what's happening at every step." },
+  ];
+
+  const marketing = [
+    { icon: "📷", title: "Professional Photography", desc: "HDR interior and exterior shots, twilight photography for curb appeal. Every listing, every time." },
+    { icon: "🚁", title: "Drone Aerial Footage", desc: "Aerial video and photos showing the property in its surroundings — especially powerful for waterfront, hillside, and large-lot homes." },
+    { icon: "🎬", title: "Walkthrough Video", desc: "A cinematic tour of the home that runs on social media and MLS — buyers watch before they ever set foot inside." },
+    { icon: "📱", title: "Targeted Social Ads", desc: "Paid Facebook and Instagram campaigns targeting active buyers in your price range and search area — not just passive scrollers." },
+    { icon: "🏷️", title: "Full MLS Syndication", desc: "Instant distribution to Zillow, Realtor.com, Redfin, Trulia, and all major portals — plus Mel's own buyer database." },
+    { icon: "✉️", title: "Email to Active Buyers", desc: "Your listing goes to Mel's database of active, pre-qualified buyers on launch day — before the general public sees it." },
+  ];
+
+  const costs = [
+    { item: "Seller's Agent Commission", range: "~2.5–3%", note: "Mel's fee" },
+    { item: "Buyer's Agent Commission", range: "~2.5–3%", note: "Negotiable" },
+    { item: "Hawaii Conveyance Tax", range: "0.1–1.25%", note: "Scales with sale price" },
+    { item: "Title & Escrow Fees", range: "0.3–0.5%", note: "Split with buyer typically" },
+    { item: "Seller's Concessions", range: "Varies", note: "Repair credits, closing costs" },
+  ];
+
+  const prep = [
+    { priority: "High Impact", color: BRAND.teal, items: ["Deep clean every surface — buyers smell before they see", "Fresh neutral paint on dated or dark walls", "Declutter every room: if it's not furniture, remove 50% of it", "Repair any visible damage: holes, stains, broken fixtures"] },
+    { priority: "Medium Impact", color: BRAND.gold, items: ["Power wash driveway and exterior", "Update dated light fixtures and cabinet hardware", "Re-caulk bathrooms and kitchens", "Trim landscaping and add fresh mulch"] },
+    { priority: "Skip It", color: BRAND.textDim, items: ["Full kitchen remodels (rarely recouped in value)", "Pool installation (buyer preference varies widely)", "Luxury upgrades that exceed neighborhood norms", "Over-personalizing staging to your own taste"] },
   ];
 
   return (
     <div style={{ paddingTop: 120 }}>
-      {/* Hero */}
       <section style={{ position: "relative", padding: "100px 24px 120px", overflow: "hidden" }}>
         <img src="https://images.unsplash.com/photo-1600210491892-03d54c0aaf87?w=1600&q=80" alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
-        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, rgba(27,42,51,0.88) 0%, rgba(212,168,83,0.5) 100%)" }} />
-        <div style={{ position: "relative", zIndex: 1, maxWidth: 700, margin: "0 auto", textAlign: "center" }}>
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, rgba(27,42,51,0.9) 0%, rgba(212,168,83,0.45) 100%)" }} />
+        <div style={{ position: "relative", zIndex: 1, maxWidth: 720, margin: "0 auto", textAlign: "center" }}>
           <Reveal>
-            <div style={{ color: "#fff", fontSize: 11, letterSpacing: "0.35em", textTransform: "uppercase", marginBottom: 16, fontWeight: 500, opacity: 0.8 }}>Your Journey</div>
-            <h1 className="font-display" style={{ fontSize: "clamp(40px, 7vw, 68px)", marginBottom: 20, color: "#fff", lineHeight: 1.05 }}>
-              Sell Smart.<br/><span style={{ fontStyle: "italic", color: BRAND.goldLight }}>Sell for More.</span>
+            <div style={{ color: "#fff", fontSize: 11, letterSpacing: "0.35em", textTransform: "uppercase", marginBottom: 16, fontWeight: 500, opacity: 0.7 }}>Complete Seller's Guide</div>
+            <h1 className="font-display" style={{ fontSize: "clamp(40px, 7vw, 70px)", marginBottom: 20, color: "#fff", lineHeight: 1.05 }}>
+              Sell Smart.<br/><span style={{ fontStyle: "italic", color: BRAND.goldLight }}>Walk Away with More.</span>
             </h1>
-            <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 17, lineHeight: 1.7, maxWidth: 520, margin: "0 auto" }}>
-              Your home is your biggest asset. Mel's strategic approach means more money in your pocket and less stress on your shoulders.
+            <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 17, lineHeight: 1.7, maxWidth: 560, margin: "0 auto 32px" }}>
+              The difference between a good outcome and a great one comes down to pricing, preparation, and marketing. Here's exactly how Mel delivers all three.
             </p>
+            <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+              <button className="btn-primary" onClick={() => go("valuation")} style={{ background: "#fff", color: BRAND.goldDark }}>Get My Home's Value</button>
+              <button className="btn-outline" onClick={() => go("contact")} style={{ borderColor: "rgba(255,255,255,0.4)", color: "#fff" }}>Talk to Mel</button>
+            </div>
           </Reveal>
         </div>
       </section>
 
-      {/* Steps as visual timeline cards */}
       <div className="section-pad">
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 24, marginBottom: 56 }}>
+        {/* 7-step selling process */}
+        <Reveal>
+          <div style={{ textAlign: "center", marginBottom: 40 }}>
+            <div style={{ color: BRAND.gold, fontSize: 11, letterSpacing: "0.25em", textTransform: "uppercase", marginBottom: 10, fontWeight: 500 }}>The Process</div>
+            <h2 className="font-display" style={{ fontSize: "clamp(28px, 4vw, 44px)", marginBottom: 12 }}>How Mel Sells Your Home</h2>
+            <p style={{ color: BRAND.textMuted, fontSize: 15, maxWidth: 560, margin: "0 auto" }}>Seven steps, one point of contact, and a clear strategy from listing day to closing.</p>
+          </div>
+        </Reveal>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 20, marginBottom: 72 }}>
           {steps.map((step, i) => (
-            <Reveal key={i} delay={i * 0.1} direction="up">
-              <div className="card-hover" style={{ background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, padding: 32, height: "100%", borderRadius: 12, position: "relative", overflow: "hidden" }}>
-                <div style={{ position: "absolute", top: -12, right: -8, fontSize: 80, fontFamily: "'DM Serif Display', serif", color: BRAND.gold, opacity: 0.06, lineHeight: 1 }}>{step.num}</div>
-                <div style={{ fontSize: 32, marginBottom: 16 }}>{step.icon}</div>
-                <div style={{ color: BRAND.gold, fontSize: 11, letterSpacing: "0.15em", textTransform: "uppercase", fontWeight: 700, marginBottom: 8 }}>Step {step.num}</div>
-                <h3 className="font-display" style={{ fontSize: 24, marginBottom: 12 }}>{step.title}</h3>
-                <p style={{ color: BRAND.textMuted, fontSize: 14, lineHeight: 1.7 }}>{step.desc}</p>
+            <Reveal key={i} delay={i * 0.07} direction="up">
+              <div className="card-hover" style={{ background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, padding: 28, height: "100%", borderRadius: 12, position: "relative", overflow: "hidden" }}>
+                <div style={{ position: "absolute", top: -10, right: -6, fontSize: 72, fontFamily: "'DM Serif Display', serif", color: BRAND.gold, opacity: 0.05, lineHeight: 1, fontStyle: "italic" }}>{step.num}</div>
+                <div style={{ color: BRAND.gold, fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", fontWeight: 700, marginBottom: 8 }}>Step {step.num}</div>
+                <h3 className="font-display" style={{ fontSize: 20, marginBottom: 10 }}>{step.title}</h3>
+                <p style={{ color: BRAND.textMuted, fontSize: 14, lineHeight: 1.7, marginBottom: 12 }}>{step.desc}</p>
+                <div style={{ borderTop: `1px solid ${BRAND.border}`, paddingTop: 12, fontSize: 12, color: BRAND.gold, fontStyle: "italic" }}>{step.detail}</div>
               </div>
             </Reveal>
           ))}
         </div>
 
-        {/* CTA band */}
+        {/* Marketing Package */}
         <Reveal>
-          <div style={{ background: `linear-gradient(135deg, ${BRAND.gold}, ${BRAND.goldDark})`, padding: "48px 40px", borderRadius: 16, textAlign: "center", color: "#fff" }}>
-            <h2 className="font-display" style={{ fontSize: 32, marginBottom: 12 }}>What's Your Home Worth?</h2>
-            <p style={{ opacity: 0.85, fontSize: 15, marginBottom: 24, maxWidth: 480, margin: "0 auto 24px" }}>Get a free, no-obligation market analysis. Mel will tell you exactly what your home could sell for in today's market.</p>
+          <div style={{ textAlign: "center", marginBottom: 32 }}>
+            <div style={{ color: BRAND.gold, fontSize: 11, letterSpacing: "0.25em", textTransform: "uppercase", marginBottom: 10, fontWeight: 500 }}>What's Included</div>
+            <h2 className="font-display" style={{ fontSize: "clamp(26px, 4vw, 40px)", marginBottom: 8 }}>Mel's Full Marketing Package</h2>
+            <p style={{ color: BRAND.textMuted, fontSize: 15, maxWidth: 520, margin: "0 auto" }}>Every seller gets the same premium package — not a budget version for lower-priced listings.</p>
+          </div>
+        </Reveal>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 16, marginBottom: 72 }}>
+          {marketing.map((m, i) => (
+            <Reveal key={i} delay={i * 0.07} direction="up">
+              <div style={{ background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, padding: 24, borderRadius: 12 }}>
+                <div style={{ fontSize: 28, marginBottom: 12 }}>{m.icon}</div>
+                <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 8 }}>{m.title}</h3>
+                <p style={{ color: BRAND.textMuted, fontSize: 13, lineHeight: 1.65 }}>{m.desc}</p>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+
+        {/* Home Prep Guide */}
+        <Reveal>
+          <div style={{ textAlign: "center", marginBottom: 32 }}>
+            <div style={{ color: BRAND.gold, fontSize: 11, letterSpacing: "0.25em", textTransform: "uppercase", marginBottom: 10, fontWeight: 500 }}>Pre-Listing</div>
+            <h2 className="font-display" style={{ fontSize: "clamp(26px, 4vw, 40px)", marginBottom: 8 }}>What to Fix, What to Skip</h2>
+            <p style={{ color: BRAND.textMuted, fontSize: 15, maxWidth: 520, margin: "0 auto" }}>Not all improvements pay for themselves. Mel tells you exactly where to spend money and where to save it.</p>
+          </div>
+        </Reveal>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 20, marginBottom: 72 }}>
+          {prep.map((p, i) => (
+            <Reveal key={i} delay={i * 0.08}>
+              <div style={{ background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, borderTop: `3px solid ${p.color}`, padding: 28, borderRadius: 12 }}>
+                <div style={{ fontSize: 12, color: p.color, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 16 }}>{p.priority}</div>
+                <ul style={{ margin: 0, padding: "0 0 0 16px" }}>
+                  {p.items.map((item, j) => (
+                    <li key={j} style={{ color: BRAND.textMuted, fontSize: 14, lineHeight: 1.7, marginBottom: 8 }}>{item}</li>
+                  ))}
+                </ul>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+
+        {/* Cost of Selling */}
+        <Reveal>
+          <div style={{ background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, borderRadius: 16, padding: 40, marginBottom: 72 }}>
+            <h2 className="font-display" style={{ fontSize: 28, marginBottom: 8 }}>Cost of Selling in Hawai'i</h2>
+            <p style={{ color: BRAND.textMuted, fontSize: 15, marginBottom: 28 }}>Know what to expect before you list. Every seller should see this table before pricing their home.</p>
+            <div style={{ display: "grid", gap: 1, background: BRAND.border, borderRadius: 8, overflow: "hidden" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr auto auto", gap: 0, background: BRAND.bgEl, padding: "12px 20px" }}>
+                <span style={{ fontSize: 11, color: BRAND.textDim, letterSpacing: "0.1em", textTransform: "uppercase" }}>Item</span>
+                <span style={{ fontSize: 11, color: BRAND.textDim, letterSpacing: "0.1em", textTransform: "uppercase" }}>Range</span>
+                <span style={{ fontSize: 11, color: BRAND.textDim, letterSpacing: "0.1em", textTransform: "uppercase", textAlign: "right", paddingLeft: 32 }}>Note</span>
+              </div>
+              {costs.map((c, i) => (
+                <div key={i} style={{ display: "grid", gridTemplateColumns: "1fr auto auto", gap: 0, background: BRAND.bgCard, padding: "16px 20px", borderTop: `1px solid ${BRAND.border}` }}>
+                  <span style={{ fontSize: 14, color: BRAND.text, fontWeight: 500 }}>{c.item}</span>
+                  <span className="font-display" style={{ fontSize: 16, color: BRAND.gold, paddingLeft: 24 }}>{c.range}</span>
+                  <span style={{ fontSize: 12, color: BRAND.textDim, textAlign: "right", paddingLeft: 24 }}>{c.note}</span>
+                </div>
+              ))}
+            </div>
+            <p style={{ color: BRAND.textDim, fontSize: 13, marginTop: 16, fontStyle: "italic" }}>Net proceeds = sale price minus these costs. Mel will build a full net sheet for your specific situation before you list.</p>
+          </div>
+        </Reveal>
+
+        <Reveal>
+          <div style={{ background: `linear-gradient(135deg, ${BRAND.gold}, ${BRAND.goldDark})`, padding: "56px 40px", borderRadius: 16, textAlign: "center", color: "#fff" }}>
+            <h2 className="font-display" style={{ fontSize: 36, marginBottom: 12 }}>What's Your Home Worth Right Now?</h2>
+            <p style={{ opacity: 0.9, fontSize: 16, marginBottom: 28, maxWidth: 500, margin: "0 auto 28px", lineHeight: 1.7 }}>Mel will give you a real number based on actual comps — not an algorithm. Free, no obligation, and usually completed within 24 hours.</p>
             <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
-              <button className="btn-primary" onClick={() => go("valuation")} style={{ background: "#fff", color: BRAND.goldDark }}>Get My Valuation</button>
-              <button className="btn-outline" onClick={() => go("contact")} style={{ borderColor: "rgba(255,255,255,0.4)", color: "#fff" }}>Talk to Mel</button>
+              <button className="btn-primary" onClick={() => go("valuation")} style={{ background: "#fff", color: BRAND.goldDark }}>Get My Free Valuation</button>
+              <button className="btn-outline" onClick={() => go("contact")} style={{ borderColor: "rgba(255,255,255,0.4)", color: "#fff" }}>Schedule a Listing Consult</button>
             </div>
           </div>
         </Reveal>
@@ -3005,44 +3192,160 @@ function ValuationPage() {
 
 function RelocationPage({ setPage }) {
   const go = (p) => { setPage(p); window.scrollTo({ top: 0, behavior: "smooth" }); };
-  const sections = [
-    { icon: <Compass size={24} color={BRAND.teal} />, title: "Island Overview", desc: "O'ahu is home to nearly 1 million residents and offers an incredible mix of urban convenience and natural beauty. Honolulu provides world-class dining, shopping, and culture, while the windward and north shores offer serene island living." },
-    { icon: <Building size={24} color={BRAND.teal} />, title: "Cost of Living", desc: "Hawaii's cost of living is higher than the national average, with housing being the largest factor. However, many find the quality of life, climate, and outdoor access more than compensate. Mel can help you find the best value for your budget." },
-    { icon: <BookOpen size={24} color={BRAND.teal} />, title: "Schools & Education", desc: "O'ahu has a mix of excellent public and private schools. Top-rated private schools include Punahou, Iolani, and Mid-Pacific Institute. The University of Hawaii system provides strong higher education options." },
-    { icon: <Heart size={24} color={BRAND.teal} />, title: "Lifestyle & Culture", desc: "Hawaii's aloha spirit is real. Expect a slower pace, deep community ties, and a multicultural environment unlike anywhere else. From hiking and surfing to food festivals and cultural celebrations, there's always something happening." },
-    { icon: <Shield size={24} color={BRAND.teal} />, title: "Logistics & Tips", desc: "Shipping your belongings, getting a Hawaii driver's license, registering your vehicle, establishing residency — Mel has helped dozens of families relocate and has resources for every step of the transition." },
+
+  const logistics = [
+    { title: "Shipping Your Car", icon: "🚗", desc: "Most people ship at least one car. Expect $1,000–$2,000 from the West Coast, $1,500–$3,000 from the East Coast. Matson and Pasha Hawaii are the main carriers. Book 4–6 weeks out. Mel can connect you with a shipping broker who works with her clients regularly." },
+    { title: "Dog & Pet Quarantine", icon: "🐕", desc: "Hawai'i has strict rabies-free status. Dogs and cats must complete a 5-day-or-less quarantine program — which requires up-to-date rabies vaccinations, microchipping, and specific FAVN blood test results done 90+ days before arrival. Start this process 6 months early. It's very manageable if you plan ahead." },
+    { title: "Driver's License", icon: "🪪", desc: "You have 30 days after establishing residency to get a Hawai'i license. Visit a DMV satellite city hall with your out-of-state license, proof of residency (two utility bills or similar), and Social Security card. The lines are real — go early on a weekday." },
+    { title: "Vehicle Registration", icon: "📋", desc: "Out-of-state vehicles must pass a safety inspection and emissions check before registration. Budget $50–$150 for the safety check plus registration fees. You'll also need proof of Hawaii no-fault insurance before registering." },
+    { title: "Shipping Household Goods", icon: "📦", desc: "Full container shipping from the mainland typically runs $4,000–$8,000 depending on volume and origin. Many relocators ship a partial container or use consolidated shipping. Pro tip: sell furniture on the mainland and buy locally — new pieces are often cheaper than shipping costs." },
+    { title: "Cost of Living Adjustment", icon: "💰", desc: "Budget 20–35% above your current mainland expenses for groceries, dining, and everyday goods. Gas is $0.50–$1.00/gallon above mainland prices. Electricity is expensive — solar on your home makes a real difference and many O'ahu homes now have it." },
+  ];
+
+  const neighborhoods = [
+    { name: "Mililani", vibe: "Best schools + family life", price: "$820K med", ideal: "Families with kids", why: "Top-ranked public schools, 15+ parks, rec centers. The master plan shows in every detail." },
+    { name: "Kailua", vibe: "Beach town lifestyle", price: "$1.4M med", ideal: "Beach lovers + remote workers", why: "World-class beaches 5 min away, walkable town, Ko'olau hikes. Worth every dollar." },
+    { name: "Ewa Beach / Kapolei", vibe: "New construction + value", price: "$780K med", ideal: "First-time buyers + military", why: "Newest homes, Ko Olina lagoons, growing 'second city' infrastructure." },
+    { name: "Hawai'i Kai", vibe: "Marina + ocean access", price: "$1.3M med", ideal: "Boaters + outdoor enthusiasts", why: "Marina in your backyard, Koko Head trails, Sandy Beach. Undervalued right now." },
+    { name: "Pearl City / Aiea", vibe: "Central access + value", price: "$620K med", ideal: "Commuters + first-time buyers", why: "Dead center of the island. Best freeway access. Pearl Harbor views from the hillsides." },
+    { name: "Kāne'ohe", vibe: "Windward lush + bay", price: "$890K med", ideal: "Military + nature lovers", why: "Ko'olau mountains, Kāne'ohe Bay, He'eia fishpond. More affordable than Kailua." },
+  ];
+
+  const timeline = [
+    { month: "6+ Months Out", color: BRAND.teal, items: ["Start dog/cat quarantine paperwork (if applicable)", "Research schools and neighborhoods", "Contact Mel — early conversations shape better decisions", "Research shipping companies for cars and household goods"] },
+    { month: "3–6 Months Out", color: BRAND.gold, items: ["Get mortgage pre-approval with an O'ahu lender", "Visit the island if possible — spend time in target neighborhoods", "Book car shipping (Matson/Pasha) — slots fill up", "Start decluttering: sell or donate what you won't ship"] },
+    { month: "1–3 Months Out", color: BRAND.coral, items: ["Active home search with Mel begins", "Schedule household goods shipping", "Update insurance to include Hawaii coverage", "Coordinate employer relocation benefits if applicable"] },
+    { month: "Moving Month", color: "#8B5CF6", items: ["Close on your home / set move-in date", "Get Hawaii driver's license within 30 days of arrival", "Register vehicle after safety inspection and emissions", "Set up utilities: Hawaiian Electric, Spectrum/Hawaiian Telcom"] },
+  ];
+
+  const costs = [
+    { label: "Groceries", detail: "30–40% higher than mainland. Costco in Pearl City / Iwilei is your best friend — seriously.", icon: "🛒" },
+    { label: "Electricity", detail: "Avg $200–$400/month for a single-family home without solar. Hawaii has among the highest rates in the US. Solar = big savings.", icon: "⚡" },
+    { label: "Gas", detail: "$0.50–$1.00/gallon above mainland. Most people drive less here — everything on O'ahu is within 40 min.", icon: "⛽" },
+    { label: "Dining Out", detail: "Dinner for two at a mid-range restaurant: $60–$100. Plate lunch: $12–$18. Local spots are the move — tourist areas inflate prices.", icon: "🍜" },
+    { label: "Income Tax", detail: "Hawaii has a state income tax (max 11%). However, military pay is exempt from state tax — a significant benefit for service members.", icon: "💼" },
+    { label: "Property Tax", detail: "~0.35% assessed value — among the lowest in the US. On a $900K home that's about $265/month. Genuinely one of the best perks of owning here.", icon: "🏠" },
   ];
 
   return (
     <div style={{ paddingTop: 120 }}>
-      <section style={{ position: "relative", padding: "80px 24px 100px", textAlign: "center" }}>
-        <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1600&q=80" alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", opacity: 0.15 }} />
-        <div style={{ position: "relative", zIndex: 1, maxWidth: 700, margin: "0 auto" }}>
+      <section style={{ position: "relative", padding: "100px 24px 120px", overflow: "hidden" }}>
+        <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1600&q=80" alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, rgba(27,42,51,0.92) 0%, rgba(26,138,125,0.5) 100%)" }} />
+        <div style={{ position: "relative", zIndex: 1, maxWidth: 720, margin: "0 auto", textAlign: "center" }}>
           <Reveal>
-            <div style={{ color: BRAND.teal, fontSize: 11, letterSpacing: "0.25em", textTransform: "uppercase", marginBottom: 12, fontWeight: 500 }}>Moving to Hawai'i</div>
-            <h1 className="font-display" style={{ fontSize: "clamp(40px, 6vw, 64px)", marginBottom: 16 }}>Relocation Guide</h1>
-            <p style={{ color: BRAND.textMuted, fontSize: 16, lineHeight: 1.7 }}>
-              Everything you need to know about making the move to O'ahu. Mel has helped dozens of families transition to island life.
+            <div style={{ color: "#fff", fontSize: 11, letterSpacing: "0.35em", textTransform: "uppercase", marginBottom: 16, fontWeight: 500, opacity: 0.7 }}>Complete Relocation Guide</div>
+            <h1 className="font-display" style={{ fontSize: "clamp(40px, 7vw, 70px)", marginBottom: 20, color: "#fff", lineHeight: 1.05 }}>
+              Moving to Hawai'i —<br/><span style={{ fontStyle: "italic", color: BRAND.goldLight }}>The Real Playbook</span>
+            </h1>
+            <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 17, lineHeight: 1.7, maxWidth: 580, margin: "0 auto 32px" }}>
+              Mel has helped dozens of families relocate from the mainland, military bases, and other islands. This is the actual knowledge that makes the move go smoothly.
             </p>
+            <button className="btn-primary" onClick={() => go("contact")} style={{ background: "#fff", color: BRAND.teal }}>Get Personalized Relocation Help</button>
           </Reveal>
         </div>
       </section>
 
       <div className="section-pad">
-        {sections.map((s, i) => (
-          <Reveal key={i} delay={i * 0.1}>
-            <div style={{ display: "flex", gap: 24, marginBottom: 48, paddingBottom: 48, borderBottom: i < sections.length - 1 ? `1px solid ${BRAND.border}` : "none" }}>
-              <div style={{ width: 56, height: 56, background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{s.icon}</div>
-              <div>
-                <h3 className="font-display" style={{ fontSize: 24, marginBottom: 8 }}>{s.title}</h3>
-                <p style={{ color: BRAND.textMuted, fontSize: 15, lineHeight: 1.7 }}>{s.description || s.desc}</p>
+
+        {/* Neighborhood Quick-Match */}
+        <Reveal>
+          <div style={{ textAlign: "center", marginBottom: 32 }}>
+            <div style={{ color: BRAND.teal, fontSize: 11, letterSpacing: "0.25em", textTransform: "uppercase", marginBottom: 10, fontWeight: 500 }}>Find Your Fit</div>
+            <h2 className="font-display" style={{ fontSize: "clamp(26px, 4vw, 42px)", marginBottom: 8 }}>Which Neighborhood is Right for You?</h2>
+            <p style={{ color: BRAND.textMuted, fontSize: 15, maxWidth: 560, margin: "0 auto" }}>Every neighborhood on O'ahu has a different personality. Here's Mel's quick take on where different types of buyers land.</p>
+          </div>
+        </Reveal>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16, marginBottom: 72 }}>
+          {neighborhoods.map((n, i) => (
+            <Reveal key={i} delay={i * 0.07} direction="up">
+              <div className="card-hover" style={{ background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, padding: 24, borderRadius: 12 }} onClick={() => go("neighborhoods")}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
+                  <h3 className="font-display" style={{ fontSize: 20 }}>{n.name}</h3>
+                  <span className="font-display" style={{ fontSize: 13, color: BRAND.teal, whiteSpace: "nowrap", paddingLeft: 12 }}>{n.price}</span>
+                </div>
+                <div style={{ fontSize: 11, color: BRAND.gold, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 8 }}>{n.ideal}</div>
+                <p style={{ color: BRAND.textMuted, fontSize: 13, lineHeight: 1.65 }}>{n.why}</p>
               </div>
-            </div>
-          </Reveal>
-        ))}
-        <div style={{ textAlign: "center", marginTop: 32 }}>
-          <button className="btn-primary" onClick={() => go("contact")}>Get Personalized Relocation Help</button>
+            </Reveal>
+          ))}
         </div>
+
+        {/* Relocation Timeline */}
+        <Reveal>
+          <div style={{ textAlign: "center", marginBottom: 32 }}>
+            <div style={{ color: BRAND.teal, fontSize: 11, letterSpacing: "0.25em", textTransform: "uppercase", marginBottom: 10, fontWeight: 500 }}>Timeline</div>
+            <h2 className="font-display" style={{ fontSize: "clamp(26px, 4vw, 42px)", marginBottom: 8 }}>Your 6-Month Relocation Checklist</h2>
+            <p style={{ color: BRAND.textMuted, fontSize: 15, maxWidth: 560, margin: "0 auto" }}>Relocations that go smoothly are planned 6 months out. Here's how to sequence it.</p>
+          </div>
+        </Reveal>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 20, marginBottom: 72 }}>
+          {timeline.map((t, i) => (
+            <Reveal key={i} delay={i * 0.08}>
+              <div style={{ background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, borderTop: `3px solid ${t.color}`, padding: 28, borderRadius: 12 }}>
+                <div style={{ fontSize: 12, color: t.color, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 16 }}>{t.month}</div>
+                <ul style={{ margin: 0, padding: "0 0 0 16px" }}>
+                  {t.items.map((item, j) => (
+                    <li key={j} style={{ color: BRAND.textMuted, fontSize: 13, lineHeight: 1.7, marginBottom: 8 }}>{item}</li>
+                  ))}
+                </ul>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+
+        {/* Logistics section */}
+        <Reveal>
+          <div style={{ textAlign: "center", marginBottom: 32 }}>
+            <div style={{ color: BRAND.teal, fontSize: 11, letterSpacing: "0.25em", textTransform: "uppercase", marginBottom: 10, fontWeight: 500 }}>Logistics</div>
+            <h2 className="font-display" style={{ fontSize: "clamp(26px, 4vw, 42px)", marginBottom: 8 }}>The Stuff Nobody Tells You</h2>
+            <p style={{ color: BRAND.textMuted, fontSize: 15, maxWidth: 560, margin: "0 auto" }}>Cars, pets, licenses, registration — the practical stuff that trips up mainlanders who didn't plan ahead.</p>
+          </div>
+        </Reveal>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 20, marginBottom: 72 }}>
+          {logistics.map((l, i) => (
+            <Reveal key={i} delay={i * 0.07}>
+              <div style={{ background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, padding: 28, borderRadius: 12 }}>
+                <div style={{ fontSize: 28, marginBottom: 12 }}>{l.icon}</div>
+                <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 10 }}>{l.title}</h3>
+                <p style={{ color: BRAND.textMuted, fontSize: 14, lineHeight: 1.7 }}>{l.desc}</p>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+
+        {/* Cost of Living */}
+        <Reveal>
+          <div style={{ textAlign: "center", marginBottom: 32 }}>
+            <div style={{ color: BRAND.teal, fontSize: 11, letterSpacing: "0.25em", textTransform: "uppercase", marginBottom: 10, fontWeight: 500 }}>Cost of Living</div>
+            <h2 className="font-display" style={{ fontSize: "clamp(26px, 4vw, 42px)", marginBottom: 8 }}>What to Budget For</h2>
+            <p style={{ color: BRAND.textMuted, fontSize: 15, maxWidth: 560, margin: "0 auto" }}>Real numbers from people who actually live here — not tourism-brochure estimates.</p>
+          </div>
+        </Reveal>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 16, marginBottom: 72 }}>
+          {costs.map((c, i) => (
+            <Reveal key={i} delay={i * 0.07}>
+              <div style={{ background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, padding: 24, borderRadius: 12, display: "flex", gap: 16 }}>
+                <div style={{ fontSize: 28, flexShrink: 0, lineHeight: 1 }}>{c.icon}</div>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 6 }}>{c.label}</div>
+                  <p style={{ color: BRAND.textMuted, fontSize: 13, lineHeight: 1.65, margin: 0 }}>{c.detail}</p>
+                </div>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+
+        <Reveal>
+          <div style={{ background: `linear-gradient(135deg, ${BRAND.teal}, ${BRAND.tealDark})`, padding: "56px 40px", borderRadius: 16, textAlign: "center", color: "#fff" }}>
+            <h2 className="font-display" style={{ fontSize: 36, marginBottom: 12 }}>Mel Has Done This Dozens of Times</h2>
+            <p style={{ opacity: 0.85, fontSize: 16, marginBottom: 28, maxWidth: 520, margin: "0 auto 28px", lineHeight: 1.7 }}>Military families, remote workers, mainland investors, returning locals — she knows the playbook for every type of move. Let's build yours.</p>
+            <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+              <button className="btn-primary" onClick={() => go("contact")} style={{ background: "#fff", color: BRAND.teal }}>Start the Conversation</button>
+              <button className="btn-outline" onClick={() => go("neighborhoods")} style={{ borderColor: "rgba(255,255,255,0.4)", color: "#fff" }}>Explore Neighborhoods</button>
+            </div>
+          </div>
+        </Reveal>
       </div>
     </div>
   );
@@ -3278,17 +3581,21 @@ function FloatingActions({ setPage }) {
       <style>{`
         .float-btn { position: fixed; right: 24px; z-index: 1000; width: 56px; height: 56px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s; box-shadow: 0 6px 24px rgba(0,0,0,0.15); }
         .float-btn:hover { transform: scale(1.08); }
-        .float-contact { bottom: 96px; background: ${BRAND.gold}; color: #fff; }
+        .float-contact { bottom: 24px; background: ${BRAND.gold}; color: #fff; }
         .float-contact:hover { box-shadow: 0 8px 32px ${BRAND.gold}44; }
-        .float-chat { bottom: 24px; background: linear-gradient(135deg, ${BRAND.teal}, ${BRAND.tealLight}); color: #fff; }
+        .float-chat { bottom: 96px; background: linear-gradient(135deg, ${BRAND.teal}, ${BRAND.tealLight}); color: #fff; }
         .float-chat:hover { box-shadow: 0 8px 32px ${BRAND.teal}44; }
         .float-chat.open { transform: rotate(90deg) scale(0.9); }
         .float-pulse { animation: fPulse 2.5s ease-in-out infinite; }
         @keyframes fPulse { 0%,100% { box-shadow: 0 6px 24px rgba(0,0,0,0.15); } 50% { box-shadow: 0 6px 24px rgba(0,0,0,0.15), 0 0 0 10px ${BRAND.teal}00; } }
-        .contact-popup { position: fixed; bottom: 160px; right: 24px; z-index: 999; background: ${BRAND.bgCard}; border: 1px solid ${BRAND.border}; border-radius: 16px; padding: 20px; width: 260px; box-shadow: 0 16px 48px rgba(0,0,0,0.1); animation: chatSlideIn 0.3s ease; }
+        .float-chat-wrap { position: fixed; right: 24px; bottom: 96px; z-index: 1000; }
+        .float-chat-wrap .float-btn { position: relative; right: auto; bottom: auto; }
+        .online-dot { position: absolute; top: 2px; right: 2px; width: 13px; height: 13px; border-radius: 50%; background: #22C55E; border: 2px solid #fff; box-shadow: 0 0 0 0 rgba(34,197,94,0.5); animation: onlinePulse 2s ease-in-out infinite; }
+        @keyframes onlinePulse { 0%,100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.4); } 50% { box-shadow: 0 0 0 6px rgba(34,197,94,0); } }
+        .contact-popup { position: fixed; bottom: 88px; right: 24px; z-index: 999; background: ${BRAND.bgCard}; border: 1px solid ${BRAND.border}; border-radius: 16px; padding: 20px; width: 260px; box-shadow: 0 16px 48px rgba(0,0,0,0.1); animation: chatSlideIn 0.3s ease; }
         .contact-popup a { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 10px; text-decoration: none; color: ${BRAND.text}; font-size: 14px; font-weight: 500; transition: background 0.2s; }
         .contact-popup a:hover { background: ${BRAND.bgEl}; }
-        .chat-window { position: fixed; bottom: 92px; right: 24px; z-index: 999; width: 380px; max-width: calc(100vw - 48px); height: 520px; max-height: calc(100vh - 140px); background: ${BRAND.bgCard}; border: 1px solid ${BRAND.border}; border-radius: 16px; box-shadow: 0 24px 80px rgba(0,0,0,0.12); display: flex; flex-direction: column; overflow: hidden; animation: chatSlideIn 0.35s cubic-bezier(0.22,1,0.36,1); }
+        .chat-window { position: fixed; bottom: 164px; right: 24px; z-index: 999; width: 380px; max-width: calc(100vw - 48px); height: 520px; max-height: calc(100vh - 200px); background: ${BRAND.bgCard}; border: 1px solid ${BRAND.border}; border-radius: 16px; box-shadow: 0 24px 80px rgba(0,0,0,0.12); display: flex; flex-direction: column; overflow: hidden; animation: chatSlideIn 0.35s cubic-bezier(0.22,1,0.36,1); }
         @keyframes chatSlideIn { from { opacity: 0; transform: translateY(20px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
         @keyframes chatDot { 0%,100% { transform: translateY(0); opacity: 0.4; } 50% { transform: translateY(-4px); opacity: 1; } }
       `}</style>
@@ -3317,9 +3624,14 @@ function FloatingActions({ setPage }) {
       )}
 
       {/* AI Chat Button */}
-      <button className={`float-btn float-chat ${chatOpen ? "open" : "float-pulse"}`} onClick={() => { setChatOpen(!chatOpen); setContactOpen(false); }} aria-label="Chat with AI assistant">
-        {chatOpen ? <X size={22} /> : <MessageCircle size={22} />}
-      </button>
+      <div className="float-chat-wrap">
+        <div style={{ position: "relative" }}>
+          <button className={`float-btn float-chat ${chatOpen ? "open" : "float-pulse"}`} onClick={() => { setChatOpen(!chatOpen); setContactOpen(false); }} aria-label="Chat with AI assistant">
+            {chatOpen ? <X size={22} /> : <MessageCircle size={22} />}
+          </button>
+          {!chatOpen && <div className="online-dot" />}
+        </div>
+      </div>
 
       {/* Chat Window */}
       {chatOpen && (
