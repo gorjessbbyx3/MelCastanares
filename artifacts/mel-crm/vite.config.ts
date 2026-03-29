@@ -14,7 +14,7 @@ if (!basePath) throw new Error("BASE_PATH environment variable is required but w
 
 // ── In-memory CRM API for local development ───────────────────────────
 function devCrmApi(): Plugin {
-  const mem: { sessions: any[]; leads: any[]; tasks: any[]; commissions: any[] } = { sessions: [], leads: [], tasks: [], commissions: [] };
+  const mem: { sessions: any[]; leads: any[]; tasks: any[]; commissions: any[]; events: any[]; todos: any[]; files: any[]; contentIdeas: any[] } = { sessions: [], leads: [], tasks: [], commissions: [], events: [], todos: [], files: [], contentIdeas: [] };
   const now = () => new Date().toISOString();
   const today = () => new Date().toISOString().slice(0, 10);
   const uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
@@ -45,6 +45,10 @@ function devCrmApi(): Plugin {
   function dbToLead(r: any) { return { id: r.id, name: r.name||"", email: r.email||"", phone: r.phone||"", intent: r.intent||"buy", status: r.status||"new", source: r.source||"website", priceMin: r.price_min||0, priceMax: r.price_max||0, neighborhoods: r.neighborhoods||"", bedsMin: r.beds_min||0, bathsMin: r.baths_min||0, preApproval: r.pre_approval||"unknown", preApprovalAmount: r.pre_approval_amount||0, timeline: r.timeline||"", propertyAddress: r.property_address||"", estimatedValue: r.estimated_value||0, notes: r.notes||"", nextStep: r.next_step||"", nextStepDate: r.next_step_date||"", createdAt: r.created_at||now(), updatedAt: r.updated_at||now() }; }
   function dbToTask(r: any) { return { id: r.id, title: r.title||"", type: r.type||"follow-up", leadId: r.lead_id||"", leadName: r.lead_name||"", dueDate: r.due_date||"", dueTime: r.due_time||"", priority: r.priority||"medium", completed: r.completed===1||r.completed===true, notes: r.notes||"", createdAt: r.created_at||now() }; }
   function dbToComm(r: any) { return { id: r.id, leadId: r.lead_id||"", clientName: r.client_name||"", propertyAddress: r.property_address||"", salePrice: r.sale_price||0, commissionRate: r.commission_rate||3, commissionAmount: r.commission_amount||0, status: r.status||"pending", closeDate: r.close_date||"", notes: r.notes||"", createdAt: r.created_at||now() }; }
+  function dbToEvent(r: any) { return { id: r.id, title: r.title||"", type: r.type||"appointment", date: r.date||"", time: r.time||"", endTime: r.end_time||"", leadId: r.lead_id||"", leadName: r.lead_name||"", location: r.location||"", notes: r.notes||"", createdAt: r.created_at||now() }; }
+  function dbToTodo(r: any) { return { id: r.id, title: r.title||"", category: r.category||"general", completed: r.completed===1||r.completed===true, dueDate: r.due_date||"", createdAt: r.created_at||now() }; }
+  function dbToFile(r: any) { return { id: r.id, name: r.name||"", category: r.category||"other", url: r.url||"", notes: r.notes||"", size: r.size||"", createdAt: r.created_at||now() }; }
+  function dbToIdea(r: any) { return { id: r.id, text: r.text||"", topic: r.topic||"", pinned: r.pinned===1||r.pinned===true, createdAt: r.created_at||now() }; }
 
   return {
     name: "dev-crm-api",
@@ -89,6 +93,39 @@ function devCrmApi(): Plugin {
         const cm=route.match(/^\/commissions\/([^/]+)$/);
         if (cm && method==="PUT") { const id=cm[1]; const b=await body(req); const i=mem.commissions.findIndex(c=>c.id===id); if(i<0) return errRes(res,"Not found",404); const upd:any={lead_id:b.leadId,client_name:b.clientName,property_address:b.propertyAddress,sale_price:b.salePrice,commission_rate:b.commissionRate,commission_amount:b.commissionAmount,status:b.status,close_date:b.closeDate,notes:b.notes}; Object.entries(upd).forEach(([k,v])=>{if(v!==undefined)mem.commissions[i][k]=v;}); return jsonRes(res,dbToComm(mem.commissions[i])); }
         if (cm && method==="DELETE") { const id=cm[1]; mem.commissions=mem.commissions.filter(c=>c.id!==id); return jsonRes(res,{ok:true}); }
+
+        // Events
+        if (route === "/events" && method === "GET") return jsonRes(res,[...mem.events].sort((a,b)=>(a.date||"").localeCompare(b.date||"")||(a.time||"").localeCompare(b.time||"")).map(dbToEvent));
+        if (route === "/events" && method === "POST") { const b=await body(req); const r={id:uid(),title:b.title||"",type:b.type||"appointment",date:b.date||"",time:b.time||"",end_time:b.endTime||"",lead_id:b.leadId||"",lead_name:b.leadName||"",location:b.location||"",notes:b.notes||"",created_at:now()}; mem.events.push(r); return jsonRes(res,dbToEvent(r),201); }
+        const em=route.match(/^\/events\/([^/]+)$/);
+        if (em && method==="PUT") { const id=em[1]; const b=await body(req); const i=mem.events.findIndex((e:any)=>e.id===id); if(i<0) return errRes(res,"Not found",404); const upd:any={title:b.title,type:b.type,date:b.date,time:b.time,end_time:b.endTime,lead_id:b.leadId,lead_name:b.leadName,location:b.location,notes:b.notes}; Object.entries(upd).forEach(([k,v])=>{if(v!==undefined)mem.events[i][k]=v;}); return jsonRes(res,dbToEvent(mem.events[i])); }
+        if (em && method==="DELETE") { const id=em[1]; mem.events=mem.events.filter((e:any)=>e.id!==id); return jsonRes(res,{ok:true}); }
+
+        // Todos
+        if (route === "/todos" && method === "GET") return jsonRes(res,[...mem.todos].sort((a:any,b:any)=>a.completed-b.completed||b.created_at.localeCompare(a.created_at)).map(dbToTodo));
+        if (route === "/todos" && method === "POST") { const b=await body(req); const r={id:uid(),title:b.title||"",category:b.category||"general",completed:0,due_date:b.dueDate||"",created_at:now()}; mem.todos.push(r); return jsonRes(res,dbToTodo(r),201); }
+        const tdm=route.match(/^\/todos\/([^/]+)$/);
+        if (tdm && method==="PUT") { const id=tdm[1]; const b=await body(req); const i=mem.todos.findIndex((t:any)=>t.id===id); if(i<0) return errRes(res,"Not found",404); const upd:any={title:b.title,category:b.category,completed:b.completed!==undefined?(b.completed?1:0):undefined,due_date:b.dueDate}; Object.entries(upd).forEach(([k,v])=>{if(v!==undefined)mem.todos[i][k]=v;}); return jsonRes(res,dbToTodo(mem.todos[i])); }
+        if (tdm && method==="DELETE") { const id=tdm[1]; mem.todos=mem.todos.filter((t:any)=>t.id!==id); return jsonRes(res,{ok:true}); }
+
+        // Files
+        if (route === "/files" && method === "GET") return jsonRes(res,[...mem.files].sort((a:any,b:any)=>b.created_at.localeCompare(a.created_at)).map(dbToFile));
+        if (route === "/files" && method === "POST") { const b=await body(req); const r={id:uid(),name:b.name||"",category:b.category||"other",url:b.url||"",notes:b.notes||"",size:b.size||"",created_at:now()}; mem.files.push(r); return jsonRes(res,dbToFile(r),201); }
+        const fxm=route.match(/^\/files\/([^/]+)$/);
+        if (fxm && method==="PUT") { const id=fxm[1]; const b=await body(req); const i=mem.files.findIndex((f:any)=>f.id===id); if(i<0) return errRes(res,"Not found",404); const upd:any={name:b.name,category:b.category,url:b.url,notes:b.notes,size:b.size}; Object.entries(upd).forEach(([k,v])=>{if(v!==undefined)mem.files[i][k]=v;}); return jsonRes(res,dbToFile(mem.files[i])); }
+        if (fxm && method==="DELETE") { const id=fxm[1]; mem.files=mem.files.filter((f:any)=>f.id!==id); return jsonRes(res,{ok:true}); }
+
+        // Content Ideas
+        if (route === "/content-ideas" && method === "GET") return jsonRes(res,mem.contentIdeas.filter((c:any)=>c.pinned).sort((a:any,b:any)=>b.created_at.localeCompare(a.created_at)).map(dbToIdea));
+        if (route === "/content-ideas" && method === "POST") { const b=await body(req); const r={id:uid(),text:b.text||"",topic:b.topic||"",pinned:1,created_at:now()}; mem.contentIdeas.push(r); return jsonRes(res,dbToIdea(r),201); }
+        const idm=route.match(/^\/content-ideas\/([^/]+)$/);
+        if (idm && method==="DELETE") { const id=idm[1]; mem.contentIdeas=mem.contentIdeas.filter((c:any)=>c.id!==id); return jsonRes(res,{ok:true}); }
+
+        // AI: Content (dev fallback)
+        if (route === "/ai/content" && method === "POST") { const b=await body(req); const tp=b.topic||"Hawaii real estate"; return jsonRes(res,{ideas:[`🏡 Looking to buy in Oahu? The ${tp} market is moving fast. Let's find your dream home before it's gone! DM me today 🤙 #hawaiirealestate #oahurealtor`,`🌺 ${tp} — local expertise makes all the difference. As your Oahu REALTOR®, I'm here every step of the way. Comment "HOME" to get started! #oahuhomes #melcastanares`,`💡 Tip: Understanding Oahu's market takes local knowledge. Let's chat about ${tp} and what it means for your goals! Link in bio 📲 #hawaiirealestate #realestatetips`,`📊 Market update: ${tp} is trending. Whether buying, selling, or just curious — I've got the answers. DM "INFO" for a free consultation! #oahurealtor #dreamhomehawaii`]}); }
+
+        // AI: Chat (dev fallback)
+        if (route === "/ai/chat" && method === "POST") { const b=await body(req); const msg=(b.message||"").toLowerCase(); const ctx=b.context||{}; if(msg.includes("lead")||msg.includes("contact")) return jsonRes(res,{message:`You have ${ctx.totalLeads??0} leads, with ${ctx.activeLeadCount??0} active. Active: ${ctx.activeLeads||"none"}. Head to Contacts or Pipeline to manage them!`}); if(msg.includes("task")||msg.includes("overdue")) return jsonRes(res,{message:`Today's tasks: ${ctx.todayTasks||"none"}. Overdue: ${ctx.overdueTasks||"none"}. Check the Tasks page!`}); if(msg.includes("calendar")||msg.includes("event")||msg.includes("schedule")) return jsonRes(res,{message:`Upcoming events: ${ctx.events||"none scheduled"}. Head to the Calendar page to add events!`}); if(msg.includes("instagram")||msg.includes("content")||msg.includes("post")) return jsonRes(res,{message:"Head to the Social page to generate Instagram content ideas! Your best time to post is Saturday at 8am. 🌺 Top hashtags: #hawaiirealestate #oahurealtor"}); return jsonRes(res,{message:"Aloha, Mel! 🌺 I'm your AI assistant. Deploy to Cloudflare with an AI binding for full AI capabilities. In the meantime, ask me about your leads, tasks, or calendar!"}); }
 
         next();
       });
