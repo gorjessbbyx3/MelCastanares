@@ -1264,55 +1264,82 @@ function PropertyCard({ property: p, onClick }) {
 // ─────────────────────────────────────────────
 
 function PropertiesPage({ setPage }) {
-  const [tab, setTab] = useState<"sale" | "rental">("sale");
-  const [filter, setFilter] = useState<{ status: string; type: string }>({ status: "", type: "" });
+  const [tab, setTab] = useState<"sale" | "sold" | "rental">("sale");
+  const [filter, setFilter] = useState<{ minPrice: string; maxPrice: string; beds: string }>({ minPrice: "", maxPrice: "", beds: "" });
+  const [searchCity, setSearchCity] = useState("");
 
   // ── Rentals (AppFolio) ──
   const [rentals, setRentals] = useState<any[]>([]);
   const [rentalsLoading, setRentalsLoading] = useState(true);
   const [rentalsError, setRentalsError] = useState<string | null>(null);
 
-  // ── For Sale (realty.com scraper) ──
+  // ── For Sale (IDX Broker / HI Central MLS) ──
   const [sales, setSales] = useState<any[]>([]);
   const [salesLoading, setSalesLoading] = useState(true);
-  const [salesBlocked, setSalesBlocked] = useState(false);
+  const [salesTotal, setSalesTotal] = useState(0);
   const [salesFetchedAt, setSalesFetchedAt] = useState<string | null>(null);
 
+  // ── Sold (IDX Broker) ──
+  const [sold, setSold] = useState<any[]>([]);
+  const [soldLoading, setSoldLoading] = useState(false);
+  const [soldFetchedAt, setSoldFetchedAt] = useState<string | null>(null);
+
   useEffect(() => {
-    // Fetch live rentals → AppFolio scrape (5-hour cache)
+    // Rentals → AppFolio (5-hour cache)
     api.getRentals()
       .then((data: any) => {
-        if (!data) throw new Error("No response");
-        if (data.error && !data.properties?.length) setRentalsError(data.error);
-        else setRentals(data.properties || []);
+        if (data?.error && !data.properties?.length) setRentalsError(data.error);
+        else setRentals(data?.properties || []);
       })
-      .catch((e: any) => setRentalsError(e?.message || "Failed to load listings"))
+      .catch((e: any) => setRentalsError(e?.message || "Failed to load"))
       .finally(() => setRentalsLoading(false));
 
-    // Fetch for-sale listings → realty.com scrape (24-hour cache)
+    // Active sales → IDX Broker / HI Central MLS (1-hour cache)
     api.getSalesListings()
       .then((data: any) => {
-        if (!data) return;
-        setSales(data.listings || []);
-        setSalesBlocked(!!data.blocked);
-        setSalesFetchedAt(data.fetchedAt || null);
+        setSales(data?.listings || []);
+        setSalesTotal(data?.total || 0);
+        setSalesFetchedAt(data?.fetchedAt || null);
       })
-      .catch(() => setSalesBlocked(true))
+      .catch(() => {})
       .finally(() => setSalesLoading(false));
   }, []);
 
-  // Apply status/type filter to sale listings
+  // Lazy-load sold listings when tab is first selected
+  useEffect(() => {
+    if (tab !== "sold" || sold.length > 0 || soldLoading) return;
+    setSoldLoading(true);
+    apiFetch("/listings/sold")
+      .then((data: any) => {
+        setSold(data?.listings || []);
+        setSoldFetchedAt(data?.fetchedAt || null);
+      })
+      .catch(() => {})
+      .finally(() => setSoldLoading(false));
+  }, [tab]);
+
+  // Client-side filter on loaded listings
   const filteredSales = useMemo(() => {
     let list = [...sales];
-    if (filter.status) list = list.filter(p => p.status === filter.status);
-    if (filter.type && filter.type !== "rental") list = list.filter(p => p.propertyType?.includes(filter.type) || p.type === filter.type);
+    if (searchCity) list = list.filter(p => p.city?.toLowerCase().includes(searchCity.toLowerCase()) || p.address?.toLowerCase().includes(searchCity.toLowerCase()));
+    if (filter.minPrice) list = list.filter(p => p.price >= parseInt(filter.minPrice, 10));
+    if (filter.maxPrice) list = list.filter(p => p.price <= parseInt(filter.maxPrice, 10));
+    if (filter.beds) list = list.filter(p => p.bedrooms >= parseInt(filter.beds, 10));
     return list;
-  }, [sales, filter]);
+  }, [sales, searchCity, filter]);
+
+  const filteredSold = useMemo(() => {
+    let list = [...sold];
+    if (searchCity) list = list.filter(p => p.city?.toLowerCase().includes(searchCity.toLowerCase()) || p.address?.toLowerCase().includes(searchCity.toLowerCase()));
+    if (filter.minPrice) list = list.filter(p => p.price >= parseInt(filter.minPrice, 10));
+    if (filter.maxPrice) list = list.filter(p => p.price <= parseInt(filter.maxPrice, 10));
+    return list;
+  }, [sold, searchCity, filter]);
 
   const SALE_PORTALS = [
-    { label: "Search All MLS Listings", url: "https://www.dreamhomerealtyhawaii.com/property-search", primary: true, icon: <Search size={14} /> },
-    { label: "Open Houses This Week", url: "https://propertysearch.hicentral.com/HBR/OpenHouses/?/Results/HotSheet/d///", icon: <Calendar size={14} /> },
-    { label: "View on Realty.com", url: "https://www.realty.com/office/148284/hawaii_dream_realty_llc", icon: <HomeIcon size={14} /> },
+    { label: "Full MLS Search", url: "https://shopoahuproperties.idxbroker.com/idx/search/advanced", icon: <Search size={14} /> },
+    { label: "Open Houses", url: "https://propertysearch.hicentral.com/HBR/OpenHouses/?/Results/HotSheet/d///", icon: <Calendar size={14} /> },
+    { label: "Dream Home Realty", url: "https://www.dreamhomerealtyhawaii.com/property-search", icon: <HomeIcon size={14} /> },
   ];
 
   return (
@@ -1335,55 +1362,81 @@ function PropertiesPage({ setPage }) {
       </section>
 
       <div className="section-pad" style={{ paddingTop: 40 }}>
-        <Reveal delay={0.1}>
-          <div style={{ display: "flex", gap: 16, marginBottom: 48, flexWrap: "wrap", padding: 24, background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, borderRadius: 12, alignItems: "flex-end" }}>
-            <div>
-              <label style={{ fontSize: 11, color: BRAND.textDim, letterSpacing: "0.1em", textTransform: "uppercase", display: "block", marginBottom: 6 }}>Status</label>
-              <select className="input-custom" style={{ maxWidth: 180 }} value={filter.status} onChange={e => setFilter(f => ({ ...f, status: e.target.value }))}>
-                <option value="">All</option>
-                <option value="active">Active</option>
-                <option value="pending">Pending</option>
-              </select>
-            </div>
-            <div>
-              <label style={{ fontSize: 11, color: BRAND.textDim, letterSpacing: "0.1em", textTransform: "uppercase", display: "block", marginBottom: 6 }}>Type</label>
-              <select className="input-custom" style={{ maxWidth: 180 }} value={filter.type} onChange={e => {
-                const type = e.target.value;
-                setFilter(f => ({ ...f, type }));
-                setTab(type === "rental" ? "rental" : "sale");
+        {/* Tab bar */}
+        <Reveal>
+          <div style={{ display: "flex", gap: 0, marginBottom: 32, borderBottom: `1px solid ${BRAND.border}` }}>
+            {(["sale", "sold", "rental"] as const).map(t => (
+              <button key={t} onClick={() => setTab(t)} style={{
+                background: "none", border: "none", cursor: "pointer", padding: "14px 28px",
+                fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 600,
+                color: tab === t ? BRAND.teal : BRAND.textMuted,
+                borderBottom: `2px solid ${tab === t ? BRAND.teal : "transparent"}`,
+                marginBottom: -1, letterSpacing: "0.05em", textTransform: "uppercase",
+                transition: "color 0.2s, border-color 0.2s",
               }}>
-                <option value="">All Types</option>
-                <option value="rental">Rentals</option>
-                <option value="single_family">Single Family</option>
-                <option value="condo">Condo</option>
-                <option value="townhouse">Townhouse</option>
-                <option value="land">Land</option>
-              </select>
-            </div>
-            <div style={{ display: "flex", gap: 10, alignItems: "flex-end", flexWrap: "wrap", marginLeft: "auto" }}>
-              <a href="https://propertysearch.hicentral.com/HBR/OpenHouses/?/Results/HotSheet/d///" target="_blank" rel="noopener noreferrer" className="btn-outline" style={{ padding: "10px 16px", textDecoration: "none", fontSize: 11, display: "inline-flex", alignItems: "center", gap: 6, borderRadius: 8 }}>
-                <Calendar size={13} /> Open Houses
-              </a>
-              <a href="https://www.dreamhomerealtyhawaii.com/property-search" target="_blank" rel="noopener noreferrer" className="btn-outline" style={{ padding: "10px 16px", textDecoration: "none", fontSize: 11, display: "inline-flex", alignItems: "center", gap: 6, borderRadius: 8 }}>
-                <Search size={13} /> Full MLS Search
-              </a>
-            </div>
+                {t === "sale" ? "For Sale" : t === "sold" ? "Recently Sold" : "Rentals"}
+              </button>
+            ))}
           </div>
         </Reveal>
-        {/* FOR SALE — realty.com scrape + Trestle stub */}
+
+        {/* Search + filter bar */}
+        <Reveal delay={0.05}>
+          <div style={{ display: "flex", gap: 12, marginBottom: 36, flexWrap: "wrap", alignItems: "flex-end" }}>
+            <div style={{ flex: "1 1 200px", minWidth: 180 }}>
+              <label style={{ fontSize: 11, color: BRAND.textDim, letterSpacing: "0.1em", textTransform: "uppercase", display: "block", marginBottom: 6 }}>City / Address</label>
+              <input className="input-custom" placeholder="e.g. Mililani, Kapolei…" value={searchCity} onChange={e => setSearchCity(e.target.value)} style={{ width: "100%" }} />
+            </div>
+            <div style={{ flex: "0 0 140px" }}>
+              <label style={{ fontSize: 11, color: BRAND.textDim, letterSpacing: "0.1em", textTransform: "uppercase", display: "block", marginBottom: 6 }}>Min Price</label>
+              <select className="input-custom" value={filter.minPrice} onChange={e => setFilter(f => ({ ...f, minPrice: e.target.value }))}>
+                <option value="">Any</option>
+                {[300000,400000,500000,600000,700000,800000,1000000].map(v => (
+                  <option key={v} value={v}>${(v/1000)}K</option>
+                ))}
+              </select>
+            </div>
+            <div style={{ flex: "0 0 140px" }}>
+              <label style={{ fontSize: 11, color: BRAND.textDim, letterSpacing: "0.1em", textTransform: "uppercase", display: "block", marginBottom: 6 }}>Max Price</label>
+              <select className="input-custom" value={filter.maxPrice} onChange={e => setFilter(f => ({ ...f, maxPrice: e.target.value }))}>
+                <option value="">Any</option>
+                {[500000,600000,700000,800000,900000,1000000,1500000,2000000].map(v => (
+                  <option key={v} value={v}>${v >= 1000000 ? `${v/1000000}M` : `${v/1000}K`}</option>
+                ))}
+              </select>
+            </div>
+            {tab !== "rental" && (
+              <div style={{ flex: "0 0 110px" }}>
+                <label style={{ fontSize: 11, color: BRAND.textDim, letterSpacing: "0.1em", textTransform: "uppercase", display: "block", marginBottom: 6 }}>Min Beds</label>
+                <select className="input-custom" value={filter.beds} onChange={e => setFilter(f => ({ ...f, beds: e.target.value }))}>
+                  <option value="">Any</option>
+                  {[1,2,3,4,5].map(v => <option key={v} value={v}>{v}+</option>)}
+                </select>
+              </div>
+            )}
+            {(searchCity || filter.minPrice || filter.maxPrice || filter.beds) && (
+              <button onClick={() => { setSearchCity(""); setFilter({ minPrice: "", maxPrice: "", beds: "" }); }} style={{
+                background: "none", border: `1px solid ${BRAND.border}`, color: BRAND.textDim,
+                fontSize: 11, padding: "10px 16px", cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+                display: "flex", alignItems: "center", gap: 6, alignSelf: "flex-end",
+              }}>
+                ✕ Clear
+              </button>
+            )}
+          </div>
+        </Reveal>
+        {/* ── FOR SALE TAB ── */}
         {tab === "sale" && (
           <div>
-            {/* Loading state */}
             {salesLoading && (
               <div style={{ textAlign: "center", padding: "60px 0" }}>
                 <div style={{ maxWidth: 360, margin: "0 auto 20px", background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, borderRadius: 4, height: 6, overflow: "hidden" }}>
                   <div className="ai-loading-bar" style={{ height: "100%", background: `linear-gradient(90deg, ${BRAND.teal}, ${BRAND.gold})`, borderRadius: 4 }} />
                 </div>
-                <p style={{ color: BRAND.textMuted, fontSize: 14 }}>Loading Dream Home Realty listings...</p>
+                <p style={{ color: BRAND.textMuted, fontSize: 14 }}>Loading O'ahu MLS listings…</p>
               </div>
             )}
 
-            {/* Live listing cards from realty.com */}
             {!salesLoading && filteredSales.length > 0 && (
               <>
                 <Reveal>
@@ -1391,53 +1444,49 @@ function PropertiesPage({ setPage }) {
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                       <div style={{ width: 8, height: 8, borderRadius: "50%", background: BRAND.teal }} />
                       <span style={{ fontSize: 13, color: BRAND.teal, fontWeight: 600 }}>
-                        Dream Home Realty · {filteredSales.length} listing{filteredSales.length !== 1 ? "s" : ""}
-                        {salesFetchedAt && <span style={{ fontWeight: 400, color: BRAND.textDim, fontSize: 11, marginLeft: 8 }}>Updated {new Date(salesFetchedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>}
+                        HI Central MLS · {filteredSales.length.toLocaleString()} listing{filteredSales.length !== 1 ? "s" : ""}
+                        {salesTotal > filteredSales.length && <span style={{ fontWeight: 400, color: BRAND.textDim, fontSize: 11 }}> (filtered from {salesTotal.toLocaleString()})</span>}
+                        {salesFetchedAt && <span style={{ fontWeight: 400, color: BRAND.textDim, fontSize: 11, marginLeft: 8 }}>· Updated {new Date(salesFetchedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}</span>}
                       </span>
                     </div>
-                    <a href="https://www.realty.com/office/148284/hawaii_dream_realty_llc" target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, color: BRAND.teal, fontWeight: 600, textDecoration: "none", display: "flex", alignItems: "center", gap: 4 }}>
-                      View on Realty.com <ArrowRight size={11} />
+                    <a href="https://shopoahuproperties.idxbroker.com/idx/search/advanced" target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, color: BRAND.teal, fontWeight: 600, textDecoration: "none", display: "flex", alignItems: "center", gap: 4 }}>
+                      Advanced Search <ArrowRight size={11} />
                     </a>
                   </div>
                 </Reveal>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: 24, marginBottom: 48 }}>
                   {filteredSales.map((p, i) => (
-                    <Reveal key={p.id} delay={i * 0.08} direction="up">
-                      <PropertyCard
-                        property={p}
-                        onClick={() => { window.open(p.listingUrl || "https://www.realty.com/office/148284/hawaii_dream_realty_llc", "_blank"); }}
-                      />
+                    <Reveal key={p.id} delay={Math.min(i * 0.05, 0.4)} direction="up">
+                      <PropertyCard property={p} onClick={() => window.open(p.listingUrl, "_blank")} />
                     </Reveal>
                   ))}
                 </div>
               </>
             )}
 
-            {/* Blocked / no live listings — portal fallback */}
-            {!salesLoading && (filteredSales.length === 0 || salesBlocked) && (
+            {!salesLoading && filteredSales.length === 0 && (
               <Reveal>
                 <div style={{ background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, padding: "48px 40px", textAlign: "center", marginBottom: 40, position: "relative", overflow: "hidden" }}>
                   <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${BRAND.teal}, ${BRAND.gold})` }} />
-                  <div style={{ color: BRAND.teal, fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 12, fontWeight: 600 }}>Live MLS Data</div>
-                  <h2 className="font-display" style={{ fontSize: "clamp(26px, 4vw, 38px)", marginBottom: 14 }}>Browse O'ahu Listings in Real Time</h2>
-                  <p style={{ color: BRAND.textMuted, fontSize: 15, lineHeight: 1.7, marginBottom: 28, maxWidth: 520, margin: "0 auto 28px" }}>
-                    Browse Mel's active listings and all O'ahu MLS properties — updated the moment a property changes status.
+                  <div style={{ color: BRAND.teal, fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 12, fontWeight: 600 }}>HI Central MLS</div>
+                  <h2 className="font-display" style={{ fontSize: "clamp(24px, 4vw, 36px)", marginBottom: 14 }}>
+                    {sales.length > 0 ? "No Listings Match Your Filters" : "Browse O'ahu Listings in Real Time"}
+                  </h2>
+                  <p style={{ color: BRAND.textMuted, fontSize: 15, lineHeight: 1.7, marginBottom: 28, maxWidth: 480, margin: "0 auto 28px" }}>
+                    {sales.length > 0 ? "Try adjusting your search or clear the filters to see all available listings." : "O'ahu MLS listings are loading. If they don't appear, use the links below to search directly."}
                   </p>
                   <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
-                    <a href="https://www.realty.com/office/148284/hawaii_dream_realty_llc" target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ textDecoration: "none", fontSize: 13, padding: "14px 28px", display: "inline-flex", alignItems: "center", gap: 8 }}>
-                      <HomeIcon size={15} /> View Dream Home Listings ↗
-                    </a>
-                    <a href="https://www.dreamhomerealtyhawaii.com/property-search" target="_blank" rel="noopener noreferrer" className="btn-outline" style={{ textDecoration: "none", fontSize: 13, padding: "14px 28px", display: "inline-flex", alignItems: "center", gap: 8 }}>
-                      <Search size={15} /> Full MLS Search ↗
+                    <a href="https://shopoahuproperties.idxbroker.com/idx/search/advanced" target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ textDecoration: "none", fontSize: 13, padding: "14px 28px", display: "inline-flex", alignItems: "center", gap: 8 }}>
+                      <Search size={15} /> Search All O'ahu Listings ↗
                     </a>
                   </div>
                 </div>
               </Reveal>
             )}
 
-            {/* Quick access portals */}
+            {/* Quick portal links */}
             <Reveal delay={0.1}>
-              <div style={{ color: BRAND.textDim, fontSize: 11, letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 16, fontWeight: 600 }}>Quick Access</div>
+              <div style={{ color: BRAND.textDim, fontSize: 11, letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 16, fontWeight: 600 }}>More Search Options</div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(210px, 1fr))", gap: 12, marginBottom: 48 }}>
                 {SALE_PORTALS.map(p => (
                   <a key={p.label} href={p.url} target="_blank" rel="noopener noreferrer" style={{
@@ -1455,23 +1504,56 @@ function PropertiesPage({ setPage }) {
                 ))}
               </div>
             </Reveal>
+          </div>
+        )}
 
-            {/* Trestle coming-soon callout */}
-            <Reveal delay={0.2}>
-              <div style={{ background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, padding: "32px 36px", display: "flex", alignItems: "center", gap: 24, flexWrap: "wrap", position: "relative", overflow: "hidden" }}>
-                <div style={{ position: "absolute", top: 0, left: 0, bottom: 0, width: 3, background: `linear-gradient(180deg, ${BRAND.gold}, ${BRAND.teal})` }} />
-                <div style={{ flex: 1, minWidth: 240 }}>
-                  <div style={{ fontSize: 10, color: BRAND.gold, letterSpacing: "0.2em", textTransform: "uppercase", fontWeight: 700, marginBottom: 6 }}>Coming Soon · IDX Integration</div>
-                  <div className="font-display" style={{ fontSize: 20, marginBottom: 6 }}>Live MLS Search via Trestle</div>
-                  <p style={{ color: BRAND.textMuted, fontSize: 13, lineHeight: 1.6 }}>
-                    Full HI Central MLS feed — every active listing on O'ahu, searchable by neighborhood, price, and type, displayed natively on this site. Awaiting Mel's IDX approval from HI Central MLS.
-                  </p>
+        {/* ── RECENTLY SOLD TAB ── */}
+        {tab === "sold" && (
+          <div>
+            {soldLoading && (
+              <div style={{ textAlign: "center", padding: "60px 0" }}>
+                <div style={{ maxWidth: 360, margin: "0 auto 20px", background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, borderRadius: 4, height: 6, overflow: "hidden" }}>
+                  <div className="ai-loading-bar" style={{ height: "100%", background: `linear-gradient(90deg, ${BRAND.gold}, ${BRAND.teal})`, borderRadius: 4 }} />
                 </div>
-                <a href="mailto:mel@homesweethomehawaii.com?subject=IDX%20Trestle%20Setup" className="btn-outline" style={{ textDecoration: "none", fontSize: 11, padding: "12px 20px", whiteSpace: "nowrap", display: "inline-flex", alignItems: "center", gap: 6 }}>
-                  <ArrowRight size={12} /> Get Started
-                </a>
+                <p style={{ color: BRAND.textMuted, fontSize: 14 }}>Loading recently sold properties…</p>
               </div>
-            </Reveal>
+            )}
+
+            {!soldLoading && filteredSold.length > 0 && (
+              <>
+                <Reveal>
+                  <div style={{ background: `${BRAND.gold}15`, border: `1px solid ${BRAND.gold}40`, padding: "12px 18px", marginBottom: 28, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <div style={{ width: 8, height: 8, borderRadius: "50%", background: BRAND.gold }} />
+                      <span style={{ fontSize: 13, color: BRAND.text, fontWeight: 600 }}>
+                        {filteredSold.length.toLocaleString()} recently sold on O'ahu
+                        {soldFetchedAt && <span style={{ fontWeight: 400, color: BRAND.textDim, fontSize: 11, marginLeft: 8 }}>· Updated {new Date(soldFetchedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>}
+                      </span>
+                    </div>
+                    <span style={{ fontSize: 11, color: BRAND.textDim }}>Via HI Central MLS</span>
+                  </div>
+                </Reveal>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: 24 }}>
+                  {filteredSold.map((p, i) => (
+                    <Reveal key={p.id} delay={Math.min(i * 0.05, 0.4)} direction="up">
+                      <div style={{ position: "relative" }}>
+                        <div style={{ position: "absolute", top: 12, left: 12, zIndex: 2, background: BRAND.gold, color: BRAND.bg, fontSize: 9, fontWeight: 700, padding: "4px 10px", letterSpacing: "0.15em", textTransform: "uppercase" }}>Sold</div>
+                        <PropertyCard property={{ ...p, status: "sold" }} onClick={() => window.open(p.listingUrl, "_blank")} />
+                      </div>
+                    </Reveal>
+                  ))}
+                </div>
+              </>
+            )}
+
+            {!soldLoading && filteredSold.length === 0 && (
+              <Reveal>
+                <div style={{ background: BRAND.bgCard, border: `1px solid ${BRAND.border}`, padding: "48px 40px", textAlign: "center" }}>
+                  <h3 className="font-display" style={{ fontSize: 26, marginBottom: 12 }}>No Sold Listings Found</h3>
+                  <p style={{ color: BRAND.textMuted, fontSize: 14 }}>Try adjusting your filters or search a different city.</p>
+                </div>
+              </Reveal>
+            )}
           </div>
         )}
 
