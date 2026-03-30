@@ -475,14 +475,6 @@ Keep responses concise, warm, and actionable. Use 'Mahalo' or Aloha where natura
   // ── MLS Listings ──────────────────────────────────────────────────────
   if (route === "/mls/listings" && method === "GET") {
     const IDX_URL = "https://search.idxbroker.com/idx/results/listings?pt=&ccz=city&city[]=Honolulu&city[]=Kailua&city[]=Mililani&city[]=Aiea&city[]=Pearl+City&city[]=Kapolei&sold=0&a_propStatus[]=Active&bd=0&tb=0&pricekeywords=0&savedName=&savedExclusive=&savedType=";
-    const FALLBACK = [
-      { mlsNum:"202415821", address:"4218 Pualei Cir", city:"Honolulu", state:"HI", zip:"96816", price:1895000, beds:4, baths:3, sqft:2210, status:"Active", photo:"https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=600&q=70", listingUrl:"#" },
-      { mlsNum:"202418432", address:"201 Hamakua Dr #305", city:"Kailua", state:"HI", zip:"96734", price:975000, beds:2, baths:2, sqft:1050, status:"Active", photo:"https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=600&q=70", listingUrl:"#" },
-      { mlsNum:"202421104", address:"95-828 Wikao St", city:"Mililani", state:"HI", zip:"96789", price:825000, beds:4, baths:2, sqft:1680, status:"Active", photo:"https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&q=70", listingUrl:"#" },
-      { mlsNum:"202419876", address:"988 Halekauwila St #1802", city:"Honolulu", state:"HI", zip:"96814", price:1250000, beds:3, baths:2, sqft:1320, status:"Active", photo:"https://images.unsplash.com/photo-1567767292278-a4f21aa2d36e?w=600&q=70", listingUrl:"#" },
-      { mlsNum:"202422567", address:"98-718 Kaonohi St", city:"Aiea", state:"HI", zip:"96701", price:699000, beds:3, baths:2, sqft:1400, status:"Pending", photo:"https://images.unsplash.com/photo-1558036117-15d82a90b9b1?w=600&q=70", listingUrl:"#" },
-      { mlsNum:"202416321", address:"396 Kawaihae St", city:"Honolulu", state:"HI", zip:"96825", price:2450000, beds:5, baths:4, sqft:3200, status:"Active", photo:"https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=600&q=70", listingUrl:"#" },
-    ];
     try {
       const r = await fetch(IDX_URL, {
         headers: { "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36", Accept: "text/html,application/xhtml+xml" },
@@ -518,10 +510,9 @@ Keep responses concise, warm, and actionable. Use 'Mahalo' or Aloha where natura
           });
         }
       }
-      const result = listings.length >= 2 ? listings : FALLBACK;
-      return json({ listings: result, count: result.length, source: listings.length >= 2 ? "idx-broker" : "fallback" });
+      return json({ listings, count: listings.length, source: "idx-broker" });
     } catch (e) {
-      return json({ listings: FALLBACK, count: FALLBACK.length, source: "fallback" });
+      return json({ listings: [], count: 0, error: "IDX feed unavailable", source: "idx-broker" });
     }
   }
 
