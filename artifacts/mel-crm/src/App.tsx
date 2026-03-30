@@ -231,11 +231,8 @@ function LoginPage() {
     <div style={{ minHeight: "100vh", background: "#1a2c24", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
       <div className="slide-in" style={{ background: "#fff", borderRadius: 16, padding: "40px 36px", width: "100%", maxWidth: 380, boxShadow: "0 24px 64px rgba(0,0,0,0.25)" }}>
         <div style={{ textAlign: "center", marginBottom: 32 }}>
-          <div style={{ width: 56, height: 56, background: "#1a2c24", borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
-            <Home size={24} color="#c9a96e" />
-          </div>
-          <h1 style={{ fontFamily: "Cormorant Garamond, Georgia, serif", fontSize: 26, color: "#2c2218", margin: "0 0 4px" }}>Mel's CRM</h1>
-          <p style={{ fontSize: 13, color: "#7a6a5a", margin: 0 }}>Dream Home Realty Hawai'i · Private Dashboard</p>
+          <img src={`${import.meta.env.BASE_URL}mel-logo.png`} alt="Mel Castanares" style={{ width: 180, height: "auto", display: "block", margin: "0 auto 18px" }} />
+          <p style={{ fontSize: 12, color: "#a89880", margin: 0, letterSpacing: "0.06em", textTransform: "uppercase" }}>Private Dashboard · Dream Home Realty Hawai'i</p>
         </div>
         <form onSubmit={e => { e.preventDefault(); mut.mutate(); }}>
           <div style={{ marginBottom: 16 }}>
@@ -279,19 +276,14 @@ function Sidebar({ mobile, onClose }: { mobile?: boolean; onClose?: () => void }
 
   return (
     <div style={{ width: "100%", background: "#1a2c24", height: "100%", display: "flex", flexDirection: "column", padding: "20px 0" }}>
-      <div style={{ padding: "0 20px 24px", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{ width: 36, height: 36, background: "rgba(201,169,110,0.15)", borderRadius: 9, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <Home size={18} color="#c9a96e" />
-          </div>
-          <div>
-            <div style={{ fontFamily: "Cormorant Garamond, Georgia, serif", fontSize: 15, color: "#fff", fontWeight: 600, lineHeight: 1.2 }}>Mel Castanares</div>
-            <div style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", letterSpacing: "0.05em" }}>REALTOR® RS-84753</div>
-          </div>
+      <div style={{ padding: "16px 18px 18px", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <img src={`${import.meta.env.BASE_URL}mel-logo.png`} alt="Mel Castanares" style={{ width: 136, height: "auto", display: "block", filter: "brightness(0) invert(1)" }} />
           {mobile && onClose && (
-            <button onClick={onClose} style={{ marginLeft: "auto", background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.5)", padding: 4 }}><X size={18} /></button>
+            <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.5)", padding: 4 }}><X size={18} /></button>
           )}
         </div>
+        <div style={{ fontSize: 10, color: "rgba(201,169,110,0.7)", letterSpacing: "0.07em", marginTop: 6, textTransform: "uppercase" }}>REALTOR® RS-84753</div>
       </div>
       <nav style={{ flex: 1, padding: "12px 10px", overflowY: "auto" }}>
         {NAV.map((item, i) => {
@@ -343,9 +335,7 @@ function Shell({ children }: { children: React.ReactNode }) {
           <button onClick={() => setMobileOpen(true)} style={{ background: "none", border: "none", cursor: "pointer", color: "#7a6a5a", padding: 4, display: "flex" }}><Menu size={20} /></button>
           <h2 style={{ margin: 0, fontSize: 16, fontWeight: 600, color: "#2c2218" }}>{pageTitle}</h2>
           <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 8 }}>
-            <div style={{ width: 30, height: 30, borderRadius: "50%", background: "#1a2c24", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <span style={{ fontSize: 12, fontWeight: 700, color: "#c9a96e" }}>M</span>
-            </div>
+            <img src={`${import.meta.env.BASE_URL}logo-mark.png`} alt="Mel" style={{ width: 30, height: 30, borderRadius: "50%", objectFit: "cover", border: "1.5px solid #e8d5b0" }} />
           </div>
         </div>
         <div style={{ flex: 1, overflowY: "auto", padding: 24 }}>{children}</div>
@@ -377,71 +367,146 @@ function DashboardPage() {
 
   const today = new Date().toISOString().slice(0, 10);
   const todayTasks = tasks.filter(t => !t.completed && t.dueDate === today);
+  const overdueTasks = tasks.filter(t => !t.completed && t.dueDate && t.dueDate < today);
   const recentLeads = [...leads].sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 5);
+  const activeLeads = leads.filter(l => !["closed", "lost"].includes(l.status));
 
   const statCards = [
-    { label: "Total Leads", value: String(stats?.totalLeads ?? leads.length), sub: `${stats?.activeLeads ?? 0} active`, icon: Users, color: "#2a6b4a" },
-    { label: "Due Today", value: String(stats?.tasksDueToday ?? todayTasks.length), sub: "tasks", icon: Clock, color: "#d4851a" },
-    { label: "In Pipeline", value: String(stats?.activeLeads ?? leads.filter(l => !["closed","lost"].includes(l.status)).length), sub: "active deals", icon: Target, color: "#1e5a8a" },
-    { label: "Commissions YTD", value: "$" + (stats?.totalCommissionYTD ?? 0).toLocaleString(), sub: `${stats?.closedCommissions ?? 0} closed`, icon: DollarSign, color: "#2a7a4a" },
+    { label: "Total Leads", value: String(stats?.totalLeads ?? leads.length), sub: `${stats?.activeLeads ?? activeLeads.length} active`, icon: Users, accent: "#2a6b4a", accentBg: "#d4f0e2" },
+    { label: "Tasks Today", value: String(stats?.tasksDueToday ?? todayTasks.length), sub: overdueTasks.length > 0 ? `${overdueTasks.length} overdue` : "on schedule", icon: Clock, accent: overdueTasks.length > 0 ? "#c0392b" : "#d4851a", accentBg: overdueTasks.length > 0 ? "#fde8e5" : "#fdefd0" },
+    { label: "In Pipeline", value: String(stats?.activeLeads ?? activeLeads.length), sub: "active deals", icon: Target, accent: "#1e5a8a", accentBg: "#dbeafe" },
+    { label: "Commissions YTD", value: "$" + (stats?.totalCommissionYTD ?? 0).toLocaleString(), sub: `${stats?.closedCommissions ?? 0} closed`, icon: DollarSign, accent: "#c9a96e", accentBg: "#fdf4e3" },
   ];
 
   return (
     <div className="fade-in">
-      <div style={{ marginBottom: 24 }}>
-        <h1 className="section-title">Good {getTimeOfDay()}, Mel</h1>
-        <p className="section-sub">{new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}</p>
+      {/* ── HERO GREETING ── */}
+      <div style={{
+        background: "linear-gradient(135deg, #1a2c24 0%, #2e5040 60%, #1a2c24 100%)",
+        borderRadius: 16,
+        padding: "28px 32px",
+        marginBottom: 24,
+        position: "relative",
+        overflow: "hidden",
+      }}>
+        <div style={{ position: "absolute", top: -20, right: -20, width: 160, height: 160, borderRadius: "50%", background: "rgba(201,169,110,0.08)", pointerEvents: "none" }} />
+        <div style={{ position: "absolute", bottom: -30, left: "40%", width: 100, height: 100, borderRadius: "50%", background: "rgba(201,169,110,0.05)", pointerEvents: "none" }} />
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", position: "relative" }}>
+          <div>
+            <div style={{ fontSize: 11, color: "rgba(201,169,110,0.7)", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 6 }}>
+              {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
+            </div>
+            <h1 style={{ fontFamily: "Cormorant Garamond, Georgia, serif", fontSize: 32, fontWeight: 600, color: "#fff", margin: "0 0 6px", lineHeight: 1.15 }}>
+              Good {getTimeOfDay()}, Mel
+            </h1>
+            <p style={{ margin: 0, fontSize: 13, color: "rgba(255,255,255,0.5)", lineHeight: 1.5 }}>
+              {todayTasks.length > 0 ? `You have ${todayTasks.length} task${todayTasks.length !== 1 ? "s" : ""} today` : "You're all caught up today"}{overdueTasks.length > 0 ? ` · ${overdueTasks.length} overdue` : ""}
+            </p>
+          </div>
+          <img src={`${import.meta.env.BASE_URL}mel-logo.png`} alt="Mel Castanares" style={{ width: 110, height: "auto", filter: "brightness(0) invert(1)", opacity: 0.18, flexShrink: 0 }} />
+        </div>
+        <div style={{ marginTop: 20, display: "flex", gap: 10, flexWrap: "wrap" }}>
+          {[
+            { label: "New Lead", href: "/contacts", icon: Plus, primary: true },
+            { label: "Add Task", href: "/tasks", icon: CheckSquare },
+            { label: "Pipeline", href: "/pipeline", icon: Target },
+            { label: "AI Chat", href: "/ai-chat", icon: MessageSquare },
+          ].map(({ label, href, icon: Icon, primary }) => (
+            <Link key={href} href={href}>
+              <a style={{
+                display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 16px",
+                borderRadius: 8, fontSize: 12, fontWeight: 600, textDecoration: "none",
+                background: primary ? "#c9a96e" : "rgba(255,255,255,0.09)",
+                color: primary ? "#1a2c24" : "rgba(255,255,255,0.75)",
+                border: primary ? "none" : "1px solid rgba(255,255,255,0.12)",
+                transition: "opacity 0.15s",
+              }}>
+                <Icon size={13} />{label}
+              </a>
+            </Link>
+          ))}
+        </div>
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 16, marginBottom: 28 }}>
+
+      {/* ── STAT CARDS ── */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 14, marginBottom: 24 }}>
         {statCards.map(s => (
-          <div key={s.label} className="stat-card">
-            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
-              <div><div className="stat-label">{s.label}</div><div className="stat-value" style={{ color: s.color }}>{s.value}</div><div className="stat-sub">{s.sub}</div></div>
-              <div style={{ width: 36, height: 36, borderRadius: 9, background: s.color + "18", display: "flex", alignItems: "center", justifyContent: "center" }}><s.icon size={18} color={s.color} /></div>
+          <div key={s.label} style={{
+            background: "#fff",
+            borderRadius: 12,
+            padding: "18px 20px",
+            borderLeft: `3px solid ${s.accent}`,
+            boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+          }}>
+            <div>
+              <div style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", color: "#a89880", marginBottom: 6 }}>{s.label}</div>
+              <div style={{ fontFamily: "Cormorant Garamond, Georgia, serif", fontSize: 34, fontWeight: 700, color: s.accent, lineHeight: 1 }}>{s.value}</div>
+              <div style={{ fontSize: 11, color: "#7a6a5a", marginTop: 5 }}>{s.sub}</div>
+            </div>
+            <div style={{ width: 40, height: 40, borderRadius: 10, background: s.accentBg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <s.icon size={19} color={s.accent} />
             </div>
           </div>
         ))}
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
-        <div className="card">
-          <div style={{ padding: "16px 18px", borderBottom: "1px solid #e8e0d4", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}><CheckSquare size={16} color="#2a6b4a" /><span style={{ fontSize: 14, fontWeight: 600 }}>Today's Tasks</span></div>
-            <Link href="/tasks"><a style={{ fontSize: 12, color: "#2a6b4a", textDecoration: "none" }}>View all</a></Link>
+
+      {/* ── TODAY'S TASKS + RECENT LEADS ── */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18, marginBottom: 18 }}>
+        <div style={{ background: "#fff", borderRadius: 12, overflow: "hidden", boxShadow: "0 1px 4px rgba(0,0,0,0.05)", border: "1px solid #e8e0d4" }}>
+          <div style={{ padding: "16px 20px", borderBottom: "1px solid #f0e8de", display: "flex", alignItems: "center", justifyContent: "space-between", background: "#fdfaf6" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#2a6b4a" }} />
+              <span style={{ fontFamily: "Cormorant Garamond, Georgia, serif", fontSize: 16, fontWeight: 600, color: "#2c2218" }}>Today's Tasks</span>
+            </div>
+            <Link href="/tasks"><a style={{ fontSize: 11, color: "#2a6b4a", textDecoration: "none", fontWeight: 600, letterSpacing: "0.04em" }}>All tasks →</a></Link>
           </div>
           <div>
             {todayTasks.length === 0 ? (
-              <div style={{ padding: "24px 18px", textAlign: "center", color: "#a89880", fontSize: 13 }}>
-                <CheckCircle2 size={24} color="#2a7a4a" style={{ marginBottom: 8, opacity: 0.6 }} /><div>All caught up!</div>
+              <div style={{ padding: "32px 20px", textAlign: "center" }}>
+                <CheckCircle2 size={28} color="#2a7a4a" style={{ opacity: 0.4, marginBottom: 10 }} />
+                <div style={{ fontSize: 13, color: "#a89880", fontStyle: "italic" }}>All caught up — enjoy your day!</div>
               </div>
-            ) : todayTasks.slice(0, 6).map(task => (
-              <div key={task.id} style={{ padding: "12px 18px", borderBottom: "1px solid #e8e0d4", display: "flex", alignItems: "center", gap: 10 }}>
-                <TaskTypeIcon type={task.type} />
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 13, fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{task.title}</div>
-                  {task.leadName && <div style={{ fontSize: 11, color: "#7a6a5a" }}>{task.leadName}</div>}
+            ) : todayTasks.slice(0, 6).map((task, i) => (
+              <div key={task.id} style={{ padding: "11px 20px", borderBottom: i < todayTasks.slice(0, 6).length - 1 ? "1px solid #f0ebe2" : "none", display: "flex", alignItems: "center", gap: 10 }}>
+                <div style={{ width: 28, height: 28, borderRadius: 7, background: "#f5efe7", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <TaskTypeIcon type={task.type} />
                 </div>
-                {task.dueTime && <span style={{ fontSize: 11, color: "#a89880" }}>{task.dueTime}</span>}
-                <Badge label={task.priority} color={PRIORITY_COLORS[task.priority]} bg={PRIORITY_BG[task.priority]} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 13, fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: "#2c2218" }}>{task.title}</div>
+                  {task.leadName && <div style={{ fontSize: 11, color: "#a89880" }}>{task.leadName}</div>}
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
+                  {task.dueTime && <span style={{ fontSize: 10, color: "#a89880", background: "#f5efe7", padding: "2px 6px", borderRadius: 4 }}>{task.dueTime}</span>}
+                  <span style={{ width: 7, height: 7, borderRadius: "50%", background: PRIORITY_COLORS[task.priority], display: "block" }} />
+                </div>
               </div>
             ))}
           </div>
         </div>
-        <div className="card">
-          <div style={{ padding: "16px 18px", borderBottom: "1px solid #e8e0d4", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}><Users size={16} color="#2a6b4a" /><span style={{ fontSize: 14, fontWeight: 600 }}>Recent Leads</span></div>
-            <Link href="/contacts"><a style={{ fontSize: 12, color: "#2a6b4a", textDecoration: "none" }}>View all</a></Link>
+
+        <div style={{ background: "#fff", borderRadius: 12, overflow: "hidden", boxShadow: "0 1px 4px rgba(0,0,0,0.05)", border: "1px solid #e8e0d4" }}>
+          <div style={{ padding: "16px 20px", borderBottom: "1px solid #f0e8de", display: "flex", alignItems: "center", justifyContent: "space-between", background: "#fdfaf6" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#c9a96e" }} />
+              <span style={{ fontFamily: "Cormorant Garamond, Georgia, serif", fontSize: 16, fontWeight: 600, color: "#2c2218" }}>Recent Leads</span>
+            </div>
+            <Link href="/contacts"><a style={{ fontSize: 11, color: "#2a6b4a", textDecoration: "none", fontWeight: 600, letterSpacing: "0.04em" }}>All leads →</a></Link>
           </div>
           <div>
             {recentLeads.length === 0 ? (
-              <div style={{ padding: "24px 18px", textAlign: "center", color: "#a89880", fontSize: 13 }}>
-                <Users size={24} style={{ marginBottom: 8, opacity: 0.4 }} /><div>No leads yet</div>
+              <div style={{ padding: "32px 20px", textAlign: "center" }}>
+                <Users size={28} style={{ opacity: 0.25, marginBottom: 10 }} />
+                <div style={{ fontSize: 13, color: "#a89880", fontStyle: "italic" }}>No leads yet — they'll show here</div>
               </div>
-            ) : recentLeads.map(lead => (
-              <div key={lead.id} style={{ padding: "12px 18px", borderBottom: "1px solid #e8e0d4", display: "flex", alignItems: "center", gap: 10 }}>
-                <div style={{ width: 32, height: 32, borderRadius: "50%", background: "#f5efe7", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 700, color: "#2a6b4a", flexShrink: 0 }}>{lead.name.charAt(0).toUpperCase()}</div>
+            ) : recentLeads.map((lead, i) => (
+              <div key={lead.id} style={{ padding: "11px 20px", borderBottom: i < recentLeads.length - 1 ? "1px solid #f0ebe2" : "none", display: "flex", alignItems: "center", gap: 10 }}>
+                <div style={{ width: 32, height: 32, borderRadius: "50%", background: "linear-gradient(135deg, #2e5040, #1a2c24)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 700, color: "#c9a96e", flexShrink: 0 }}>
+                  {lead.name.charAt(0).toUpperCase()}
+                </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 13, fontWeight: 500 }}>{lead.name}</div>
-                  <div style={{ fontSize: 11, color: "#7a6a5a" }}>{lead.email}</div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: "#2c2218" }}>{lead.name}</div>
+                  <div style={{ fontSize: 11, color: "#a89880", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{INTENT_LABELS[lead.intent] ?? lead.intent} · {lead.source}</div>
                 </div>
                 <Badge label={STAGE_LABELS[lead.status]} color={STAGE_COLORS[lead.status]} bg={STAGE_BG[lead.status]} />
               </div>
@@ -449,28 +514,39 @@ function DashboardPage() {
           </div>
         </div>
       </div>
-      {leads.length > 0 && (
-        <div className="card" style={{ marginTop: 20 }}>
-          <div style={{ padding: "16px 18px", borderBottom: "1px solid #e8e0d4", display: "flex", alignItems: "center", gap: 8 }}><BarChart2 size={16} color="#2a6b4a" /><span style={{ fontSize: 14, fontWeight: 600 }}>Pipeline Overview</span></div>
-          <div style={{ padding: "18px 20px" }}>
-            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-              {STAGES.filter(s => s !== "lost").map(stage => {
-                const count = leads.filter(l => l.status === stage).length;
-                return (
-                  <Link key={stage} href={`/pipeline`}>
-                    <a style={{ textDecoration: "none" }}>
-                      <div style={{ background: STAGE_BG[stage], borderRadius: 8, padding: "10px 16px", cursor: "pointer" }}>
-                        <div style={{ fontSize: 20, fontWeight: 700, color: STAGE_COLORS[stage] }}>{count}</div>
-                        <div style={{ fontSize: 11, color: "#7a6a5a", marginTop: 2 }}>{STAGE_LABELS[stage]}</div>
-                      </div>
-                    </a>
-                  </Link>
-                );
-              })}
-            </div>
+
+      {/* ── PIPELINE STRIP ── */}
+      <div style={{ background: "#fff", borderRadius: 12, border: "1px solid #e8e0d4", boxShadow: "0 1px 4px rgba(0,0,0,0.05)", overflow: "hidden" }}>
+        <div style={{ padding: "16px 20px", borderBottom: "1px solid #f0e8de", display: "flex", alignItems: "center", justifyContent: "space-between", background: "#fdfaf6" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#1e5a8a" }} />
+            <span style={{ fontFamily: "Cormorant Garamond, Georgia, serif", fontSize: 16, fontWeight: 600, color: "#2c2218" }}>Pipeline Snapshot</span>
           </div>
+          <Link href="/pipeline"><a style={{ fontSize: 11, color: "#2a6b4a", textDecoration: "none", fontWeight: 600, letterSpacing: "0.04em" }}>Open pipeline →</a></Link>
         </div>
-      )}
+        <div style={{ padding: "16px 20px", display: "flex", gap: 10, flexWrap: "wrap" }}>
+          {STAGES.map(stage => {
+            const count = leads.filter(l => l.status === stage).length;
+            const isActive = stage !== "lost" && count > 0;
+            return (
+              <Link key={stage} href="/pipeline">
+                <a style={{ textDecoration: "none" }}>
+                  <div style={{
+                    minWidth: 90, borderRadius: 10, padding: "12px 16px", textAlign: "center", cursor: "pointer",
+                    background: isActive ? STAGE_BG[stage] : "#f9f5f0",
+                    border: `1px solid ${isActive ? STAGE_COLORS[stage] + "30" : "#ece6de"}`,
+                    opacity: count === 0 ? 0.5 : 1,
+                    transition: "transform 0.15s",
+                  }}>
+                    <div style={{ fontFamily: "Cormorant Garamond, Georgia, serif", fontSize: 26, fontWeight: 700, color: isActive ? STAGE_COLORS[stage] : "#a89880", lineHeight: 1 }}>{count}</div>
+                    <div style={{ fontSize: 10, color: "#7a6a5a", marginTop: 4, textTransform: "uppercase", letterSpacing: "0.06em" }}>{STAGE_LABELS[stage]}</div>
+                  </div>
+                </a>
+              </Link>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }
@@ -1010,7 +1086,7 @@ function SettingsPage() {
 
         <div className="card" style={{ padding: 24 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
-            <div style={{ width: 48, height: 48, borderRadius: 12, background: "#1a2c24", display: "flex", alignItems: "center", justifyContent: "center" }}><Home size={22} color="#c9a96e" /></div>
+            <img src={`${import.meta.env.BASE_URL}mel-logo.png`} alt="Mel Castanares" style={{ height: 40, width: "auto" }} />
             <div><div style={{ fontWeight: 700, fontSize: 15 }}>Mel Castanares</div><div style={{ fontSize: 12, color: "#7a6a5a" }}>REALTOR® RS-84753 · Dream Home Realty Hawai'i</div></div>
           </div>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
