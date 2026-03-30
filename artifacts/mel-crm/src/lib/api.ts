@@ -1,6 +1,19 @@
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") || "";
 const API = `${BASE}/api`;
 
+// Standalone Cloudflare Worker with Workers AI binding
+const AI_WORKER = "https://mel-crm-ai.gorjessbbyx3.workers.dev";
+
+async function aiReq<T>(path: string, body: unknown): Promise<T> {
+  const res = await fetch(`${AI_WORKER}${path}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error("AI request failed");
+  return res.json();
+}
+
 export interface Lead {
   id: string; name: string; email: string; phone: string; intent: string; status: string; source: string;
   priceMin: number; priceMax: number; neighborhoods: string; bedsMin: number; bathsMin: number;
@@ -125,7 +138,7 @@ export const api = {
   createContentIdea: (data: Partial<ContentIdea>) => req<ContentIdea>("POST", "/content-ideas", data),
   deleteContentIdea: (id: string) => req<void>("DELETE", `/content-ideas/${id}`),
 
-  // AI
-  generateContent: (topic: string) => req<{ ideas: string[] }>("POST", "/ai/content", { topic }),
-  aiChat: (message: string, context: AIChatContext) => req<{ message: string; action?: string; event?: Partial<CRMEvent> }>("POST", "/ai/chat", { message, context }),
+  // AI — calls standalone Cloudflare Worker (mel-crm-ai) with Workers AI binding
+  generateContent: (topic: string) => aiReq<{ ideas: string[] }>("/ai/content", { topic }),
+  aiChat: (message: string, context: AIChatContext) => aiReq<{ message: string; action?: string; event?: Partial<CRMEvent> }>("/ai/chat", { message, context }),
 };
