@@ -1,4 +1,21 @@
-import { useState, useEffect, useCallback, createContext, useContext } from "react";
+import React, { useState, useEffect, useCallback, createContext, useContext } from "react";
+
+class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { error: string | null }> {
+  constructor(props: any) { super(props); this.state = { error: null }; }
+  static getDerivedStateFromError(e: Error) { return { error: e.message }; }
+  render() {
+    if (this.state.error) return (
+      <div style={{ minHeight: "100vh", background: "#1a2c24", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+        <div style={{ background: "#fff", borderRadius: 12, padding: "32px 28px", maxWidth: 480, width: "100%" }}>
+          <h2 style={{ color: "#c0392b", fontFamily: "Cormorant Garamond, serif", marginTop: 0 }}>Something went wrong</h2>
+          <pre style={{ fontSize: 12, color: "#555", whiteSpace: "pre-wrap", wordBreak: "break-all" }}>{this.state.error}</pre>
+          <button onClick={() => window.location.reload()} style={{ marginTop: 16, padding: "8px 20px", background: "#1a2c24", color: "#fff", border: "none", borderRadius: 8, cursor: "pointer" }}>Reload</button>
+        </div>
+      </div>
+    );
+    return this.props.children;
+  }
+}
 import { QueryClient, QueryClientProvider, useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation, Link } from "wouter";
 import {
@@ -1102,14 +1119,16 @@ const queryClient = new QueryClient();
 export default function App() {
   const base = import.meta.env.BASE_URL?.replace(/\/$/, "") || "";
   return (
-    <QueryClientProvider client={queryClient}>
-      <ToastProvider>
-        <WouterRouter base={base}>
-          <AuthProvider>
-            <ProtectedApp />
-          </AuthProvider>
-        </WouterRouter>
-      </ToastProvider>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <ToastProvider>
+          <WouterRouter base={base}>
+            <AuthProvider>
+              <ProtectedApp />
+            </AuthProvider>
+          </WouterRouter>
+        </ToastProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
