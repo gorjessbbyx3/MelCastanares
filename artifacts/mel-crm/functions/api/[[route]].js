@@ -470,7 +470,7 @@ Keep responses concise, warm, and actionable. Use 'Mahalo' or Aloha where natura
     if (lower.includes("task") || lower.includes("overdue")) return json({ message: `Today's tasks: ${context?.todayTasks || "none"}. Overdue: ${context?.overdueTasks || "none"}. Head to the Tasks page to check them off!` });
     if (lower.includes("calendar") || lower.includes("event") || lower.includes("schedule")) return json({ message: `Your upcoming events: ${context?.events || "nothing scheduled yet"}. Head to the Calendar page to add or manage events!` });
     if (lower.includes("instagram") || lower.includes("post") || lower.includes("content")) return json({ message: "Head to the Social page to generate Instagram content ideas with AI! Your best posting time is Saturday at 8am, and your top hashtags are #hawaiirealestate and #oahurealtor. 🌺" });
-    return json({ message: "Mahalo for reaching out! Deploy to Cloudflare Pages and add the AI binding to enable the full AI assistant. In the meantime, I can answer basic questions about your leads, tasks, and calendar!" });
+    return json({ message: "Mahalo! 🌺 I can help with your leads, tasks, calendar, and Instagram content ideas. What would you like to know?" });
   }
 
   // ── MLS Listings ──────────────────────────────────────────────────────
