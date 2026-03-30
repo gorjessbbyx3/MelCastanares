@@ -64,3 +64,19 @@ CREATE TABLE IF NOT EXISTS crm_settings (
   key TEXT PRIMARY KEY,
   value TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS crm_expenses (
+  id TEXT PRIMARY KEY,
+  date TEXT NOT NULL,
+  category TEXT DEFAULT 'Other',
+  vendor TEXT NOT NULL,
+  description TEXT,
+  amount REAL DEFAULT 0,
+  receipt_url TEXT,
+  tax_deductible INTEGER DEFAULT 1,
+  notes TEXT,
+  created_at TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_expenses_date ON crm_expenses(date);
+CREATE INDEX IF NOT EXISTS idx_expenses_category ON crm_expenses(category);

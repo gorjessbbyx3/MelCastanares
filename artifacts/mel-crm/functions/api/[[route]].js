@@ -5,7 +5,7 @@ function uuid() { return crypto.randomUUID ? crypto.randomUUID() : Math.random()
 function now() { return new Date().toISOString(); }
 function today() { return new Date().toISOString().slice(0, 10); }
 
-const mem = { sessions: [], leads: [], tasks: [], commissions: [], events: [], todos: [], files: [], contentIdeas: [], settings: {} };
+const mem = { sessions: [], leads: [], tasks: [], commissions: [], events: [], todos: [], files: [], contentIdeas: [], expenses: [], settings: {} };
 
 function cors(h = {}) { return new Headers({ "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS", "Access-Control-Allow-Headers": "Content-Type,Authorization", ...h }); }
 function json(data, status = 200) { return new Response(JSON.stringify(data), { status, headers: cors({ "Content-Type": "application/json" }) }); }
@@ -37,6 +37,7 @@ const dbToEvent = r => ({ id:r.id, title:r.title||"", type:r.type||"appointment"
 const dbToTodo = r => ({ id:r.id, title:r.title||"", category:r.category||"general", completed:r.completed===1||r.completed===true, dueDate:r.due_date||"", createdAt:r.created_at||now() });
 const dbToFile = r => ({ id:r.id, name:r.name||"", category:r.category||"other", url:r.url||"", notes:r.notes||"", size:r.size||"", createdAt:r.created_at||now() });
 const dbToIdea = r => ({ id:r.id, text:r.text||"", topic:r.topic||"", pinned:r.pinned===1||r.pinned===true, createdAt:r.created_at||now() });
+const dbToExpense = r => ({ id:r.id, date:r.date||"", category:r.category||"Other", vendor:r.vendor||"", description:r.description||"", amount:r.amount||0, receiptUrl:r.receipt_url||"", taxDeductible:r.tax_deductible===1||r.tax_deductible===true, notes:r.notes||"", createdAt:r.created_at||now() });
 
 // ── AI helpers ────────────────────────────────────────────────────────
 const AI_MODEL = "@cf/meta/llama-3.1-8b-instruct";
@@ -514,6 +515,113 @@ Keep responses concise, warm, and actionable. Use 'Mahalo' or Aloha where natura
       return json({ listings, count: listings.length, source: "idx-broker" });
     } catch (e) {
       return json({ listings: [], count: 0, error: "IDX feed unavailable", source: "idx-broker" });
+    }
+  }
+
+  // ── Expenses ──────────────────────────────────────────────────────────
+  if (route === "/expenses" && method === "GET") {
+    if (env.DB) {
+      const rows = await env.DB.prepare("SELECT * FROM crm_expenses ORDER BY date DESC, created_at DESC").all();
+      return json((rows.results || []).map(dbToExpense));
+    }
+    return json(mem.expenses.sort((a, b) => b.date.localeCompare(a.date)).map(dbToExpense));
+  }
+  if (route === "/expenses" && method === "POST") {
+    const d = await request.json().catch(() => ({}));
+    const id = uuid();
+    const ts = now();
+    if (env.DB) {
+      await env.DB.prepare("INSERT INTO crm_expenses (id,date,category,vendor,description,amount,receipt_url,tax_deductible,notes,created_at) VALUES (?,?,?,?,?,?,?,?,?,?)")
+        .bind(id, d.date||today(), d.category||"Other", d.vendor||"", d.description||"", d.amount||0, d.receiptUrl||"", d.taxDeductible!==false?1:0, d.notes||"", ts).run();
+      const row = await env.DB.prepare("SELECT * FROM crm_expenses WHERE id=?").bind(id).first();
+      return json(dbToExpense(row), 201);
+    }
+    const e = { id, date:d.date||today(), category:d.category||"Other", vendor:d.vendor||"", description:d.description||"", amount:d.amount||0, receipt_url:d.receiptUrl||"", tax_deductible:d.taxDeductible!==false?1:0, notes:d.notes||"", created_at:ts };
+    mem.expenses.push(e);
+    return json(dbToExpense(e), 201);
+  }
+  if (route.startsWith("/expenses/") && method === "PUT") {
+    const id = route.split("/")[2];
+    const d = await request.json().catch(() => ({}));
+    if (env.DB) {
+      await env.DB.prepare("UPDATE crm_expenses SET date=?,category=?,vendor=?,description=?,amount=?,receipt_url=?,tax_deductible=?,notes=? WHERE id=?")
+        .bind(d.date, d.category, d.vendor, d.description||"", d.amount||0, d.receiptUrl||"", d.taxDeductible!==false?1:0, d.notes||"", id).run();
+      const row = await env.DB.prepare("SELECT * FROM crm_expenses WHERE id=?").bind(id).first();
+      return json(row ? dbToExpense(row) : {});
+    }
+    const idx = mem.expenses.findIndex(e => e.id === id);
+    if (idx >= 0) { mem.expenses[idx] = { ...mem.expenses[idx], ...d, id }; return json(dbToExpense(mem.expenses[idx])); }
+    return err("Not found", 404);
+  }
+  if (route.startsWith("/expenses/") && method === "DELETE") {
+    const id = route.split("/")[2];
+    if (env.DB) { await env.DB.prepare("DELETE FROM crm_expenses WHERE id=?").bind(id).run(); return json({ ok: true }); }
+    mem.expenses = mem.expenses.filter(e => e.id !== id);
+    return json({ ok: true });
+  }
+
+  // ── Receipt upload (R2) ───────────────────────────────────────────────
+  if (route === "/expenses/upload" && method === "POST") {
+    if (!env.FILES_BUCKET) return err("R2 not configured", 503);
+    const formData = await request.formData().catch(() => null);
+    const file = formData?.get("file");
+    if (!file || typeof file === "string") return err("No file provided", 400);
+    const ext = file.name.split(".").pop()?.toLowerCase() || "bin";
+    const key = `receipts/${today()}-${uuid().slice(0,8)}.${ext}`;
+    await env.FILES_BUCKET.put(key, file.stream(), { httpMetadata: { contentType: file.type || "application/octet-stream" } });
+    const obj = await env.FILES_BUCKET.get(key);
+    const url = obj ? `https://pub-${key}` : key;
+    return json({ ok: true, url: `/api/r2/download?key=${encodeURIComponent(key)}`, key });
+  }
+
+  // ── HI Central Open Houses ────────────────────────────────────────────
+  if (route === "/hicentral/openhouses" && method === "GET") {
+    try {
+      // HI Central public open house search
+      const HICENTRAL_URL = "https://www.hicentral.com/for-sale-oahu/homes/?open_house=1";
+      const r = await fetch(HICENTRAL_URL, {
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+          "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+          "Accept-Language": "en-US,en;q=0.5",
+          "Referer": "https://www.hicentral.com/",
+        },
+        signal: AbortSignal.timeout(12000),
+      });
+      if (!r.ok) throw new Error(`HI Central returned ${r.status}`);
+      const html = await r.text();
+      const listings = [];
+
+      // Parse listing cards from HI Central
+      const cardRx = /<(?:div|article)[^>]+class="[^"]*(?:listing-card|property-card|search-result)[^"]*"[^>]*>([\s\S]*?)<\/(?:div|article)>/gi;
+      let m;
+      while ((m = cardRx.exec(html)) !== null && listings.length < 30) {
+        const card = m[1];
+        const priceM = card.match(/\$[\d,]+(?:,\d{3})?/);
+        const addrM = card.match(/(?:address|street)[^>]*>([^<]{5,80})</i) || card.match(/<[^>]+title="([^"]{10,80})"/);
+        const ohM = card.match(/Open\s+House[^<]*([A-Za-z]+\s+\d+|today)/i);
+        const bedM = card.match(/(\d+)\s*(?:bed|br)/i);
+        const bathM = card.match(/([\d.]+)\s*(?:bath|ba)/i);
+        const sqftM = card.match(/([\d,]+)\s*(?:sq\.?\s*ft|sqft)/i);
+        const imgM = card.match(/src="([^"]*(?:property|listing|image)[^"]*\.jpe?g[^"]*)"/i);
+        const linkM = card.match(/href="([^"]*(?:property|listing|detail)[^"]*)"/i);
+        if (priceM || addrM) {
+          listings.push({
+            price: priceM ? parseInt(priceM[0].replace(/[\$,]/g, "")) : 0,
+            address: addrM ? addrM[1].trim() : "Oahu, HI",
+            openHouseDate: ohM ? ohM[1] : "",
+            beds: bedM ? bedM[1] : "",
+            baths: bathM ? bathM[1] : "",
+            sqft: sqftM ? sqftM[1].replace(/,/g, "") : "",
+            photo: imgM ? imgM[1] : "",
+            url: linkM ? (linkM[1].startsWith("http") ? linkM[1] : "https://www.hicentral.com" + linkM[1]) : "https://www.hicentral.com",
+            source: "hicentral",
+          });
+        }
+      }
+      return json({ openHouses: listings, count: listings.length, source: "hicentral", url: HICENTRAL_URL });
+    } catch (e) {
+      return json({ openHouses: [], count: 0, error: "Could not load HI Central data", url: "https://www.hicentral.com/for-sale-oahu/homes/?open_house=1" });
     }
   }
 

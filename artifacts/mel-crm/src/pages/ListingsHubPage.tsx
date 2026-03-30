@@ -198,42 +198,81 @@ function OpenHousesTab() {
   );
 }
 
-// ── AppFolio Tab ──────────────────────────────────────────────────────
-function AppFolioTab() {
-  const [loaded, setLoaded] = useState(false);
-  const APPFOLIO_URL = "https://account.appfolio.com/realms/foliospace/protocol/openid-connect/auth?client_id=account-picker&redirect_uri=https%3A%2F%2Faccount.appfolio.com%2Frealms%2Ffoliospace%2Fappfolio%2Faccount-picker%2Flogin-redirect%3Fpath%3D%2F&state=0%2F7ac79406-7330-2211-750a-84fe21823c09&response_type=code&scope=openid";
+// ── External Portals Tab ──────────────────────────────────────────────
+const PORTALS = [
+  {
+    name: "AppFolio",
+    desc: "Property management — leases, maintenance, owner reports",
+    url: "https://www.appfolio.com/login",
+    color: "#1e5a8a",
+    bg: "#dbeafe",
+  },
+  {
+    name: "Apollo.io",
+    desc: "Prospecting, lead intelligence & outreach sequences",
+    url: "https://app.apollo.io/",
+    color: "#5a2a7a",
+    bg: "#ead5f5",
+  },
+  {
+    name: "IDX Broker",
+    desc: "Manage your IDX feed, featured listings & widgets",
+    url: "https://shopoahuproperties.idxbroker.com/idx/account",
+    color: "#2a6b4a",
+    bg: "#d4f0e2",
+  },
+  {
+    name: "HI Central MLS",
+    desc: "Hawaii's official MLS — search, CMAs & market reports",
+    url: "https://search.mls.hicentral.com",
+    color: "#c0392b",
+    bg: "#fde8e5",
+  },
+  {
+    name: "Dotloop",
+    desc: "Transaction management & e-signatures",
+    url: "https://www.dotloop.com/",
+    color: "#d4851a",
+    bg: "#fdefd0",
+  },
+  {
+    name: "Dream Home Realty",
+    desc: "Brokerage back-office portal",
+    url: "https://dreamhomerealtyhawaii.com",
+    color: "#1a2c24",
+    bg: "#f0ece6",
+  },
+];
 
+function PortalsTab() {
   return (
     <div>
-      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontWeight: 600, fontSize: 14 }}>AppFolio Portal</div>
-          <div style={{ fontSize: 12, color: "#7a6a5a" }}>Property management dashboard</div>
+      <div style={{ marginBottom: 16 }}>
+        <div style={{ fontSize: 13, color: "#7a6a5a", lineHeight: 1.6 }}>
+          These portals block embedded views for security — all open in a new tab so your session stays secure.
         </div>
-        <a href={APPFOLIO_URL} target="_blank" rel="noopener" className="crm-btn crm-btn-ghost crm-btn-sm" style={{ textDecoration: "none" }}>
-          <ExternalLink size={13} />Open in New Tab
-        </a>
       </div>
-      <div style={{ border: "1px solid #e8e0d4", borderRadius: 12, overflow: "hidden", background: "#f0ece6", minHeight: 600, position: "relative" }}>
-        {!loaded && (
-          <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16 }}>
-            <div style={{ width: 56, height: 56, borderRadius: 14, background: "#fff", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 12px rgba(0,0,0,0.08)" }}><Globe size={24} color="#1a2c24" /></div>
-            <div style={{ fontSize: 13, color: "#7a6a5a", textAlign: "center", maxWidth: 320, lineHeight: 1.6 }}>
-              Loading AppFolio portal…<br />
-              <span style={{ fontSize: 12 }}>If it doesn't load, AppFolio may block embedded views. Use "Open in New Tab" above.</span>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 14 }}>
+        {PORTALS.map(p => (
+          <a key={p.name} href={p.url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none" }}>
+            <div style={{
+              background: "#fff", border: "1px solid #e8e0d4", borderRadius: 12, padding: "18px 20px",
+              display: "flex", alignItems: "flex-start", gap: 14, transition: "box-shadow 0.15s, transform 0.15s",
+              cursor: "pointer",
+            }}
+              onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.boxShadow = "0 4px 20px rgba(0,0,0,0.1)"; (e.currentTarget as HTMLDivElement).style.transform = "translateY(-1px)"; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.boxShadow = ""; (e.currentTarget as HTMLDivElement).style.transform = ""; }}>
+              <div style={{ width: 40, height: 40, borderRadius: 10, background: p.bg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <Globe size={18} color={p.color} />
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontWeight: 700, fontSize: 14, color: "#2c2218", marginBottom: 3 }}>{p.name}</div>
+                <div style={{ fontSize: 12, color: "#7a6a5a", lineHeight: 1.5 }}>{p.desc}</div>
+              </div>
+              <ExternalLink size={14} color="#a89880" style={{ flexShrink: 0, marginTop: 2 }} />
             </div>
-          </div>
-        )}
-        <iframe
-          src={APPFOLIO_URL}
-          style={{ width: "100%", height: 680, border: "none", display: loaded ? "block" : "block", opacity: loaded ? 1 : 0 }}
-          onLoad={() => setLoaded(true)}
-          title="AppFolio Portal"
-          sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-top-navigation"
-        />
-      </div>
-      <div style={{ marginTop: 12, padding: "10px 14px", background: "#fdf4e3", borderRadius: 8, fontSize: 12, color: "#7a6a5a" }}>
-        <strong>Note:</strong> Some portals block embedded views for security reasons. If you see a blank screen, click "Open in New Tab" to access AppFolio directly.
+          </a>
+        ))}
       </div>
     </div>
   );
@@ -243,7 +282,7 @@ function AppFolioTab() {
 const TABS = [
   { id: "mls", label: "MLS Listings", icon: <Building2 size={13} /> },
   { id: "openhouses", label: "Open Houses", icon: <Home size={13} /> },
-  { id: "appfolio", label: "AppFolio", icon: <Globe size={13} /> },
+  { id: "portals", label: "Portals", icon: <Globe size={13} /> },
 ] as const;
 type TabId = typeof TABS[number]["id"];
 
@@ -253,7 +292,7 @@ export default function ListingsHubPage() {
     <div className="fade-in">
       <div style={{ marginBottom: 20 }}>
         <h1 className="section-title" style={{ display: "flex", alignItems: "center", gap: 10 }}><Building2 size={22} color="#c9a96e" />Listings Hub</h1>
-        <p className="section-sub">MLS listings · Open house schedule · AppFolio portal</p>
+        <p className="section-sub">MLS listings · Open house schedule · Quick links to AppFolio, Apollo & HI Central</p>
       </div>
 
       <div style={{ display: "flex", gap: 0, marginBottom: 24, borderBottom: "2px solid #e8e0d4" }}>
@@ -266,7 +305,7 @@ export default function ListingsHubPage() {
 
       {tab === "mls" && <MLSTab />}
       {tab === "openhouses" && <OpenHousesTab />}
-      {tab === "appfolio" && <AppFolioTab />}
+      {tab === "portals" && <PortalsTab />}
     </div>
   );
 }

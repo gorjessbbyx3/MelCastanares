@@ -24,7 +24,7 @@ import {
   ChevronRight, Search, X, AlertCircle, TrendingUp, Star, Filter,
   BarChart2, Building2, Megaphone, CheckCircle2, Circle, Target,
   ArrowRight, ExternalLink, RefreshCw, Menu, XCircle, Lock,
-  Instagram, FolderOpen, ListTodo, MessageSquare
+  Instagram, FolderOpen, ListTodo, MessageSquare, Receipt
 } from "lucide-react";
 import { api, type Lead, type Task, type Commission, type Stats } from "./lib/api";
 import SocialPage from "./pages/SocialPage";
@@ -33,6 +33,7 @@ import TodosPage from "./pages/TodosPage";
 import FilesPage from "./pages/FilesPage";
 import AIChatPage from "./pages/AIChatPage";
 import ListingsHubPage from "./pages/ListingsHubPage";
+import ExpensesPage from "./pages/ExpensesPage";
 
 // ─── BRAND ───────────────────────────────────────────────────────────
 const C = {
@@ -265,6 +266,7 @@ const NAV = [
   { href: "/listings", label: "Listings Hub", icon: Building2 },
   { href: "/todos", label: "Todos", icon: ListTodo },
   { href: "/files", label: "Files", icon: FolderOpen },
+  { href: "/expenses", label: "Expenses", icon: Receipt },
   { href: "/ai-chat", label: "AI Chat", icon: MessageSquare },
   { section: "Account" },
   { href: "/settings", label: "Settings", icon: Settings },
@@ -1179,6 +1181,7 @@ function ProtectedApp() {
       {loc.startsWith("/listings") && <ListingsHubPage />}
       {loc.startsWith("/todos") && <TodosPage />}
       {loc.startsWith("/files") && <FilesPage />}
+      {loc.startsWith("/expenses") && <ExpensesPage />}
       {loc.startsWith("/ai-chat") && <AIChatPage />}
       {loc.startsWith("/settings") && <SettingsPage />}
     </Shell>
