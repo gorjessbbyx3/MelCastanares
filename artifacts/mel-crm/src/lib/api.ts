@@ -56,6 +56,8 @@ export const api = {
   login: (password: string) => req<{ token: string }>("POST", "/auth/login", { password }),
   logout: () => req("POST", "/auth/logout"),
   verify: () => req<{ ok: boolean }>("GET", "/auth/verify"),
+  changePassword: (currentPassword: string, newPassword: string) =>
+    req<{ ok: boolean }>("POST", "/auth/password", { currentPassword, newPassword }),
 
   // Core CRM
   getLeads: () => req<Lead[]>("GET", "/leads"),
@@ -87,11 +89,36 @@ export const api = {
   updateTodo: (id: string, data: Partial<Todo>) => req<Todo>("PUT", `/todos/${id}`, data),
   deleteTodo: (id: string) => req<void>("DELETE", `/todos/${id}`),
 
-  // Files
+  // Files (link manager)
   getFiles: () => req<CRMFile[]>("GET", "/files"),
   createFile: (data: Partial<CRMFile>) => req<CRMFile>("POST", "/files", data),
   updateFile: (id: string, data: Partial<CRMFile>) => req<CRMFile>("PUT", `/files/${id}`, data),
   deleteFile: (id: string) => req<void>("DELETE", `/files/${id}`),
+
+  // R2 File Manager
+  r2Status: () => req<{ available: boolean }>("GET", "/r2/status"),
+  r2List: (folder: string) => req<{ folders: any[]; files: any[]; prefix: string; available: boolean }>("GET", `/r2/list?folder=${encodeURIComponent(folder)}`),
+  r2CreateFolder: (folder: string, name: string) => req<{ ok: boolean }>("POST", "/r2/folder", { folder, name }),
+  r2Delete: (key: string) => {
+    const token = localStorage.getItem("crm_token");
+    return fetch(`${API}/r2/delete?key=${encodeURIComponent(key)}`, {
+      method: "DELETE",
+      headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+    }).then(r => r.json());
+  },
+  r2Move: (oldKey: string, newKey: string) => req<{ ok: boolean }>("POST", "/r2/move", { oldKey, newKey }),
+  r2Upload: async (folder: string, file: File): Promise<{ ok: boolean; key: string }> => {
+    const token = localStorage.getItem("crm_token");
+    const form = new FormData();
+    form.append("file", file);
+    const res = await fetch(`${API}/r2/upload?folder=${encodeURIComponent(folder)}`, {
+      method: "POST",
+      headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      body: form,
+    });
+    if (!res.ok) throw new Error("Upload failed");
+    return res.json();
+  },
 
   // Content Ideas
   getContentIdeas: () => req<ContentIdea[]>("GET", "/content-ideas"),

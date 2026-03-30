@@ -64,9 +64,10 @@ function devCrmApi(): Plugin {
         if (method === "OPTIONS") { res.setHeader("Access-Control-Allow-Origin","*"); res.setHeader("Access-Control-Allow-Headers","Content-Type,Authorization"); res.statusCode=204; return res.end(); }
 
         // Auth: login
-        if (route === "/auth/login" && method === "POST") { const b = await body(req); if (b.password !== CRM_PW) return errRes(res,"Incorrect password",401); const token = uid()+uid(); mem.sessions.push({ token, expires_at: new Date(Date.now()+30*86400000).toISOString() }); return jsonRes(res,{token}); }
+        if (route === "/auth/login" && method === "POST") { const b = await body(req); const pw = (mem as any).password || CRM_PW; if (b.password !== pw) return errRes(res,"Incorrect password",401); const token = uid()+uid(); mem.sessions.push({ token, expires_at: new Date(Date.now()+30*86400000).toISOString() }); return jsonRes(res,{token}); }
         if (route === "/auth/verify" && method === "GET") { return getAuth(req) ? jsonRes(res,{ok:true}) : errRes(res,"Unauthorized",401); }
         if (route === "/auth/logout" && method === "POST") { const hdr=(req.headers["authorization"]||"").replace("Bearer ","").trim(); mem.sessions=mem.sessions.filter(s=>s.token!==hdr); return jsonRes(res,{ok:true}); }
+        if (route === "/auth/password" && method === "POST") { const b=await body(req); const pw=(mem as any).password||CRM_PW; if(b.currentPassword!==pw) return errRes(res,"Current password is incorrect",401); if(!b.newPassword||b.newPassword.length<4) return errRes(res,"Password too short"); (mem as any).password=b.newPassword; return jsonRes(res,{ok:true}); }
 
         if (!getAuth(req)) return errRes(res,"Unauthorized",401);
 
@@ -114,6 +115,19 @@ function devCrmApi(): Plugin {
         const fxm=route.match(/^\/files\/([^/]+)$/);
         if (fxm && method==="PUT") { const id=fxm[1]; const b=await body(req); const i=mem.files.findIndex((f:any)=>f.id===id); if(i<0) return errRes(res,"Not found",404); const upd:any={name:b.name,category:b.category,url:b.url,notes:b.notes,size:b.size}; Object.entries(upd).forEach(([k,v])=>{if(v!==undefined)mem.files[i][k]=v;}); return jsonRes(res,dbToFile(mem.files[i])); }
         if (fxm && method==="DELETE") { const id=fxm[1]; mem.files=mem.files.filter((f:any)=>f.id!==id); return jsonRes(res,{ok:true}); }
+
+        // R2 File Manager (dev stubs — no actual R2 in dev)
+        if (route === "/r2/status" && method === "GET") return jsonRes(res,{available:false});
+        if (route.startsWith("/r2/")) return jsonRes(res,{available:false,folders:[],files:[]});
+
+        // MLS Listings proxy (forward to api-server in dev)
+        if (route === "/mls/listings" && method === "GET") {
+          try {
+            const r = await fetch("http://localhost:3001/listings/idx");
+            if (r.ok) { const d = await r.json(); return jsonRes(res, d); }
+          } catch {}
+          return jsonRes(res,{listings:[],count:0,error:"api-server unavailable in dev"});
+        }
 
         // Content Ideas
         if (route === "/content-ideas" && method === "GET") return jsonRes(res,mem.contentIdeas.filter((c:any)=>c.pinned).sort((a:any,b:any)=>b.created_at.localeCompare(a.created_at)).map(dbToIdea));

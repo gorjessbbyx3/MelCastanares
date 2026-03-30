@@ -59,3 +59,8 @@ CREATE INDEX IF NOT EXISTS idx_tasks_completed ON crm_tasks(completed);
 CREATE INDEX IF NOT EXISTS idx_commissions_status ON crm_commissions(status);
 CREATE INDEX IF NOT EXISTS idx_events_date ON crm_events(date);
 CREATE INDEX IF NOT EXISTS idx_todos_completed ON crm_todos(completed);
+
+CREATE TABLE IF NOT EXISTS crm_settings (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL
+);

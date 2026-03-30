@@ -6,7 +6,7 @@ import {
   Plus, Trash2, Edit3, Phone, Mail, Home, MapPin, Calendar, Clock,
   ChevronRight, Search, X, AlertCircle, TrendingUp, Star, Filter,
   BarChart2, Building2, Megaphone, CheckCircle2, Circle, Target,
-  ArrowRight, ExternalLink, RefreshCw, Menu, XCircle,
+  ArrowRight, ExternalLink, RefreshCw, Menu, XCircle, Lock,
   Instagram, FolderOpen, ListTodo, MessageSquare
 } from "lucide-react";
 import { api, type Lead, type Task, type Commission, type Stats } from "./lib/api";
@@ -15,6 +15,7 @@ import CalendarPage from "./pages/CalendarPage";
 import TodosPage from "./pages/TodosPage";
 import FilesPage from "./pages/FilesPage";
 import AIChatPage from "./pages/AIChatPage";
+import ListingsHubPage from "./pages/ListingsHubPage";
 
 // ─── BRAND ───────────────────────────────────────────────────────────
 const C = {
@@ -241,6 +242,7 @@ const NAV = [
   { section: "Tools" },
   { href: "/social", label: "Social", icon: Instagram },
   { href: "/calendar", label: "Calendar", icon: Calendar },
+  { href: "/listings", label: "Listings Hub", icon: Building2 },
   { href: "/todos", label: "Todos", icon: ListTodo },
   { href: "/files", label: "Files", icon: FolderOpen },
   { href: "/ai-chat", label: "AI Chat", icon: MessageSquare },
@@ -946,6 +948,26 @@ function CommissionForm({ comm, leads, onSave, onCancel, saving }: { comm: Parti
 // ═══════════════════════════════════════════════════════════════════════
 function SettingsPage() {
   const { logout } = useAuth();
+  const toast = useToast();
+  const [pwForm, setPwForm] = useState({ current: "", next: "", confirm: "" });
+  const [pwSaving, setPwSaving] = useState(false);
+
+  async function handleChangePassword(e: React.FormEvent) {
+    e.preventDefault();
+    if (pwForm.next !== pwForm.confirm) { toast("New passwords don't match", "error"); return; }
+    if (pwForm.next.length < 4) { toast("Password must be at least 4 characters", "error"); return; }
+    setPwSaving(true);
+    try {
+      await api.changePassword(pwForm.current, pwForm.next);
+      toast("Password updated successfully");
+      setPwForm({ current: "", next: "", confirm: "" });
+    } catch (err: any) {
+      toast(err.message || "Failed to update password", "error");
+    } finally {
+      setPwSaving(false);
+    }
+  }
+
   return (
     <div className="fade-in">
       <h1 className="section-title">Settings</h1>
@@ -962,18 +984,45 @@ function SettingsPage() {
             <a href="https://melcastanares.techsavvyhawaii.com" target="_blank" rel="noopener" className="crm-btn crm-btn-ghost crm-btn-sm" style={{ textDecoration: "none" }}><ExternalLink size={13} />Website</a>
           </div>
         </div>
+
         <div className="card" style={{ padding: 24 }}>
-          <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 12 }}>Cloudflare D1 Setup</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+            <Lock size={16} color="#c9a96e" />
+            <div style={{ fontWeight: 600, fontSize: 14 }}>Change Password</div>
+          </div>
+          <form onSubmit={handleChangePassword} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <div>
+              <label style={{ fontSize: 12, fontWeight: 600, color: "#7a6a5a", display: "block", marginBottom: 5 }}>Current Password</label>
+              <input className="crm-input" type="password" value={pwForm.current} onChange={e => setPwForm(f => ({ ...f, current: e.target.value }))} placeholder="Enter current password" autoComplete="current-password" />
+            </div>
+            <div>
+              <label style={{ fontSize: 12, fontWeight: 600, color: "#7a6a5a", display: "block", marginBottom: 5 }}>New Password</label>
+              <input className="crm-input" type="password" value={pwForm.next} onChange={e => setPwForm(f => ({ ...f, next: e.target.value }))} placeholder="Enter new password (min 4 chars)" autoComplete="new-password" />
+            </div>
+            <div>
+              <label style={{ fontSize: 12, fontWeight: 600, color: "#7a6a5a", display: "block", marginBottom: 5 }}>Confirm New Password</label>
+              <input className="crm-input" type="password" value={pwForm.confirm} onChange={e => setPwForm(f => ({ ...f, confirm: e.target.value }))} placeholder="Repeat new password" autoComplete="new-password" />
+            </div>
+            <div style={{ display: "flex", justifyContent: "flex-end" }}>
+              <button className="crm-btn crm-btn-primary" type="submit" disabled={!pwForm.current || !pwForm.next || !pwForm.confirm || pwSaving}>
+                <Lock size={13} />{pwSaving ? "Updating…" : "Update Password"}
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <div className="card" style={{ padding: 24 }}>
+          <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 12 }}>Cloudflare Setup</div>
           <div style={{ fontSize: 13, color: "#7a6a5a", lineHeight: 1.7 }}>
-            <p style={{ margin: "0 0 8px" }}>This CRM requires a D1 database to store your leads, tasks, and commissions.</p>
-            <ol style={{ margin: "0 0 12px", paddingLeft: 20, display: "flex", flexDirection: "column", gap: 4 }}>
-              <li>Create a D1 database named <code style={{ background: "#f5efe7", padding: "1px 6px", borderRadius: 4, fontSize: 12 }}>mel-crm-db</code> in your Cloudflare dashboard</li>
-              <li>Bind it to this Pages project as <code style={{ background: "#f5efe7", padding: "1px 6px", borderRadius: 4, fontSize: 12 }}>DB</code></li>
-              <li>Add env var <code style={{ background: "#f5efe7", padding: "1px 6px", borderRadius: 4, fontSize: 12 }}>CRM_PASSWORD</code> = your login password</li>
-              <li>Run: <code style={{ background: "#f5efe7", padding: "2px 6px", borderRadius: 4, fontSize: 11, display: "block", marginTop: 4 }}>npx wrangler d1 execute mel-crm-db --file=functions/api/schema.sql --remote</code></li>
+            <ol style={{ margin: 0, paddingLeft: 20, display: "flex", flexDirection: "column", gap: 4 }}>
+              <li>D1 database <code style={{ background: "#f5efe7", padding: "1px 6px", borderRadius: 4, fontSize: 12 }}>mel-crm-db</code> → bind as <code style={{ background: "#f5efe7", padding: "1px 6px", borderRadius: 4, fontSize: 12 }}>DB</code></li>
+              <li>R2 bucket <code style={{ background: "#f5efe7", padding: "1px 6px", borderRadius: 4, fontSize: 12 }}>mel-crm-files</code> → bind as <code style={{ background: "#f5efe7", padding: "1px 6px", borderRadius: 4, fontSize: 12 }}>FILES_BUCKET</code></li>
+              <li>Workers AI → bind as <code style={{ background: "#f5efe7", padding: "1px 6px", borderRadius: 4, fontSize: 12 }}>AI</code></li>
+              <li>Env var <code style={{ background: "#f5efe7", padding: "1px 6px", borderRadius: 4, fontSize: 12 }}>CRM_PASSWORD</code> = initial login password</li>
             </ol>
           </div>
         </div>
+
         <div className="card" style={{ padding: 24 }}>
           <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 4 }}>Sign Out</div>
           <div style={{ fontSize: 13, color: "#7a6a5a", marginBottom: 16 }}>You'll need your password to sign back in.</div>
@@ -1015,6 +1064,7 @@ function ProtectedApp() {
       {loc.startsWith("/commissions") && <CommissionsPage />}
       {loc.startsWith("/social") && <SocialPage />}
       {loc.startsWith("/calendar") && <CalendarPage />}
+      {loc.startsWith("/listings") && <ListingsHubPage />}
       {loc.startsWith("/todos") && <TodosPage />}
       {loc.startsWith("/files") && <FilesPage />}
       {loc.startsWith("/ai-chat") && <AIChatPage />}

@@ -1,11 +1,11 @@
 // Cloudflare Pages Function — Mel's CRM API
-// Env vars: CRM_PASSWORD, DB (D1), AI (Workers AI binding)
+// Env vars: CRM_PASSWORD, DB (D1), AI (Workers AI), FILES_BUCKET (R2)
 
 function uuid() { return crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2) + Date.now().toString(36); }
 function now() { return new Date().toISOString(); }
 function today() { return new Date().toISOString().slice(0, 10); }
 
-const mem = { sessions: [], leads: [], tasks: [], commissions: [], events: [], todos: [], files: [], contentIdeas: [] };
+const mem = { sessions: [], leads: [], tasks: [], commissions: [], events: [], todos: [], files: [], contentIdeas: [], settings: {} };
 
 function cors(h = {}) { return new Headers({ "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS", "Access-Control-Allow-Headers": "Content-Type,Authorization", ...h }); }
 function json(data, status = 200) { return new Response(JSON.stringify(data), { status, headers: cors({ "Content-Type": "application/json" }) }); }
@@ -16,6 +16,16 @@ async function auth(request, env) {
   if (!token) return false;
   if (env.DB) { const r = await env.DB.prepare("SELECT id FROM crm_sessions WHERE token=? AND expires_at>?").bind(token, now()).first(); return !!r; }
   return mem.sessions.some(s => s.token === token && s.expires_at > now());
+}
+
+async function getPassword(env) {
+  if (env.DB) {
+    const r = await env.DB.prepare("SELECT value FROM crm_settings WHERE key='password'").first().catch(() => null);
+    if (r?.value) return r.value;
+  } else if (mem.settings.password) {
+    return mem.settings.password;
+  }
+  return env.CRM_PASSWORD || "mel2024";
 }
 
 // ── Mappers ──────────────────────────────────────────────────────────
@@ -29,13 +39,28 @@ const dbToIdea = r => ({ id:r.id, text:r.text||"", topic:r.topic||"", pinned:r.p
 
 // ── AI helpers ────────────────────────────────────────────────────────
 const AI_MODEL = "@cf/meta/llama-3.1-8b-instruct";
-
 async function runAI(env, messages, maxTokens = 1024) {
   if (!env.AI) return null;
   try {
     const res = await env.AI.run(AI_MODEL, { messages, max_tokens: maxTokens });
     return res.response || res.result?.response || "";
   } catch (e) { console.error("AI error:", e); return null; }
+}
+
+// ── R2 helpers ────────────────────────────────────────────────────────
+function r2KeyToItem(obj, folder) {
+  const key = obj.key;
+  const relativePath = folder ? key.slice(folder.length) : key;
+  const parts = relativePath.split("/").filter(Boolean);
+  const isFolder = key.endsWith("/") || (obj.size === 0 && key.endsWith("/.keep"));
+  return {
+    key,
+    name: parts[parts.length - 1] || key,
+    size: obj.size || 0,
+    uploaded: obj.uploaded ? obj.uploaded.toISOString() : now(),
+    isFolder,
+    contentType: obj.httpMetadata?.contentType || "application/octet-stream",
+  };
 }
 
 // ── Main handler ──────────────────────────────────────────────────────
@@ -51,7 +76,8 @@ export async function onRequest(ctx) {
   // ── Auth ─────────────────────────────────────────────────────────────
   if (route === "/auth/login" && method === "POST") {
     const { password } = await request.json().catch(() => ({}));
-    if (password !== (env.CRM_PASSWORD || "mel2024")) return err("Incorrect password", 401);
+    const correctPw = await getPassword(env);
+    if (password !== correctPw) return err("Incorrect password", 401);
     const token = uuid() + uuid();
     const expires = new Date(Date.now() + 30 * 86400000).toISOString();
     if (env.DB) await env.DB.prepare("INSERT INTO crm_sessions (id,token,expires_at) VALUES (?,?,?)").bind(uuid(), token, expires).run();
@@ -66,6 +92,21 @@ export async function onRequest(ctx) {
     return json({ ok: true });
   }
   if (!(await auth(request, env))) return err("Unauthorized", 401);
+
+  // ── Password change ───────────────────────────────────────────────────
+  if (route === "/auth/password" && method === "POST") {
+    const { currentPassword, newPassword } = await request.json().catch(() => ({}));
+    if (!newPassword || newPassword.length < 4) return err("New password must be at least 4 characters");
+    const correctPw = await getPassword(env);
+    if (currentPassword !== correctPw) return err("Current password is incorrect", 401);
+    if (env.DB) {
+      await env.DB.prepare("CREATE TABLE IF NOT EXISTS crm_settings (key TEXT PRIMARY KEY, value TEXT NOT NULL)").run().catch(() => {});
+      await env.DB.prepare("INSERT OR REPLACE INTO crm_settings (key, value) VALUES ('password', ?)").bind(newPassword).run();
+    } else {
+      mem.settings.password = newPassword;
+    }
+    return json({ ok: true });
+  }
 
   // ── Stats ─────────────────────────────────────────────────────────────
   if (route === "/stats" && method === "GET") {
@@ -209,7 +250,7 @@ export async function onRequest(ctx) {
     if (method === "DELETE") { if (env.DB) await env.DB.prepare("DELETE FROM crm_todos WHERE id=?").bind(id).run(); else mem.todos = mem.todos.filter(t => t.id !== id); return json({ ok: true }); }
   }
 
-  // ── FILES ─────────────────────────────────────────────────────────────
+  // ── FILES (D1 link manager) ────────────────────────────────────────────
   if (route === "/files" && method === "GET") {
     if (env.DB) { const { results } = await env.DB.prepare("SELECT * FROM crm_files ORDER BY created_at DESC").all(); return json(results.map(dbToFile)); }
     return json([...mem.files].sort((a,b)=>b.created_at.localeCompare(a.created_at)).map(dbToFile));
@@ -232,6 +273,108 @@ export async function onRequest(ctx) {
       const i = mem.files.findIndex(f => f.id === id); if (i < 0) return err("Not found", 404); fields.forEach(([k,v]) => { mem.files[i][k] = v; }); return json(dbToFile(mem.files[i]));
     }
     if (method === "DELETE") { if (env.DB) await env.DB.prepare("DELETE FROM crm_files WHERE id=?").bind(id).run(); else mem.files = mem.files.filter(f => f.id !== id); return json({ ok: true }); }
+  }
+
+  // ── R2 FILE MANAGER ───────────────────────────────────────────────────
+  // Check if R2 is available
+  if (route === "/r2/status" && method === "GET") {
+    return json({ available: !!env.FILES_BUCKET });
+  }
+
+  // List files/folders in a directory
+  if (route === "/r2/list" && method === "GET") {
+    if (!env.FILES_BUCKET) return json({ folders: [], files: [], available: false });
+    const folder = url.searchParams.get("folder") || "";
+    const prefix = folder ? (folder.endsWith("/") ? folder : folder + "/") : "";
+    const listed = await env.FILES_BUCKET.list({ prefix, delimiter: "/" });
+    const folders = (listed.delimitedPrefixes || []).map(p => ({
+      key: p,
+      name: p.slice(prefix.length).replace(/\/$/, ""),
+      isFolder: true,
+    }));
+    const files = (listed.objects || [])
+      .filter(o => !o.key.endsWith("/.keep") && o.key !== prefix)
+      .map(o => ({
+        key: o.key,
+        name: o.key.slice(prefix.length),
+        size: o.size,
+        uploaded: o.uploaded ? o.uploaded.toISOString() : now(),
+        isFolder: false,
+        contentType: o.httpMetadata?.contentType || "application/octet-stream",
+      }));
+    return json({ folders, files, prefix, available: true });
+  }
+
+  // Create folder
+  if (route === "/r2/folder" && method === "POST") {
+    if (!env.FILES_BUCKET) return err("R2 not configured", 503);
+    const { folder, name } = await request.json().catch(() => ({}));
+    if (!name) return err("Folder name required");
+    const folderKey = (folder ? folder + "/" : "") + name.replace(/\//g, "-") + "/.keep";
+    await env.FILES_BUCKET.put(folderKey, "", { httpMetadata: { contentType: "text/plain" } });
+    return json({ ok: true, key: folderKey });
+  }
+
+  // Upload file (multipart)
+  if (route === "/r2/upload" && method === "POST") {
+    if (!env.FILES_BUCKET) return err("R2 not configured", 503);
+    const folder = url.searchParams.get("folder") || "";
+    const formData = await request.formData().catch(() => null);
+    if (!formData) return err("Expected multipart form data");
+    const file = formData.get("file");
+    if (!file || typeof file === "string") return err("No file provided");
+    const prefix = folder ? (folder.endsWith("/") ? folder : folder + "/") : "";
+    const key = prefix + file.name;
+    await env.FILES_BUCKET.put(key, file.stream(), {
+      httpMetadata: { contentType: file.type || "application/octet-stream" },
+    });
+    return json({ ok: true, key, name: file.name, size: file.size, contentType: file.type });
+  }
+
+  // Move / rename file
+  if (route === "/r2/move" && method === "POST") {
+    if (!env.FILES_BUCKET) return err("R2 not configured", 503);
+    const { oldKey, newKey } = await request.json().catch(() => ({}));
+    if (!oldKey || !newKey) return err("oldKey and newKey required");
+    const obj = await env.FILES_BUCKET.get(oldKey);
+    if (!obj) return err("Source file not found", 404);
+    const body = await obj.arrayBuffer();
+    await env.FILES_BUCKET.put(newKey, body, { httpMetadata: { contentType: obj.httpMetadata?.contentType || "application/octet-stream" } });
+    await env.FILES_BUCKET.delete(oldKey);
+    return json({ ok: true, newKey });
+  }
+
+  // Delete file or folder
+  if (route === "/r2/delete" && method === "DELETE") {
+    if (!env.FILES_BUCKET) return err("R2 not configured", 503);
+    const key = url.searchParams.get("key");
+    if (!key) return err("key required");
+    // If it's a folder, delete all objects with that prefix
+    if (key.endsWith("/") || !key.includes(".")) {
+      const prefix = key.endsWith("/") ? key : key + "/";
+      let cursor;
+      do {
+        const listed = await env.FILES_BUCKET.list({ prefix, cursor });
+        for (const obj of listed.objects || []) await env.FILES_BUCKET.delete(obj.key);
+        cursor = listed.truncated ? listed.cursor : null;
+      } while (cursor);
+    } else {
+      await env.FILES_BUCKET.delete(key);
+    }
+    return json({ ok: true });
+  }
+
+  // Download / stream file
+  if (route === "/r2/download" && method === "GET") {
+    if (!env.FILES_BUCKET) return err("R2 not configured", 503);
+    const key = url.searchParams.get("key");
+    if (!key) return err("key required");
+    const obj = await env.FILES_BUCKET.get(key);
+    if (!obj) return err("File not found", 404);
+    const contentType = obj.httpMetadata?.contentType || "application/octet-stream";
+    const fileName = key.split("/").pop() || "file";
+    const headers = cors({ "Content-Type": contentType, "Content-Disposition": `attachment; filename="${fileName}"` });
+    return new Response(obj.body, { headers });
   }
 
   // ── CONTENT IDEAS ─────────────────────────────────────────────────────
@@ -263,7 +406,7 @@ Generate exactly 4 engaging Instagram post captions for her. Each should:
 - Include 1-2 relevant emojis
 - End with a call to action (DM, comment, or link in bio)
 - Include 3-5 hashtags at the end (#hawaiirealestate #oahurealtor etc.)
-- Be authentic and personable, not generic
+- Be authentic and personable, not genuine
 - Be 2-4 sentences max
 
 Topic: ${prompt}
@@ -278,7 +421,7 @@ Return ONLY the 4 captions, separated by "|||" (three pipe characters). No numbe
     return json({ ideas: [
       `🏡 Dreaming of owning a home in Oahu? The ${prompt.toLowerCase().includes("seller") ? "market" : "process"} might feel overwhelming, but I'm here to guide you every step of the way. DM me "HOME" to get started! #hawaiirealestate #oahurealtor #firsttimebuyer`,
       `🌺 Local expertise matters. As an Oahu Realtor who lives and breathes this market, I know what it takes to find YOUR perfect home. Let's chat! 📲 Link in bio. #oahuhomes #honolulurealestate #alohastate`,
-      `💡 ${prompt.includes("tip") ? "Tip" : "Did you know"}? Understanding Hawaii's fee simple vs leasehold properties can save you thousands. Comment "INFO" and I'll explain! #hawaiirealestate #realestatetips #oahulife`,
+      `💡 Did you know? Understanding Hawaii's fee simple vs leasehold properties can save you thousands. Comment "INFO" and I'll explain! #hawaiirealestate #realestatetips #oahulife`,
       `📊 Oahu market update: Homes are moving fast and inventory is tight. If you're thinking of buying or selling, NOW is the time to talk strategy. DM me today! 🤙 #oahurealtor #hawaiirealestate #mililani`,
     ]});
   }
@@ -312,7 +455,6 @@ Keep responses concise, warm, and actionable. Use 'Mahalo' or Aloha where natura
     ], 800);
 
     if (aiResponse) {
-      // Try to extract action block
       let action = undefined; let event = undefined;
       const jsonMatch = aiResponse.match(/\{[\s\S]*"action"\s*:\s*"create_event"[\s\S]*\}/);
       if (jsonMatch) {
@@ -322,13 +464,65 @@ Keep responses concise, warm, and actionable. Use 'Mahalo' or Aloha where natura
       return json({ message: cleanMessage, action, event });
     }
 
-    // Fallback (no AI binding)
     const lower = message.toLowerCase();
     if (lower.includes("lead") || lower.includes("contact")) return json({ message: `You currently have ${context?.totalLeads ?? 0} leads, with ${context?.activeLeadCount ?? 0} active in your pipeline. Your active leads include: ${context?.activeLeads || "none yet"}. Would you like to add a new lead or update someone's status?` });
     if (lower.includes("task") || lower.includes("overdue")) return json({ message: `Today's tasks: ${context?.todayTasks || "none"}. Overdue: ${context?.overdueTasks || "none"}. Head to the Tasks page to check them off!` });
     if (lower.includes("calendar") || lower.includes("event") || lower.includes("schedule")) return json({ message: `Your upcoming events: ${context?.events || "nothing scheduled yet"}. Head to the Calendar page to add or manage events!` });
     if (lower.includes("instagram") || lower.includes("post") || lower.includes("content")) return json({ message: "Head to the Social page to generate Instagram content ideas with AI! Your best posting time is Saturday at 8am, and your top hashtags are #hawaiirealestate and #oahurealtor. 🌺" });
     return json({ message: "Mahalo for reaching out! Deploy to Cloudflare Pages and add the AI binding to enable the full AI assistant. In the meantime, I can answer basic questions about your leads, tasks, and calendar!" });
+  }
+
+  // ── MLS Listings ──────────────────────────────────────────────────────
+  if (route === "/mls/listings" && method === "GET") {
+    const IDX_URL = "https://search.idxbroker.com/idx/results/listings?pt=&ccz=city&city[]=Honolulu&city[]=Kailua&city[]=Mililani&city[]=Aiea&city[]=Pearl+City&city[]=Kapolei&sold=0&a_propStatus[]=Active&bd=0&tb=0&pricekeywords=0&savedName=&savedExclusive=&savedType=";
+    const FALLBACK = [
+      { mlsNum:"202415821", address:"4218 Pualei Cir", city:"Honolulu", state:"HI", zip:"96816", price:1895000, beds:4, baths:3, sqft:2210, status:"Active", photo:"https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=600&q=70", listingUrl:"#" },
+      { mlsNum:"202418432", address:"201 Hamakua Dr #305", city:"Kailua", state:"HI", zip:"96734", price:975000, beds:2, baths:2, sqft:1050, status:"Active", photo:"https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=600&q=70", listingUrl:"#" },
+      { mlsNum:"202421104", address:"95-828 Wikao St", city:"Mililani", state:"HI", zip:"96789", price:825000, beds:4, baths:2, sqft:1680, status:"Active", photo:"https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&q=70", listingUrl:"#" },
+      { mlsNum:"202419876", address:"988 Halekauwila St #1802", city:"Honolulu", state:"HI", zip:"96814", price:1250000, beds:3, baths:2, sqft:1320, status:"Active", photo:"https://images.unsplash.com/photo-1567767292278-a4f21aa2d36e?w=600&q=70", listingUrl:"#" },
+      { mlsNum:"202422567", address:"98-718 Kaonohi St", city:"Aiea", state:"HI", zip:"96701", price:699000, beds:3, baths:2, sqft:1400, status:"Pending", photo:"https://images.unsplash.com/photo-1558036117-15d82a90b9b1?w=600&q=70", listingUrl:"#" },
+      { mlsNum:"202416321", address:"396 Kawaihae St", city:"Honolulu", state:"HI", zip:"96825", price:2450000, beds:5, baths:4, sqft:3200, status:"Active", photo:"https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=600&q=70", listingUrl:"#" },
+    ];
+    try {
+      const r = await fetch(IDX_URL, {
+        headers: { "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36", Accept: "text/html,application/xhtml+xml" },
+        signal: AbortSignal.timeout(12000),
+      });
+      if (!r.ok) throw new Error(`IDX ${r.status}`);
+      const html = await r.text();
+      const listings = [];
+      const blockRx = /<div[^>]+class="[^"]*IDX-resultsRow[^"]*"[^>]*>([\s\S]*?)<\/div>\s*(?=<div[^>]+class="[^"]*IDX-resultsRow|$)/g;
+      let match;
+      while ((match = blockRx.exec(html)) !== null && listings.length < 20) {
+        const block = match[1];
+        const priceM = block.match(/\$[\d,]+/);
+        const addrM = block.match(/(?:Address|address)[^>]*>[^<]*<[^>]+>([^<]+)/);
+        const mlsM = block.match(/MLS[^\d]*(\d{7,9})/i);
+        const bedsM = block.match(/(\d+)\s*(?:Bed|BR|bd)/i);
+        const bathsM = block.match(/([\d.]+)\s*(?:Bath|BA|ba)/i);
+        const sqftM = block.match(/([\d,]+)\s*(?:sq\s*ft|sqft)/i);
+        const imgM = block.match(/src="([^"]*\.jpe?g[^"]*)"/i);
+        const hrefM = block.match(/href="(\/idx\/listings\/detail[^"]+)"/);
+        if (priceM && addrM) {
+          listings.push({
+            mlsNum: mlsM ? mlsM[1] : "",
+            address: addrM[1].trim(),
+            city: "Honolulu", state: "HI", zip: "",
+            price: parseInt(priceM[0].replace(/[\$,]/g, "")) || 0,
+            beds: bedsM ? parseInt(bedsM[1]) : 0,
+            baths: bathsM ? parseFloat(bathsM[1]) : 0,
+            sqft: sqftM ? parseInt(sqftM[1].replace(/,/g, "")) : 0,
+            status: "Active",
+            photo: imgM ? imgM[1] : "",
+            listingUrl: hrefM ? `https://search.idxbroker.com${hrefM[1]}` : "#",
+          });
+        }
+      }
+      const result = listings.length >= 2 ? listings : FALLBACK;
+      return json({ listings: result, count: result.length, source: listings.length >= 2 ? "idx-broker" : "fallback" });
+    } catch (e) {
+      return json({ listings: FALLBACK, count: FALLBACK.length, source: "fallback" });
+    }
   }
 
   return err("Not found", 404);
