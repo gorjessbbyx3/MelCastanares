@@ -124,6 +124,132 @@ Format: Return ONLY the 4 captions separated by the exact string "|||" with no e
   }
 }
 
+// ── /ai/lead-dna ─────────────────────────────────────────────────────────
+async function handleLeadDna(request, env) {
+  const { lead } = await request.json().catch(() => ({}));
+  if (!lead) return json({ error: "lead required" }, 400);
+
+  const systemPrompt = `You are a real estate sales coach analyzing a lead profile for Mel Castanares, REALTOR® in Honolulu, Hawaii.
+
+Analyze this lead and produce a concise "Lead DNA" profile. Return ONLY valid JSON — no extra text.
+
+Lead data:
+- Name: ${lead.name}
+- Intent: ${lead.intent} (buy/sell/lease)
+- Status: ${lead.status}
+- Price range: $${(lead.priceMin||0).toLocaleString()} – $${(lead.priceMax||0).toLocaleString()}
+- Neighborhoods: ${lead.neighborhoods || "not specified"}
+- Beds/Baths: ${lead.bedsMin || "?"}bd / ${lead.bathsMin || "?"}ba
+- Pre-approval: ${lead.preApproval} ${lead.preApprovalAmount > 0 ? "($" + lead.preApprovalAmount.toLocaleString() + ")" : ""}
+- Timeline: ${lead.timeline || "not specified"}
+- Notes: ${lead.notes || "none"}
+- Next step: ${lead.nextStep || "none"}
+
+Return JSON with exactly these fields:
+{
+  "communicationStyle": "one of: Direct, Analytical, Relational, Expressive",
+  "motivationLevel": "one of: Hot 🔥, Warm ☀️, Cool 🌊, Cold ❄️",
+  "primaryMotivation": "1 sentence on what is driving this person",
+  "keyRisks": "1 sentence on their likely hesitations or objections",
+  "recommendedApproach": "2-3 specific actionable tactics for Mel to use with this person",
+  "bestContactMethod": "one of: Call, Text, Email, Video Tour",
+  "coachingTip": "1 sharp coaching tip for Mel on how to move this deal forward"
+}`;
+
+  try {
+    const raw = await runAI(env, [{ role: "user", content: systemPrompt }], 600);
+    const jsonMatch = raw.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error("no JSON");
+    const profile = JSON.parse(jsonMatch[0]);
+    return json({ profile });
+  } catch (e) {
+    console.error("Lead DNA error:", e);
+    return json({ error: "Could not generate DNA profile" }, 500);
+  }
+}
+
+// ── /ai/offer-strategy ───────────────────────────────────────────────────
+async function handleOfferStrategy(request, env) {
+  const { property } = await request.json().catch(() => ({}));
+  if (!property) return json({ error: "property required" }, 400);
+
+  const systemPrompt = `You are a Hawaii real estate transaction expert helping Mel Castanares (REALTOR® RS-84753, Dream Home Realty Hawai'i) advise a buyer on offer strategy.
+
+Property details:
+- Address: ${property.address || "Oahu, HI"}
+- List price: $${(property.listPrice||0).toLocaleString()}
+- Beds/Baths: ${property.beds || "?"}bd / ${property.baths || "?"}ba
+- Sqft: ${property.sqft || "unknown"}
+- Days on market: ${property.daysOnMarket || "unknown"}
+- HOA fees: ${property.hoaFees ? "$" + property.hoaFees + "/mo" : "unknown"}
+- Fee simple or leasehold: ${property.ownership || "unknown"}
+- Additional context: ${property.notes || "none"}
+
+Hawaii-specific factors to weigh: fee simple vs leasehold, condo reserve funds, flood zones, lava zones, termite/pest history, ohana unit potential.
+
+Return ONLY valid JSON:
+{
+  "suggestedOfferRange": { "low": number, "mid": number, "high": number },
+  "offerStrategyNote": "2-3 sentence rationale for the suggested range",
+  "contingenciesRecommended": ["list", "of", "contingencies"],
+  "contingenciesToConsiderWaiving": ["list", "if", "market", "is", "competitive"],
+  "negotiationTips": ["2-3", "specific", "negotiation", "tips"],
+  "hawaiiSpecificWarnings": ["any", "hawaii-specific", "flags", "or", "empty", "array"],
+  "confidenceLevel": "one of: Strong, Moderate, Limited — based on available info"
+}`;
+
+  try {
+    const raw = await runAI(env, [{ role: "user", content: systemPrompt }], 800);
+    const jsonMatch = raw.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error("no JSON");
+    const strategy = JSON.parse(jsonMatch[0]);
+    return json({ strategy });
+  } catch (e) {
+    console.error("Offer strategy error:", e);
+    return json({ error: "Could not generate offer strategy" }, 500);
+  }
+}
+
+// ── /ai/nurture-draft ─────────────────────────────────────────────────────
+async function handleNurtureDraft(request, env) {
+  const { client } = await request.json().catch(() => ({}));
+  if (!client) return json({ error: "client required" }, 400);
+
+  const systemPrompt = `You are writing a personal check-in email from Mel Castanares (REALTOR® RS-84753, Dream Home Realty Hawai'i, mel@homesweethomehawaii.com, (808) 285-8774) to a past client.
+
+Client: ${client.name}
+Property they closed on: ${client.address}
+Close date: ${client.closeDate}
+Anniversary: ${client.anniversary} (${client.daysUntil} days from now)
+Sale price: ${client.salePrice ? "$" + client.salePrice.toLocaleString() : "not specified"}
+Notes: ${client.notes || "none"}
+
+Write a warm, personal email (NOT templated-sounding) that:
+1. References their specific home and neighborhood
+2. Shares a brief genuine market update for their area
+3. Mentions that their home has likely appreciated (if anniversary is 1+ yr)
+4. Offers a free current market valuation
+5. Includes a soft ask for referrals — not pushy
+6. Signs off with Mel's contact info
+
+Return ONLY valid JSON:
+{
+  "subject": "email subject line",
+  "body": "full email body with \\n for line breaks"
+}`;
+
+  try {
+    const raw = await runAI(env, [{ role: "user", content: systemPrompt }], 900);
+    const jsonMatch = raw.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error("no JSON");
+    const email = JSON.parse(jsonMatch[0]);
+    return json({ email });
+  } catch (e) {
+    console.error("Nurture draft error:", e);
+    return json({ error: "Could not generate email draft" }, 500);
+  }
+}
+
 // ── Router ────────────────────────────────────────────────────────────────
 export default {
   async fetch(request, env) {
@@ -146,6 +272,18 @@ export default {
 
     if (url.pathname === "/ai/content" && method === "POST") {
       return handleContent(request, env);
+    }
+
+    if (url.pathname === "/ai/lead-dna" && method === "POST") {
+      return handleLeadDna(request, env);
+    }
+
+    if (url.pathname === "/ai/offer-strategy" && method === "POST") {
+      return handleOfferStrategy(request, env);
+    }
+
+    if (url.pathname === "/ai/nurture-draft" && method === "POST") {
+      return handleNurtureDraft(request, env);
     }
 
     return json({ error: "Not found" }, 404);

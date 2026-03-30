@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Building2, Calendar, Globe, RefreshCw, ExternalLink, BedDouble, Bath, Maximize2, MapPin, Home, Search } from "lucide-react";
-import { api, type CRMEvent } from "../lib/api";
+import { Building2, Calendar, Globe, RefreshCw, ExternalLink, BedDouble, Bath, Maximize2, MapPin, Home, Search, Sparkles, X, DollarSign, AlertCircle } from "lucide-react";
+import { api, type OfferStrategy, type CRMEvent } from "../lib/api";
 
 // ── Helpers ───────────────────────────────────────────────────────────
 function fmtDate(d: string) {
@@ -299,11 +299,174 @@ function PortalsTab() {
   );
 }
 
+// ── Offer Strategy Tab ────────────────────────────────────────────────
+function fmt$(n: number) { return n > 0 ? "$" + n.toLocaleString() : "—"; }
+
+function OfferStrategyTab() {
+  const [form, setForm] = useState({ address: "", listPrice: "", beds: "", baths: "", sqft: "", daysOnMarket: "", hoaFees: "", ownership: "fee-simple", notes: "" });
+  const [loading, setLoading] = useState(false);
+  const [strategy, setStrategy] = useState<OfferStrategy | null>(null);
+  const [error, setError] = useState("");
+  const upd = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }));
+
+  const analyze = async () => {
+    if (!form.address || !form.listPrice) { setError("Address and list price are required"); return; }
+    setLoading(true); setError(""); setStrategy(null);
+    try {
+      const res = await api.getOfferStrategy({
+        address: form.address,
+        listPrice: parseInt(form.listPrice.replace(/[^0-9]/g, "")) || 0,
+        beds: form.beds, baths: form.baths, sqft: form.sqft,
+        daysOnMarket: parseInt(form.daysOnMarket) || undefined,
+        hoaFees: parseInt(form.hoaFees) || undefined,
+        ownership: form.ownership, notes: form.notes,
+      });
+      setStrategy(res.strategy);
+    } catch { setError("Couldn't generate strategy — try again in a moment"); }
+    setLoading(false);
+  };
+
+  const CONF_COLOR = { "Strong": "#2a7a4a", "Moderate": "#d4851a", "Limited": "#c0392b" };
+
+  return (
+    <div style={{ display: "grid", gridTemplateColumns: strategy ? "1fr 1fr" : "1fr", gap: 24, alignItems: "start" }}>
+      {/* Input form */}
+      <div style={{ background: "#fff", border: "1px solid #e8e0d4", borderRadius: 14, padding: "20px 22px" }}>
+        <div style={{ fontWeight: 700, fontSize: 14, color: "#2c2218", marginBottom: 4, display: "flex", alignItems: "center", gap: 8 }}>
+          <Sparkles size={15} color="#c9a96e" />Offer Strategy Analysis
+        </div>
+        <div style={{ fontSize: 12, color: "#7a6a5a", marginBottom: 18 }}>Enter property details — AI will suggest offer range, contingencies & negotiation tactics</div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <div>
+            <label style={{ fontSize: 11, fontWeight: 600, color: "#7a6a5a", display: "block", marginBottom: 4 }}>Property Address *</label>
+            <input className="crm-input" value={form.address} onChange={e => upd("address", e.target.value)} placeholder="e.g. 1234 Ala Moana Blvd, Honolulu, HI" />
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+            <div>
+              <label style={{ fontSize: 11, fontWeight: 600, color: "#7a6a5a", display: "block", marginBottom: 4 }}>List Price *</label>
+              <input className="crm-input" value={form.listPrice} onChange={e => upd("listPrice", e.target.value)} placeholder="e.g. 850,000" />
+            </div>
+            <div>
+              <label style={{ fontSize: 11, fontWeight: 600, color: "#7a6a5a", display: "block", marginBottom: 4 }}>Days on Market</label>
+              <input className="crm-input" type="number" value={form.daysOnMarket} onChange={e => upd("daysOnMarket", e.target.value)} placeholder="e.g. 14" />
+            </div>
+            <div>
+              <label style={{ fontSize: 11, fontWeight: 600, color: "#7a6a5a", display: "block", marginBottom: 4 }}>Beds</label>
+              <input className="crm-input" value={form.beds} onChange={e => upd("beds", e.target.value)} placeholder="e.g. 3" />
+            </div>
+            <div>
+              <label style={{ fontSize: 11, fontWeight: 600, color: "#7a6a5a", display: "block", marginBottom: 4 }}>Baths</label>
+              <input className="crm-input" value={form.baths} onChange={e => upd("baths", e.target.value)} placeholder="e.g. 2" />
+            </div>
+            <div>
+              <label style={{ fontSize: 11, fontWeight: 600, color: "#7a6a5a", display: "block", marginBottom: 4 }}>Sq Ft</label>
+              <input className="crm-input" value={form.sqft} onChange={e => upd("sqft", e.target.value)} placeholder="e.g. 1,200" />
+            </div>
+            <div>
+              <label style={{ fontSize: 11, fontWeight: 600, color: "#7a6a5a", display: "block", marginBottom: 4 }}>HOA/mo</label>
+              <input className="crm-input" value={form.hoaFees} onChange={e => upd("hoaFees", e.target.value)} placeholder="e.g. 450" />
+            </div>
+          </div>
+          <div>
+            <label style={{ fontSize: 11, fontWeight: 600, color: "#7a6a5a", display: "block", marginBottom: 4 }}>Ownership Type</label>
+            <select className="crm-input" value={form.ownership} onChange={e => upd("ownership", e.target.value)}>
+              <option value="fee-simple">Fee Simple</option>
+              <option value="leasehold">Leasehold</option>
+              <option value="unknown">Unknown</option>
+            </select>
+          </div>
+          <div>
+            <label style={{ fontSize: 11, fontWeight: 600, color: "#7a6a5a", display: "block", marginBottom: 4 }}>Additional Context</label>
+            <textarea className="crm-input" rows={2} value={form.notes} onChange={e => upd("notes", e.target.value)} placeholder="e.g. Multiple offers expected, seller wants quick close, motivated seller..." style={{ resize: "vertical" }} />
+          </div>
+          {error && <div style={{ color: "#c0392b", fontSize: 12, display: "flex", alignItems: "center", gap: 5 }}><AlertCircle size={12} />{error}</div>}
+          <button className="crm-btn crm-btn-primary" onClick={analyze} disabled={loading} style={{ display: "flex", alignItems: "center", gap: 7, justifyContent: "center" }}>
+            {loading ? "Analyzing…" : <><Sparkles size={14} />Generate Offer Strategy</>}
+          </button>
+        </div>
+      </div>
+
+      {/* Results */}
+      {loading && (
+        <div style={{ background: "#fff", border: "1px solid #e8e0d4", borderRadius: 14, padding: "40px 22px", textAlign: "center", color: "#a89880" }}>
+          <div style={{ marginBottom: 10 }}>🏡 Analyzing property…</div>
+          <div style={{ fontSize: 12 }}>Checking comps, DOM, Hawaii-specific factors</div>
+        </div>
+      )}
+
+      {strategy && !loading && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+          {/* Offer range */}
+          <div style={{ background: "linear-gradient(135deg, #1a2c24, #2a4a34)", borderRadius: 14, padding: "18px 20px" }}>
+            <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#8aaa8a", marginBottom: 10 }}>Suggested Offer Range</div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
+              {[["Low", strategy.suggestedOfferRange.low, "#a89880"], ["Mid", strategy.suggestedOfferRange.mid, "#c9a96e"], ["High", strategy.suggestedOfferRange.high, "#f0e8d8"]].map(([label, val, color]) => (
+                <div key={label as string} style={{ textAlign: "center" }}>
+                  <div style={{ fontSize: 10, color: "#8aaa8a", marginBottom: 4 }}>{label as string}</div>
+                  <div style={{ fontSize: 16, fontWeight: 800, color: color as string }}>{fmt$(val as number)}</div>
+                </div>
+              ))}
+            </div>
+            <div style={{ marginTop: 12, fontSize: 12, color: "#d4c4a4", lineHeight: 1.6 }}>{strategy.offerStrategyNote}</div>
+            <div style={{ marginTop: 8, fontSize: 11, color: "#8aaa8a" }}>Confidence: <span style={{ color: CONF_COLOR[strategy.confidenceLevel as keyof typeof CONF_COLOR] || "#a89880", fontWeight: 700 }}>{strategy.confidenceLevel}</span></div>
+          </div>
+
+          {/* Contingencies */}
+          <div style={{ background: "#fff", border: "1px solid #e8e0d4", borderRadius: 12, padding: "14px 16px" }}>
+            <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#2a7a4a", marginBottom: 8 }}>Include These Contingencies</div>
+            {strategy.contingenciesRecommended.map((c, i) => (
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 5, fontSize: 12, color: "#2c2218" }}>
+                <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#2a7a4a", flexShrink: 0 }} />{c}
+              </div>
+            ))}
+            {strategy.contingenciesToConsiderWaiving.length > 0 && (
+              <>
+                <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#d4851a", marginTop: 10, marginBottom: 8 }}>Consider Waiving (competitive market)</div>
+                {strategy.contingenciesToConsiderWaiving.map((c, i) => (
+                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 5, fontSize: 12, color: "#2c2218" }}>
+                    <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#d4851a", flexShrink: 0 }} />{c}
+                  </div>
+                ))}
+              </>
+            )}
+          </div>
+
+          {/* Negotiation tips */}
+          <div style={{ background: "#fff", border: "1px solid #e8e0d4", borderRadius: 12, padding: "14px 16px" }}>
+            <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#1e5a8a", marginBottom: 8 }}>Negotiation Tips</div>
+            {strategy.negotiationTips.map((t, i) => (
+              <div key={i} style={{ display: "flex", gap: 10, marginBottom: 8, fontSize: 12, color: "#2c2218", lineHeight: 1.5 }}>
+                <span style={{ fontWeight: 700, color: "#c9a96e", flexShrink: 0 }}>{i + 1}.</span>{t}
+              </div>
+            ))}
+          </div>
+
+          {/* Hawaii warnings */}
+          {strategy.hawaiiSpecificWarnings.length > 0 && (
+            <div style={{ background: "#fef9ec", border: "1px solid #f5d87a", borderRadius: 12, padding: "14px 16px" }}>
+              <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#d4851a", marginBottom: 8, display: "flex", alignItems: "center", gap: 5 }}><AlertCircle size={11} />Hawaii-Specific Flags</div>
+              {strategy.hawaiiSpecificWarnings.map((w, i) => (
+                <div key={i} style={{ fontSize: 12, color: "#2c2218", marginBottom: 5, lineHeight: 1.5 }}>⚠️ {w}</div>
+              ))}
+            </div>
+          )}
+
+          <button className="crm-btn crm-btn-ghost" onClick={() => setStrategy(null)} style={{ fontSize: 12, display: "flex", alignItems: "center", gap: 5 }}>
+            <X size={12} />Clear & Analyze New Property
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Main Component ────────────────────────────────────────────────────
 const TABS = [
   { id: "mls", label: "MLS Listings", icon: <Building2 size={13} /> },
   { id: "openhouses", label: "Open Houses", icon: <Home size={13} /> },
   { id: "mlssearch", label: "MLS Search", icon: <Search size={13} /> },
+  { id: "offer", label: "Offer Strategy", icon: <Sparkles size={13} /> },
   { id: "portals", label: "Portals", icon: <Globe size={13} /> },
 ] as const;
 type TabId = typeof TABS[number]["id"];
@@ -328,6 +491,7 @@ export default function ListingsHubPage() {
       {tab === "mls" && <MLSTab />}
       {tab === "openhouses" && <OpenHousesTab />}
       {tab === "mlssearch" && <MLSSearchTab />}
+      {tab === "offer" && <OfferStrategyTab />}
       {tab === "portals" && <PortalsTab />}
     </div>
   );

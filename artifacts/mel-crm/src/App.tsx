@@ -24,9 +24,10 @@ import {
   ChevronRight, Search, X, AlertCircle, TrendingUp, Star, Filter,
   BarChart2, Building2, Megaphone, CheckCircle2, Circle, Target,
   ArrowRight, ExternalLink, RefreshCw, Menu, XCircle, Lock,
-  Instagram, FolderOpen, ListTodo, MessageSquare, Receipt
+  Instagram, FolderOpen, ListTodo, MessageSquare, Receipt,
+  FileText, Heart, Sparkles, Brain
 } from "lucide-react";
-import { api, type Lead, type Task, type Commission, type Stats } from "./lib/api";
+import { api, type Lead, type Task, type Commission, type Stats, type LeadDnaProfile } from "./lib/api";
 import SocialPage from "./pages/SocialPage";
 import CalendarPage from "./pages/CalendarPage";
 import TodosPage from "./pages/TodosPage";
@@ -34,6 +35,9 @@ import FilesPage from "./pages/FilesPage";
 import AIChatPage from "./pages/AIChatPage";
 import ListingsHubPage from "./pages/ListingsHubPage";
 import ExpensesPage from "./pages/ExpensesPage";
+import TransactionsPage from "./pages/TransactionsPage";
+import ForecastPage from "./pages/ForecastPage";
+import NurturePage from "./pages/NurturePage";
 
 // ─── BRAND ───────────────────────────────────────────────────────────
 const C = {
@@ -267,6 +271,10 @@ const NAV = [
   { href: "/todos", label: "Todos", icon: ListTodo },
   { href: "/files", label: "Files", icon: FolderOpen },
   { href: "/expenses", label: "Expenses", icon: Receipt },
+  { section: "Intelligence" },
+  { href: "/transactions", label: "Transactions", icon: FileText },
+  { href: "/forecast", label: "Forecast", icon: TrendingUp },
+  { href: "/nurture", label: "Nurture", icon: Heart },
   { href: "/ai-chat", label: "AI Chat", icon: MessageSquare },
   { section: "Account" },
   { href: "/settings", label: "Settings", icon: Settings },
@@ -666,11 +674,91 @@ function PipelinePage() {
   );
 }
 
+// ── Lead DNA Modal ────────────────────────────────────────────────────
+function LeadDnaModal({ lead, onClose }: { lead: Lead; onClose: () => void }) {
+  const qc = useQueryClient();
+  const [loading, setLoading] = useState(false);
+  const [profile, setProfile] = useState<LeadDnaProfile | null>(null);
+  const [error, setError] = useState("");
+
+  const analyze = async () => {
+    setLoading(true); setError("");
+    try {
+      const res = await api.analyzeLeadDna(lead);
+      setProfile(res.profile);
+      await api.saveLeadDna(lead.id, JSON.stringify(res.profile));
+      qc.invalidateQueries({ queryKey: ["leads"] });
+    } catch { setError("Couldn't analyze — try again in a moment"); }
+    setLoading(false);
+  };
+
+  const STYLE_COLORS: Record<string, string> = { Direct: "#c0392b", Analytical: "#1e5a8a", Relational: "#2a7a4a", Expressive: "#7a2a7a" };
+  const MOTIV_COLORS: Record<string, string> = { "Hot 🔥": "#c0392b", "Warm ☀️": "#d4851a", "Cool 🌊": "#1e5a8a", "Cold ❄️": "#7a6a5a" };
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      {!profile && !loading && (
+        <div style={{ textAlign: "center", padding: "20px 0" }}>
+          <Brain size={36} color="#c9a96e" style={{ marginBottom: 12 }} />
+          <div style={{ fontSize: 13, color: "#7a6a5a", marginBottom: 20, lineHeight: 1.6 }}>
+            AI will analyze {lead.name}'s profile — communication style, motivation level, key risks, and coaching tips for closing this deal.
+          </div>
+          <button className="crm-btn crm-btn-primary" onClick={analyze} style={{ display: "inline-flex", alignItems: "center", gap: 7 }}>
+            <Sparkles size={14} />Analyze Lead DNA
+          </button>
+          {error && <div style={{ marginTop: 10, color: "#c0392b", fontSize: 12 }}>{error}</div>}
+        </div>
+      )}
+      {loading && (
+        <div style={{ textAlign: "center", padding: "28px 0", color: "#a89880" }}>
+          <div style={{ marginBottom: 10 }}>🧬 Analyzing {lead.name}…</div>
+          <div style={{ fontSize: 12 }}>Reading communication style, motivation, and coaching insights</div>
+        </div>
+      )}
+      {profile && (
+        <>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+            <div style={{ background: "#f5f2ee", borderRadius: 10, padding: "12px 14px" }}>
+              <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#a89880", marginBottom: 5 }}>Communication Style</div>
+              <div style={{ fontSize: 16, fontWeight: 800, color: STYLE_COLORS[profile.communicationStyle] || "#2c2218" }}>{profile.communicationStyle}</div>
+            </div>
+            <div style={{ background: "#f5f2ee", borderRadius: 10, padding: "12px 14px" }}>
+              <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#a89880", marginBottom: 5 }}>Motivation Level</div>
+              <div style={{ fontSize: 16, fontWeight: 800, color: MOTIV_COLORS[profile.motivationLevel] || "#2c2218" }}>{profile.motivationLevel}</div>
+            </div>
+          </div>
+          {[
+            { label: "Primary Motivation", value: profile.primaryMotivation, color: "#2a7a4a" },
+            { label: "Key Risks / Objections", value: profile.keyRisks, color: "#c0392b" },
+            { label: "Recommended Approach", value: profile.recommendedApproach, color: "#1e5a8a" },
+            { label: "Best Contact Method", value: profile.bestContactMethod, color: "#7a2a7a" },
+          ].map(({ label, value, color }) => (
+            <div key={label} style={{ background: "#fff", border: "1px solid #e8e0d4", borderRadius: 10, padding: "12px 14px" }}>
+              <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#a89880", marginBottom: 6 }}>{label}</div>
+              <div style={{ fontSize: 13, color: "#2c2218", lineHeight: 1.55 }}>{value}</div>
+            </div>
+          ))}
+          <div style={{ background: "linear-gradient(135deg, #1a2c24, #2a4a34)", borderRadius: 12, padding: "14px 16px" }}>
+            <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#8aaa8a", marginBottom: 6 }}>Coaching Tip for Mel</div>
+            <div style={{ fontSize: 13, color: "#f0e8d8", lineHeight: 1.6 }}>{profile.coachingTip}</div>
+          </div>
+          <div style={{ display: "flex", justifyContent: "flex-end" }}>
+            <button className="crm-btn crm-btn-ghost" onClick={analyze} style={{ fontSize: 12, display: "flex", alignItems: "center", gap: 5 }}>
+              <Sparkles size={12} />Re-analyze
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 function PipelineRow({ lead, onStageChange }: { lead: Lead; onStageChange: (s: string) => void }) {
   const qc = useQueryClient();
   const toast = useToast();
   const [editing, setEditing] = useState(false);
   const [delConfirm, setDelConfirm] = useState(false);
+  const [showDna, setShowDna] = useState(false);
   const updateMut = useMutation({
     mutationFn: (data: Partial<Lead>) => api.updateLead(lead.id, data),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["leads"] }); setEditing(false); toast("Lead updated"); },
@@ -701,11 +789,13 @@ function PipelineRow({ lead, onStageChange }: { lead: Lead; onStageChange: (s: s
       </select>
       <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
         {lead.phone && <a href={`tel:${lead.phone}`} style={{ width: 30, height: 30, borderRadius: 6, border: "1px solid #e8e0d4", display: "flex", alignItems: "center", justifyContent: "center", textDecoration: "none" }}><Phone size={13} color="#2a6b4a" /></a>}
+        <button title="Lead DNA Analysis" style={{ width: 30, height: 30, borderRadius: 6, border: "1px solid #e8e0d4", background: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#c9a96e" }} onClick={() => setShowDna(true)}><Brain size={13} /></button>
         <button style={{ width: 30, height: 30, borderRadius: 6, border: "1px solid #e8e0d4", background: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#7a6a5a" }} onClick={() => setEditing(true)}><Edit3 size={13} /></button>
         <button style={{ width: 30, height: 30, borderRadius: 6, border: "1px solid #e8e0d4", background: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#c0392b" }} onClick={() => setDelConfirm(true)}><Trash2 size={13} /></button>
       </div>
     </div>
     <Modal open={editing} onClose={() => setEditing(false)} title="Edit Lead" width={580}><LeadForm lead={lead} onSave={data => updateMut.mutate(data)} onCancel={() => setEditing(false)} saving={updateMut.isPending} /></Modal>
+    <Modal open={showDna} onClose={() => setShowDna(false)} title={`Lead DNA — ${lead.name}`} width={500}><LeadDnaModal lead={lead} onClose={() => setShowDna(false)} /></Modal>
     <ConfirmDialog open={delConfirm} msg={`Delete ${lead.name}?`} onConfirm={() => deleteMut.mutate()} onCancel={() => setDelConfirm(false)} />
   </>);
 }
@@ -1182,6 +1272,9 @@ function ProtectedApp() {
       {loc.startsWith("/todos") && <TodosPage />}
       {loc.startsWith("/files") && <FilesPage />}
       {loc.startsWith("/expenses") && <ExpensesPage />}
+      {loc.startsWith("/transactions") && <TransactionsPage />}
+      {loc.startsWith("/forecast") && <ForecastPage />}
+      {loc.startsWith("/nurture") && <NurturePage />}
       {loc.startsWith("/ai-chat") && <AIChatPage />}
       {loc.startsWith("/settings") && <SettingsPage />}
     </Shell>

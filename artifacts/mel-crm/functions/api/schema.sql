@@ -80,3 +80,34 @@ CREATE TABLE IF NOT EXISTS crm_expenses (
 
 CREATE INDEX IF NOT EXISTS idx_expenses_date ON crm_expenses(date);
 CREATE INDEX IF NOT EXISTS idx_expenses_category ON crm_expenses(category);
+
+CREATE TABLE IF NOT EXISTS crm_transactions (
+  id TEXT PRIMARY KEY,
+  lead_id TEXT,
+  client_name TEXT NOT NULL,
+  property_address TEXT NOT NULL,
+  transaction_type TEXT DEFAULT 'buy',
+  status TEXT DEFAULT 'active',
+  list_price INTEGER DEFAULT 0,
+  sale_price INTEGER DEFAULT 0,
+  commission_rate REAL DEFAULT 3,
+  commission_amount INTEGER DEFAULT 0,
+  contract_date TEXT,
+  escrow_open_date TEXT,
+  inspection_deadline TEXT,
+  disclosure_deadline TEXT,
+  loan_contingency_date TEXT,
+  title_clear_date TEXT,
+  hoa_docs_date TEXT,
+  closing_date TEXT,
+  milestones TEXT DEFAULT '[]',
+  notes TEXT,
+  created_at TEXT NOT NULL,
+  FOREIGN KEY (lead_id) REFERENCES crm_leads(id) ON DELETE SET NULL
+);
+CREATE INDEX IF NOT EXISTS idx_transactions_status ON crm_transactions(status);
+CREATE INDEX IF NOT EXISTS idx_transactions_closing_date ON crm_transactions(closing_date);
+
+-- Lead DNA columns (ALTER TABLE at runtime if not present)
+-- ALTER TABLE crm_leads ADD COLUMN lead_dna TEXT;
+-- ALTER TABLE crm_leads ADD COLUMN lead_dna_updated TEXT;

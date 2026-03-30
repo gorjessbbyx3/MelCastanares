@@ -38,6 +38,8 @@ const dbToTodo = r => ({ id:r.id, title:r.title||"", category:r.category||"gener
 const dbToFile = r => ({ id:r.id, name:r.name||"", category:r.category||"other", url:r.url||"", notes:r.notes||"", size:r.size||"", createdAt:r.created_at||now() });
 const dbToIdea = r => ({ id:r.id, text:r.text||"", topic:r.topic||"", pinned:r.pinned===1||r.pinned===true, createdAt:r.created_at||now() });
 const dbToExpense = r => ({ id:r.id, date:r.date||"", category:r.category||"Other", vendor:r.vendor||"", description:r.description||"", amount:r.amount||0, receiptUrl:r.receipt_url||"", taxDeductible:r.tax_deductible===1||r.tax_deductible===true, notes:r.notes||"", createdAt:r.created_at||now() });
+const dbToTx = r => ({ id:r.id, leadId:r.lead_id||"", clientName:r.client_name||"", propertyAddress:r.property_address||"", transactionType:r.transaction_type||"buy", status:r.status||"active", listPrice:r.list_price||0, salePrice:r.sale_price||0, commissionRate:r.commission_rate||3, commissionAmount:r.commission_amount||0, contractDate:r.contract_date||"", escrowOpenDate:r.escrow_open_date||"", inspectionDeadline:r.inspection_deadline||"", disclosureDeadline:r.disclosure_deadline||"", loanContingencyDate:r.loan_contingency_date||"", titleClearDate:r.title_clear_date||"", hoaDocsDate:r.hoa_docs_date||"", closingDate:r.closing_date||"", milestones:typeof r.milestones==="string" ? JSON.parse(r.milestones||"[]") : (r.milestones||[]), notes:r.notes||"", createdAt:r.created_at||now() });
+const dbToLeadWithDna = r => ({ ...dbToLead(r), leadDna:r.lead_dna||"", leadDnaUpdated:r.lead_dna_updated||"" });
 
 // ── AI helpers ────────────────────────────────────────────────────────
 const AI_MODEL = "@cf/meta/llama-3.1-8b-instruct";
@@ -623,6 +625,123 @@ Keep responses concise, warm, and actionable. Use 'Mahalo' or Aloha where natura
     } catch (e) {
       return json({ openHouses: [], count: 0, error: "Could not load HI Central data", url: "https://www.hicentral.com/for-sale-oahu/homes/?open_house=1" });
     }
+  }
+
+  // ── TRANSACTIONS ──────────────────────────────────────────────────────
+  const BUY_MILESTONES = () => JSON.stringify([
+    {id:"droa",label:"DROA Signed",completed:false,date:""},
+    {id:"earnest",label:"Earnest Money Deposited",completed:false,date:""},
+    {id:"escrow",label:"Escrow Opened",completed:false,date:""},
+    {id:"inspection",label:"Home Inspection",completed:false,date:""},
+    {id:"disclosure",label:"Seller Disclosures Reviewed (SREC)",completed:false,date:""},
+    {id:"loan",label:"Loan Commitment Received",completed:false,date:""},
+    {id:"title",label:"Title Search Cleared",completed:false,date:""},
+    {id:"hoa",label:"HOA Docs Reviewed",completed:false,date:""},
+    {id:"walkthrough",label:"Final Walk-Through",completed:false,date:""},
+    {id:"closing",label:"Closing & Recording",completed:false,date:""},
+  ]);
+  const SELL_MILESTONES = () => JSON.stringify([
+    {id:"listing",label:"Listing Agreement Signed",completed:false,date:""},
+    {id:"photos",label:"Photos & Marketing Live",completed:false,date:""},
+    {id:"mls",label:"Listed on MLS",completed:false,date:""},
+    {id:"offer",label:"Offer Accepted",completed:false,date:""},
+    {id:"escrow",label:"Escrow Opened",completed:false,date:""},
+    {id:"inspection",label:"Inspection Completed",completed:false,date:""},
+    {id:"appraisal",label:"Appraisal Cleared",completed:false,date:""},
+    {id:"loan",label:"Buyer's Loan Approved",completed:false,date:""},
+    {id:"walkthrough",label:"Final Walk-Through",completed:false,date:""},
+    {id:"closing",label:"Closing & Recording",completed:false,date:""},
+  ]);
+
+  if (route === "/transactions" && method === "GET") {
+    if (!await auth(request, env)) return err("Unauthorized", 401);
+    if (env.DB) {
+      const { results } = await env.DB.prepare("SELECT * FROM crm_transactions ORDER BY created_at DESC").all();
+      return json(results.map(dbToTx));
+    }
+    return json(mem.transactions || []);
+  }
+  if (route === "/transactions" && method === "POST") {
+    if (!await auth(request, env)) return err("Unauthorized", 401);
+    const d = await request.json().catch(() => ({}));
+    if (!d.clientName || !d.propertyAddress) return err("clientName and propertyAddress required");
+    const id = uuid();
+    const milestones = d.milestones ? JSON.stringify(d.milestones) : (d.transactionType === "sell" ? SELL_MILESTONES() : BUY_MILESTONES());
+    const commAmt = d.commissionAmount || Math.round((d.salePrice||d.listPrice||0) * ((d.commissionRate||3)/100));
+    if (env.DB) {
+      await env.DB.prepare("INSERT INTO crm_transactions (id,lead_id,client_name,property_address,transaction_type,status,list_price,sale_price,commission_rate,commission_amount,contract_date,escrow_open_date,inspection_deadline,disclosure_deadline,loan_contingency_date,title_clear_date,hoa_docs_date,closing_date,milestones,notes,created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)").bind(id,d.leadId||null,d.clientName,d.propertyAddress,d.transactionType||"buy",d.status||"active",d.listPrice||0,d.salePrice||0,d.commissionRate||3,commAmt,d.contractDate||null,d.escrowOpenDate||null,d.inspectionDeadline||null,d.disclosureDeadline||null,d.loanContingencyDate||null,d.titleClearDate||null,d.hoaDocsDate||null,d.closingDate||null,milestones,d.notes||null,now()).run();
+      const r = await env.DB.prepare("SELECT * FROM crm_transactions WHERE id=?").bind(id).first();
+      return json(dbToTx(r), 201);
+    }
+    const tx = { id, lead_id:d.leadId||"", client_name:d.clientName, property_address:d.propertyAddress, transaction_type:d.transactionType||"buy", status:d.status||"active", list_price:d.listPrice||0, sale_price:d.salePrice||0, commission_rate:d.commissionRate||3, commission_amount:commAmt, milestones, notes:d.notes||"", created_at:now() };
+    if (!mem.transactions) mem.transactions = [];
+    mem.transactions.unshift(tx);
+    return json(dbToTx(tx), 201);
+  }
+  if (route.match(/^\/transactions\/[^/]+$/) && method === "PUT") {
+    if (!await auth(request, env)) return err("Unauthorized", 401);
+    const id = route.split("/")[2];
+    const d = await request.json().catch(() => ({}));
+    const milestonesVal = d.milestones !== undefined ? JSON.stringify(d.milestones) : undefined;
+    const commAmt = d.commissionAmount !== undefined ? d.commissionAmount : (d.salePrice !== undefined ? Math.round(d.salePrice * ((d.commissionRate||3)/100)) : undefined);
+    if (env.DB) {
+      const fields = []; const vals = [];
+      if (d.clientName !== undefined) { fields.push("client_name=?"); vals.push(d.clientName); }
+      if (d.propertyAddress !== undefined) { fields.push("property_address=?"); vals.push(d.propertyAddress); }
+      if (d.transactionType !== undefined) { fields.push("transaction_type=?"); vals.push(d.transactionType); }
+      if (d.status !== undefined) { fields.push("status=?"); vals.push(d.status); }
+      if (d.listPrice !== undefined) { fields.push("list_price=?"); vals.push(d.listPrice); }
+      if (d.salePrice !== undefined) { fields.push("sale_price=?"); vals.push(d.salePrice); }
+      if (d.commissionRate !== undefined) { fields.push("commission_rate=?"); vals.push(d.commissionRate); }
+      if (commAmt !== undefined) { fields.push("commission_amount=?"); vals.push(commAmt); }
+      if (d.contractDate !== undefined) { fields.push("contract_date=?"); vals.push(d.contractDate); }
+      if (d.escrowOpenDate !== undefined) { fields.push("escrow_open_date=?"); vals.push(d.escrowOpenDate); }
+      if (d.inspectionDeadline !== undefined) { fields.push("inspection_deadline=?"); vals.push(d.inspectionDeadline); }
+      if (d.disclosureDeadline !== undefined) { fields.push("disclosure_deadline=?"); vals.push(d.disclosureDeadline); }
+      if (d.loanContingencyDate !== undefined) { fields.push("loan_contingency_date=?"); vals.push(d.loanContingencyDate); }
+      if (d.titleClearDate !== undefined) { fields.push("title_clear_date=?"); vals.push(d.titleClearDate); }
+      if (d.hoaDocsDate !== undefined) { fields.push("hoa_docs_date=?"); vals.push(d.hoaDocsDate); }
+      if (d.closingDate !== undefined) { fields.push("closing_date=?"); vals.push(d.closingDate); }
+      if (milestonesVal !== undefined) { fields.push("milestones=?"); vals.push(milestonesVal); }
+      if (d.notes !== undefined) { fields.push("notes=?"); vals.push(d.notes); }
+      if (fields.length) { vals.push(id); await env.DB.prepare(`UPDATE crm_transactions SET ${fields.join(",")} WHERE id=?`).bind(...vals).run(); }
+      const r = await env.DB.prepare("SELECT * FROM crm_transactions WHERE id=?").bind(id).first();
+      return r ? json(dbToTx(r)) : err("Not found", 404);
+    }
+    return err("Not found", 404);
+  }
+  if (route.match(/^\/transactions\/[^/]+$/) && method === "DELETE") {
+    if (!await auth(request, env)) return err("Unauthorized", 401);
+    const id = route.split("/")[2];
+    if (env.DB) { await env.DB.prepare("DELETE FROM crm_transactions WHERE id=?").bind(id).run(); return json({ ok: true }); }
+    return json({ ok: true });
+  }
+
+  // ── LEAD DNA ──────────────────────────────────────────────────────────
+  if (route.match(/^\/leads\/[^/]+\/dna$/) && method === "PUT") {
+    if (!await auth(request, env)) return err("Unauthorized", 401);
+    const leadId = route.split("/")[2];
+    const { dna } = await request.json().catch(() => ({}));
+    if (!dna) return err("dna required");
+    if (env.DB) {
+      try { await env.DB.prepare("ALTER TABLE crm_leads ADD COLUMN lead_dna TEXT").run(); } catch {}
+      try { await env.DB.prepare("ALTER TABLE crm_leads ADD COLUMN lead_dna_updated TEXT").run(); } catch {}
+      await env.DB.prepare("UPDATE crm_leads SET lead_dna=?, lead_dna_updated=? WHERE id=?").bind(dna, now(), leadId).run();
+      const r = await env.DB.prepare("SELECT * FROM crm_leads WHERE id=?").bind(leadId).first();
+      return r ? json(dbToLeadWithDna(r)) : err("Not found", 404);
+    }
+    return json({ ok: true });
+  }
+  if (route.match(/^\/leads\/[^/]+$/) && method === "GET") {
+    if (!await auth(request, env)) return err("Unauthorized", 401);
+    const leadId = route.split("/")[2];
+    if (env.DB) {
+      try { await env.DB.prepare("ALTER TABLE crm_leads ADD COLUMN lead_dna TEXT").run(); } catch {}
+      try { await env.DB.prepare("ALTER TABLE crm_leads ADD COLUMN lead_dna_updated TEXT").run(); } catch {}
+      const r = await env.DB.prepare("SELECT * FROM crm_leads WHERE id=?").bind(leadId).first();
+      return r ? json(dbToLeadWithDna(r)) : err("Not found", 404);
+    }
+    return err("Not found", 404);
   }
 
   return err("Not found", 404);

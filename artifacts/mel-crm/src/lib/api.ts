@@ -49,6 +49,27 @@ export interface AIChatContext {
   activeLeads?: string; totalLeads?: number; activeLeadCount?: number;
   overdueTasks?: string; todayTasks?: string; events?: string; leads?: Lead[];
 }
+export interface Transaction {
+  id: string; leadId: string; clientName: string; propertyAddress: string;
+  transactionType: string; status: string; listPrice: number; salePrice: number;
+  commissionRate: number; commissionAmount: number;
+  contractDate: string; escrowOpenDate: string; inspectionDeadline: string;
+  disclosureDeadline: string; loanContingencyDate: string; titleClearDate: string;
+  hoaDocsDate: string; closingDate: string;
+  milestones: TxMilestone[]; notes: string; createdAt: string;
+}
+export interface TxMilestone { id: string; label: string; completed: boolean; date: string; }
+export interface LeadDnaProfile {
+  communicationStyle: string; motivationLevel: string; primaryMotivation: string;
+  keyRisks: string; recommendedApproach: string; bestContactMethod: string; coachingTip: string;
+}
+export interface OfferStrategy {
+  suggestedOfferRange: { low: number; mid: number; high: number };
+  offerStrategyNote: string; contingenciesRecommended: string[];
+  contingenciesToConsiderWaiving: string[]; negotiationTips: string[];
+  hawaiiSpecificWarnings: string[]; confidenceLevel: string;
+}
+export interface NurtureEmail { subject: string; body: string; }
 
 async function req<T>(method: string, path: string, body?: unknown): Promise<T> {
   const token = localStorage.getItem("crm_token");
@@ -138,7 +159,20 @@ export const api = {
   createContentIdea: (data: Partial<ContentIdea>) => req<ContentIdea>("POST", "/content-ideas", data),
   deleteContentIdea: (id: string) => req<void>("DELETE", `/content-ideas/${id}`),
 
+  // Transactions
+  getTransactions: () => req<Transaction[]>("GET", "/transactions"),
+  createTransaction: (data: Partial<Transaction>) => req<Transaction>("POST", "/transactions", data),
+  updateTransaction: (id: string, data: Partial<Transaction>) => req<Transaction>("PUT", `/transactions/${id}`, data),
+  deleteTransaction: (id: string) => req<void>("DELETE", `/transactions/${id}`),
+
+  // Lead DNA
+  getLeadWithDna: (id: string) => req<Lead & { leadDna: string; leadDnaUpdated: string }>("GET", `/leads/${id}`),
+  saveLeadDna: (id: string, dna: string) => req<Lead>("PUT", `/leads/${id}/dna`, { dna }),
+
   // AI — calls standalone Cloudflare Worker (mel-crm-ai) with Workers AI binding
   generateContent: (topic: string) => aiReq<{ ideas: string[] }>("/ai/content", { topic }),
   aiChat: (message: string, context: AIChatContext) => aiReq<{ message: string; action?: string; event?: Partial<CRMEvent> }>("/ai/chat", { message, context }),
+  analyzeLeadDna: (lead: Lead) => aiReq<{ profile: LeadDnaProfile }>("/ai/lead-dna", { lead }),
+  getOfferStrategy: (property: { address: string; listPrice: number; beds?: string; baths?: string; sqft?: string; daysOnMarket?: number; hoaFees?: number; ownership?: string; notes?: string }) => aiReq<{ strategy: OfferStrategy }>("/ai/offer-strategy", { property }),
+  generateNurtureDraft: (client: { name: string; address: string; closeDate: string; anniversary: string; daysUntil: number; salePrice?: number; notes?: string }) => aiReq<{ email: NurtureEmail }>("/ai/nurture-draft", { client }),
 };
