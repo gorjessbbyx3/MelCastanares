@@ -18,8 +18,9 @@ function devCrmApi(): Plugin {
   const now = () => new Date().toISOString();
   const today = () => new Date().toISOString().slice(0, 10);
   const uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
-  // Read password dynamically so changes to the env secret take effect without a restart
-  const getCrmPw = () => (mem as any).password || process.env.CRM_PASSWORD || "mel2024";
+  // Returns the active password, or null if none has been set (first-run mode)
+  const getCrmPw = (): string | null => (mem as any).password || process.env.CRM_PASSWORD || null;
+  const isPasswordSet = () => getCrmPw() !== null;
 
   function getAuth(req: any) {
     const hdr = req.headers["authorization"] || "";
@@ -65,10 +66,10 @@ function devCrmApi(): Plugin {
         if (method === "OPTIONS") { res.setHeader("Access-Control-Allow-Origin","*"); res.setHeader("Access-Control-Allow-Headers","Content-Type,Authorization"); res.statusCode=204; return res.end(); }
 
         // Auth: login
-        if (route === "/auth/login" && method === "POST") { const b = await body(req); if (b.password !== getCrmPw()) return errRes(res,"Incorrect password",401); const token = uid()+uid(); mem.sessions.push({ token, expires_at: new Date(Date.now()+30*86400000).toISOString() }); return jsonRes(res,{token}); }
+        if (route === "/auth/login" && method === "POST") { const b = await body(req); const pw = getCrmPw(); if (pw !== null && b.password !== pw) return errRes(res,"Incorrect password",401); const token = uid()+uid(); mem.sessions.push({ token, expires_at: new Date(Date.now()+30*86400000).toISOString() }); return jsonRes(res,{token, requiresPasswordSetup: !isPasswordSet()}); }
         if (route === "/auth/verify" && method === "GET") { return getAuth(req) ? jsonRes(res,{ok:true}) : errRes(res,"Unauthorized",401); }
         if (route === "/auth/logout" && method === "POST") { const hdr=(req.headers["authorization"]||"").replace("Bearer ","").trim(); mem.sessions=mem.sessions.filter(s=>s.token!==hdr); return jsonRes(res,{ok:true}); }
-        if (route === "/auth/password" && method === "POST") { const b=await body(req); if(b.currentPassword!==getCrmPw()) return errRes(res,"Current password is incorrect",401); if(!b.newPassword||b.newPassword.length<4) return errRes(res,"Password too short"); (mem as any).password=b.newPassword; return jsonRes(res,{ok:true}); }
+        if (route === "/auth/password" && method === "POST") { const b=await body(req); const pw=getCrmPw(); if(pw!==null && b.currentPassword!==pw) return errRes(res,"Current password is incorrect",401); if(!b.newPassword||b.newPassword.length<4) return errRes(res,"Password too short"); (mem as any).password=b.newPassword; return jsonRes(res,{ok:true}); }
 
         if (!getAuth(req)) return errRes(res,"Unauthorized",401);
 

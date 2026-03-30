@@ -191,14 +191,27 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 function LoginPage() {
   const [pw, setPw] = useState("");
   const [error, setError] = useState("");
+  const [firstRun, setFirstRun] = useState(false);
   const [, setLoc] = useLocation();
   const { authed } = useAuth();
+
+  // Probe whether a password has been set by sending a blank login
+  useEffect(() => {
+    api.login("").then(r => {
+      if (r.requiresPasswordSetup) setFirstRun(true);
+    }).catch(() => {});
+  }, []);
 
   const mut = useMutation({
     mutationFn: () => api.login(pw),
     onSuccess: (r) => {
       localStorage.setItem("crm_token", r.token);
-      window.location.href = import.meta.env.BASE_URL || "/";
+      if (r.requiresPasswordSetup) {
+        localStorage.setItem("crm_setup_pw", "1");
+        window.location.href = (import.meta.env.BASE_URL || "/").replace(/\/$/, "") + "/settings";
+      } else {
+        window.location.href = import.meta.env.BASE_URL || "/";
+      }
     },
     onError: () => { setError("Incorrect password. Please try again."); setPw(""); },
   });
@@ -215,12 +228,19 @@ function LoginPage() {
           <h1 style={{ fontFamily: "Cormorant Garamond, Georgia, serif", fontSize: 26, color: "#2c2218", margin: "0 0 4px" }}>Mel's CRM</h1>
           <p style={{ fontSize: 13, color: "#7a6a5a", margin: 0 }}>Dream Home Realty Hawai'i · Private Dashboard</p>
         </div>
-        <form onSubmit={e => { e.preventDefault(); if (pw) mut.mutate(); }}>
+        {firstRun && (
+          <div style={{ background: "#f0faf4", border: "1px solid #a8d5b5", borderRadius: 10, padding: "12px 14px", marginBottom: 16, fontSize: 13, color: "#1a5c33" }}>
+            No password set yet — click <strong>Sign In</strong> to get started and create your password.
+          </div>
+        )}
+        <form onSubmit={e => { e.preventDefault(); mut.mutate(); }}>
           <div style={{ marginBottom: 16 }}>
-            <input className="crm-input" type="password" placeholder="Enter password" value={pw} onChange={e => { setPw(e.target.value); setError(""); }} autoFocus />
+            {!firstRun && (
+              <input className="crm-input" type="password" placeholder="Enter password" value={pw} onChange={e => { setPw(e.target.value); setError(""); }} autoFocus />
+            )}
             {error && <p style={{ fontSize: 12, color: "#c0392b", marginTop: 6, marginBottom: 0 }}>{error}</p>}
           </div>
-          <button type="submit" className="crm-btn crm-btn-primary" style={{ width: "100%", justifyContent: "center" }} disabled={!pw || mut.isPending}>
+          <button type="submit" className="crm-btn crm-btn-primary" style={{ width: "100%", justifyContent: "center" }} disabled={(!firstRun && !pw) || mut.isPending}>
             {mut.isPending ? "Signing in…" : "Sign In"}
           </button>
         </form>
@@ -951,6 +971,7 @@ function SettingsPage() {
   const toast = useToast();
   const [pwForm, setPwForm] = useState({ current: "", next: "", confirm: "" });
   const [pwSaving, setPwSaving] = useState(false);
+  const isSetupMode = !!localStorage.getItem("crm_setup_pw");
 
   async function handleChangePassword(e: React.FormEvent) {
     e.preventDefault();
@@ -958,8 +979,9 @@ function SettingsPage() {
     if (pwForm.next.length < 4) { toast("Password must be at least 4 characters", "error"); return; }
     setPwSaving(true);
     try {
-      await api.changePassword(pwForm.current, pwForm.next);
-      toast("Password updated successfully");
+      await api.changePassword(isSetupMode ? null : pwForm.current, pwForm.next);
+      localStorage.removeItem("crm_setup_pw");
+      toast(isSetupMode ? "Password set! Your CRM is now secured." : "Password updated successfully");
       setPwForm({ current: "", next: "", confirm: "" });
     } catch (err: any) {
       toast(err.message || "Failed to update password", "error");
@@ -973,6 +995,16 @@ function SettingsPage() {
       <h1 className="section-title">Settings</h1>
       <p className="section-sub">CRM configuration</p>
       <div style={{ display: "flex", flexDirection: "column", gap: 16, maxWidth: 560 }}>
+        {isSetupMode && (
+          <div style={{ background: "#f0faf4", border: "1px solid #a8d5b5", borderRadius: 12, padding: "16px 18px", display: "flex", alignItems: "flex-start", gap: 12 }}>
+            <Lock size={18} color="#1a5c33" style={{ flexShrink: 0, marginTop: 1 }} />
+            <div>
+              <div style={{ fontWeight: 700, fontSize: 14, color: "#1a5c33", marginBottom: 3 }}>Welcome! Set your password</div>
+              <div style={{ fontSize: 13, color: "#2d7a4a" }}>Your CRM has no password yet. Fill in the form below to secure it — you'll use this password every time you log in.</div>
+            </div>
+          </div>
+        )}
+
         <div className="card" style={{ padding: 24 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
             <div style={{ width: 48, height: 48, borderRadius: 12, background: "#1a2c24", display: "flex", alignItems: "center", justifyContent: "center" }}><Home size={22} color="#c9a96e" /></div>
@@ -988,24 +1020,26 @@ function SettingsPage() {
         <div className="card" style={{ padding: 24 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
             <Lock size={16} color="#c9a96e" />
-            <div style={{ fontWeight: 600, fontSize: 14 }}>Change Password</div>
+            <div style={{ fontWeight: 600, fontSize: 14 }}>{isSetupMode ? "Set Password" : "Change Password"}</div>
           </div>
           <form onSubmit={handleChangePassword} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {!isSetupMode && (
+              <div>
+                <label style={{ fontSize: 12, fontWeight: 600, color: "#7a6a5a", display: "block", marginBottom: 5 }}>Current Password</label>
+                <input className="crm-input" type="password" value={pwForm.current} onChange={e => setPwForm(f => ({ ...f, current: e.target.value }))} placeholder="Enter current password" autoComplete="current-password" />
+              </div>
+            )}
             <div>
-              <label style={{ fontSize: 12, fontWeight: 600, color: "#7a6a5a", display: "block", marginBottom: 5 }}>Current Password</label>
-              <input className="crm-input" type="password" value={pwForm.current} onChange={e => setPwForm(f => ({ ...f, current: e.target.value }))} placeholder="Enter current password" autoComplete="current-password" />
+              <label style={{ fontSize: 12, fontWeight: 600, color: "#7a6a5a", display: "block", marginBottom: 5 }}>{isSetupMode ? "Password" : "New Password"}</label>
+              <input className="crm-input" type="password" value={pwForm.next} onChange={e => setPwForm(f => ({ ...f, next: e.target.value }))} placeholder="Choose a password (min 4 chars)" autoComplete="new-password" autoFocus={isSetupMode} />
             </div>
             <div>
-              <label style={{ fontSize: 12, fontWeight: 600, color: "#7a6a5a", display: "block", marginBottom: 5 }}>New Password</label>
-              <input className="crm-input" type="password" value={pwForm.next} onChange={e => setPwForm(f => ({ ...f, next: e.target.value }))} placeholder="Enter new password (min 4 chars)" autoComplete="new-password" />
-            </div>
-            <div>
-              <label style={{ fontSize: 12, fontWeight: 600, color: "#7a6a5a", display: "block", marginBottom: 5 }}>Confirm New Password</label>
-              <input className="crm-input" type="password" value={pwForm.confirm} onChange={e => setPwForm(f => ({ ...f, confirm: e.target.value }))} placeholder="Repeat new password" autoComplete="new-password" />
+              <label style={{ fontSize: 12, fontWeight: 600, color: "#7a6a5a", display: "block", marginBottom: 5 }}>Confirm Password</label>
+              <input className="crm-input" type="password" value={pwForm.confirm} onChange={e => setPwForm(f => ({ ...f, confirm: e.target.value }))} placeholder="Repeat password" autoComplete="new-password" />
             </div>
             <div style={{ display: "flex", justifyContent: "flex-end" }}>
-              <button className="crm-btn crm-btn-primary" type="submit" disabled={!pwForm.current || !pwForm.next || !pwForm.confirm || pwSaving}>
-                <Lock size={13} />{pwSaving ? "Updating…" : "Update Password"}
+              <button className="crm-btn crm-btn-primary" type="submit" disabled={(!isSetupMode && !pwForm.current) || !pwForm.next || !pwForm.confirm || pwSaving}>
+                <Lock size={13} />{pwSaving ? "Saving…" : isSetupMode ? "Set Password" : "Update Password"}
               </button>
             </div>
           </form>
@@ -1018,7 +1052,6 @@ function SettingsPage() {
               <li>D1 database <code style={{ background: "#f5efe7", padding: "1px 6px", borderRadius: 4, fontSize: 12 }}>mel-crm-db</code> → bind as <code style={{ background: "#f5efe7", padding: "1px 6px", borderRadius: 4, fontSize: 12 }}>DB</code></li>
               <li>R2 bucket <code style={{ background: "#f5efe7", padding: "1px 6px", borderRadius: 4, fontSize: 12 }}>mel-crm-files</code> → bind as <code style={{ background: "#f5efe7", padding: "1px 6px", borderRadius: 4, fontSize: 12 }}>FILES_BUCKET</code></li>
               <li>Workers AI → bind as <code style={{ background: "#f5efe7", padding: "1px 6px", borderRadius: 4, fontSize: 12 }}>AI</code></li>
-              <li>Env var <code style={{ background: "#f5efe7", padding: "1px 6px", borderRadius: 4, fontSize: 12 }}>CRM_PASSWORD</code> = initial login password</li>
             </ol>
           </div>
         </div>

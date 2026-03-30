@@ -53,10 +53,10 @@ async function req<T>(method: string, path: string, body?: unknown): Promise<T> 
 
 export const api = {
   // Auth
-  login: (password: string) => req<{ token: string }>("POST", "/auth/login", { password }),
+  login: (password: string) => req<{ token: string; requiresPasswordSetup?: boolean }>("POST", "/auth/login", { password }),
   logout: () => req("POST", "/auth/logout"),
   verify: () => req<{ ok: boolean }>("GET", "/auth/verify"),
-  changePassword: (currentPassword: string, newPassword: string) =>
+  changePassword: (currentPassword: string | null, newPassword: string) =>
     req<{ ok: boolean }>("POST", "/auth/password", { currentPassword, newPassword }),
 
   // Core CRM

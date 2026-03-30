@@ -18,6 +18,7 @@ async function auth(request, env) {
   return mem.sessions.some(s => s.token === token && s.expires_at > now());
 }
 
+// Returns the configured password, or null if none has ever been set (first-run mode)
 async function getPassword(env) {
   if (env.DB) {
     const r = await env.DB.prepare("SELECT value FROM crm_settings WHERE key='password'").first().catch(() => null);
@@ -25,7 +26,7 @@ async function getPassword(env) {
   } else if (mem.settings.password) {
     return mem.settings.password;
   }
-  return env.CRM_PASSWORD || "mel2024";
+  return env.CRM_PASSWORD || null;
 }
 
 // ── Mappers ──────────────────────────────────────────────────────────
@@ -77,12 +78,12 @@ export async function onRequest(ctx) {
   if (route === "/auth/login" && method === "POST") {
     const { password } = await request.json().catch(() => ({}));
     const correctPw = await getPassword(env);
-    if (password !== correctPw) return err("Incorrect password", 401);
+    if (correctPw !== null && password !== correctPw) return err("Incorrect password", 401);
     const token = uuid() + uuid();
     const expires = new Date(Date.now() + 30 * 86400000).toISOString();
     if (env.DB) await env.DB.prepare("INSERT INTO crm_sessions (id,token,expires_at) VALUES (?,?,?)").bind(uuid(), token, expires).run();
     else mem.sessions.push({ token, expires_at: expires });
-    return json({ token });
+    return json({ token, requiresPasswordSetup: correctPw === null });
   }
   if (route === "/auth/verify" && method === "GET") { return (await auth(request, env)) ? json({ ok: true }) : err("Unauthorized", 401); }
   if (route === "/auth/logout" && method === "POST") {
@@ -98,7 +99,7 @@ export async function onRequest(ctx) {
     const { currentPassword, newPassword } = await request.json().catch(() => ({}));
     if (!newPassword || newPassword.length < 4) return err("New password must be at least 4 characters");
     const correctPw = await getPassword(env);
-    if (currentPassword !== correctPw) return err("Current password is incorrect", 401);
+    if (correctPw !== null && currentPassword !== correctPw) return err("Current password is incorrect", 401);
     if (env.DB) {
       await env.DB.prepare("CREATE TABLE IF NOT EXISTS crm_settings (key TEXT PRIMARY KEY, value TEXT NOT NULL)").run().catch(() => {});
       await env.DB.prepare("INSERT OR REPLACE INTO crm_settings (key, value) VALUES ('password', ?)").bind(newPassword).run();
