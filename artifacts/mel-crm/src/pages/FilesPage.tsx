@@ -386,7 +386,36 @@ export default function FilesPage() {
       </div>
 
       {tab === "files" && <R2FileManager />}
-      {tab === "links" && <LinkManager />}
+      {tab === "links" && (
+        <>
+          {/* ── Pinned Resource Shortcuts ── */}
+          <div style={{ marginBottom: 20 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#a89880", marginBottom: 10 }}>Pinned Resources</div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+              {[
+                { name: "HI Central – MLS Forms & Docs", url: "https://members.hicentral.com/index.php/mls-forms-docs", color: "#c0392b", bg: "#fde8e5", desc: "Forms, contracts & MLS documentation" },
+                { name: "HI Central – Member Portal", url: "https://members.hicentral.com", color: "#c0392b", bg: "#fde8e5", desc: "HI Central member login & resources" },
+              ].map(r => (
+                <a key={r.name} href={r.url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none", flex: "1 1 260px", maxWidth: 380 }}>
+                  <div style={{ background: "#fff", border: "1px solid #e8e0d4", borderRadius: 10, padding: "12px 16px", display: "flex", alignItems: "center", gap: 12, transition: "box-shadow 0.15s" }}
+                    onMouseEnter={e => (e.currentTarget as HTMLDivElement).style.boxShadow = "0 3px 14px rgba(0,0,0,0.09)"}
+                    onMouseLeave={e => (e.currentTarget as HTMLDivElement).style.boxShadow = ""}>
+                    <div style={{ width: 34, height: 34, borderRadius: 8, background: r.bg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <Link2 size={15} color={r.color} />
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 700, fontSize: 13, color: "#2c2218", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{r.name}</div>
+                      <div style={{ fontSize: 11, color: "#7a6a5a" }}>{r.desc}</div>
+                    </div>
+                    <ExternalLink size={12} color="#a89880" style={{ flexShrink: 0 }} />
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
+          <LinkManager />
+        </>
+      )}
     </div>
   );
 }

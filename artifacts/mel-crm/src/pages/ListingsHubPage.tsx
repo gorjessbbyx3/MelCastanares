@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Building2, Calendar, Globe, RefreshCw, ExternalLink, BedDouble, Bath, Maximize2, MapPin, Home } from "lucide-react";
+import { Building2, Calendar, Globe, RefreshCw, ExternalLink, BedDouble, Bath, Maximize2, MapPin, Home, Search } from "lucide-react";
 import { api, type CRMEvent } from "../lib/api";
 
 // ── Helpers ───────────────────────────────────────────────────────────
@@ -198,12 +198,33 @@ function OpenHousesTab() {
   );
 }
 
+// ── MMSI MLS Search Tab ───────────────────────────────────────────────
+function MLSSearchTab() {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+      <div style={{ fontSize: 12, color: "#7a6a5a", marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>
+        <Globe size={13} color="#c9a96e" />
+        Honolulu MLS Search — powered by MMSI
+        <a href="https://mdweb.mmsi2.com/honoluluss/" target="_blank" rel="noopener noreferrer" style={{ marginLeft: "auto", fontSize: 11, color: "#2a6b4a", display: "flex", alignItems: "center", gap: 4, textDecoration: "none" }}>
+          Open in new tab <ExternalLink size={11} />
+        </a>
+      </div>
+      <iframe
+        src="https://mdweb.mmsi2.com/honoluluss/"
+        title="MMSI MLS Search"
+        style={{ width: "100%", height: "calc(100vh - 260px)", minHeight: 520, border: "1px solid #e8e0d4", borderRadius: 12, background: "#f9f6f1" }}
+        allow="fullscreen"
+      />
+    </div>
+  );
+}
+
 // ── External Portals Tab ──────────────────────────────────────────────
 const PORTALS = [
   {
-    name: "AppFolio",
-    desc: "Property management — leases, maintenance, owner reports",
-    url: "https://www.appfolio.com/login",
+    name: "MMSI MLS Search",
+    desc: "Honolulu MLS property search & client portal",
+    url: "https://mdweb.mmsi2.com/honoluluss/",
     color: "#1e5a8a",
     bg: "#dbeafe",
   },
@@ -282,6 +303,7 @@ function PortalsTab() {
 const TABS = [
   { id: "mls", label: "MLS Listings", icon: <Building2 size={13} /> },
   { id: "openhouses", label: "Open Houses", icon: <Home size={13} /> },
+  { id: "mlssearch", label: "MLS Search", icon: <Search size={13} /> },
   { id: "portals", label: "Portals", icon: <Globe size={13} /> },
 ] as const;
 type TabId = typeof TABS[number]["id"];
@@ -305,6 +327,7 @@ export default function ListingsHubPage() {
 
       {tab === "mls" && <MLSTab />}
       {tab === "openhouses" && <OpenHousesTab />}
+      {tab === "mlssearch" && <MLSSearchTab />}
       {tab === "portals" && <PortalsTab />}
     </div>
   );
