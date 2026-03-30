@@ -191,16 +191,8 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 function LoginPage() {
   const [pw, setPw] = useState("");
   const [error, setError] = useState("");
-  const [firstRun, setFirstRun] = useState(false);
   const [, setLoc] = useLocation();
   const { authed } = useAuth();
-
-  // Probe whether a password has been set by sending a blank login
-  useEffect(() => {
-    api.login("").then(r => {
-      if (r.requiresPasswordSetup) setFirstRun(true);
-    }).catch(() => {});
-  }, []);
 
   const mut = useMutation({
     mutationFn: () => api.login(pw),
@@ -228,23 +220,17 @@ function LoginPage() {
           <h1 style={{ fontFamily: "Cormorant Garamond, Georgia, serif", fontSize: 26, color: "#2c2218", margin: "0 0 4px" }}>Mel's CRM</h1>
           <p style={{ fontSize: 13, color: "#7a6a5a", margin: 0 }}>Dream Home Realty Hawai'i · Private Dashboard</p>
         </div>
-        {firstRun && (
-          <div style={{ background: "#f0faf4", border: "1px solid #a8d5b5", borderRadius: 10, padding: "12px 14px", marginBottom: 16, fontSize: 13, color: "#1a5c33" }}>
-            No password set yet — click <strong>Sign In</strong> to get started and create your password.
-          </div>
-        )}
         <form onSubmit={e => { e.preventDefault(); mut.mutate(); }}>
           <div style={{ marginBottom: 16 }}>
-            {!firstRun && (
-              <input className="crm-input" type="password" placeholder="Enter password" value={pw} onChange={e => { setPw(e.target.value); setError(""); }} autoFocus />
-            )}
+            <input className="crm-input" type="password" placeholder="Enter password (leave blank if first time)" value={pw} onChange={e => { setPw(e.target.value); setError(""); }} autoFocus />
             {error && <p style={{ fontSize: 12, color: "#c0392b", marginTop: 6, marginBottom: 0 }}>{error}</p>}
           </div>
-          <button type="submit" className="crm-btn crm-btn-primary" style={{ width: "100%", justifyContent: "center" }} disabled={(!firstRun && !pw) || mut.isPending}>
+          <button type="submit" className="crm-btn crm-btn-primary" style={{ width: "100%", justifyContent: "center" }} disabled={mut.isPending}>
             {mut.isPending ? "Signing in…" : "Sign In"}
           </button>
         </form>
-        <p style={{ textAlign: "center", fontSize: 11, color: "#a89880", marginTop: 24, marginBottom: 0 }}>melcastanares.techsavvyhawaii.com · RS-84753</p>
+        <p style={{ textAlign: "center", fontSize: 11, color: "#a89880", marginTop: 20, marginBottom: 0 }}>First time? Leave the field blank and click Sign In to set your password.</p>
+        <p style={{ textAlign: "center", fontSize: 11, color: "#a89880", marginTop: 8, marginBottom: 0 }}>melcastanares.techsavvyhawaii.com · RS-84753</p>
       </div>
     </div>
   );
