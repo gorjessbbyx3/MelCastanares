@@ -5,33 +5,7 @@ import {
   TrendingDown, FileText, Filter, Download, Edit3, X, Check,
   Camera, Link as LinkIcon,
 } from "lucide-react";
-
-const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") || "";
-const API = `${BASE}/api`;
-
-async function req<T>(method: string, path: string, body?: unknown): Promise<T> {
-  const token = localStorage.getItem("crm_token");
-  const res = await fetch(`${API}${path}`, {
-    method,
-    headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  if (!res.ok) { const e = await res.json().catch(() => ({ error: "Request failed" })); throw new Error(e.error || "Request failed"); }
-  return res.json();
-}
-
-export interface Expense {
-  id: string;
-  date: string;
-  category: string;
-  vendor: string;
-  description: string;
-  amount: number;
-  receiptUrl: string;
-  taxDeductible: boolean;
-  notes: string;
-  createdAt: string;
-}
+import { api, type Expense } from "../lib/api";
 
 const CATEGORIES = [
   "Marketing & Advertising", "MLS & Board Fees", "Office Supplies",
@@ -93,16 +67,16 @@ export default function ExpensesPage() {
   const fileRef = useRef<HTMLInputElement>(null);
 
   const { data: expenses = [], isLoading } = useQuery<Expense[]>({
-    queryKey: ["expenses"], queryFn: () => req("GET", "/expenses"),
+    queryKey: ["expenses"], queryFn: api.getExpenses,
   });
   const { data: r2Status } = useQuery<{ available: boolean }>({
-    queryKey: ["r2-status"], queryFn: () => req("GET", "/r2/status"),
+    queryKey: ["r2-status"], queryFn: api.r2Status,
   });
   const canUpload = r2Status?.available ?? false;
 
-  const createMut = useMutation({ mutationFn: (d: Partial<Expense>) => req("POST", "/expenses", d), onSuccess: () => { qc.invalidateQueries({ queryKey: ["expenses"] }); resetForm(); } });
-  const updateMut = useMutation({ mutationFn: ({ id, d }: { id: string; d: Partial<Expense> }) => req("PUT", `/expenses/${id}`, d), onSuccess: () => { qc.invalidateQueries({ queryKey: ["expenses"] }); resetForm(); } });
-  const deleteMut = useMutation({ mutationFn: (id: string) => req("DELETE", `/expenses/${id}`), onSuccess: () => { qc.invalidateQueries({ queryKey: ["expenses"] }); setDeleteId(null); } });
+  const createMut = useMutation({ mutationFn: (d: Partial<Expense>) => api.createExpense(d), onSuccess: () => { qc.invalidateQueries({ queryKey: ["expenses"] }); resetForm(); } });
+  const updateMut = useMutation({ mutationFn: ({ id, d }: { id: string; d: Partial<Expense> }) => api.updateExpense(id, d), onSuccess: () => { qc.invalidateQueries({ queryKey: ["expenses"] }); resetForm(); } });
+  const deleteMut = useMutation({ mutationFn: (id: string) => api.deleteExpense(id), onSuccess: () => { qc.invalidateQueries({ queryKey: ["expenses"] }); setDeleteId(null); } });
 
   function resetForm() { setForm(EMPTY); setEditId(null); setShowForm(false); setUrlMode(false); }
   function openEdit(e: Expense) { setForm(e); setEditId(e.id); setShowForm(true); }
@@ -111,11 +85,7 @@ export default function ExpensesPage() {
   async function handleUpload(file: File) {
     setUploading(true);
     try {
-      const token = localStorage.getItem("crm_token");
-      const fd = new FormData(); fd.append("file", file);
-      const res = await fetch(`${API}/expenses/upload`, { method: "POST", headers: token ? { Authorization: `Bearer ${token}` } : {}, body: fd });
-      if (!res.ok) throw new Error("Upload failed");
-      const { url } = await res.json();
+      const { url } = await api.uploadReceipt(file);
       setF("receiptUrl", url);
     } catch { alert("Receipt upload failed. You can paste a URL instead."); setUrlMode(true); }
     finally { setUploading(false); }

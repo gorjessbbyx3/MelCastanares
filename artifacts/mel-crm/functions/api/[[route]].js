@@ -659,7 +659,7 @@ Keep responses concise, warm, and actionable. Use 'Mahalo' or Aloha where natura
       const { results } = await env.DB.prepare("SELECT * FROM crm_transactions ORDER BY created_at DESC").all();
       return json(results.map(dbToTx));
     }
-    return json(mem.transactions || []);
+    return json((mem.transactions || []).map(dbToTx));
   }
   if (route === "/transactions" && method === "POST") {
     if (!await auth(request, env)) return err("Unauthorized", 401);
@@ -708,7 +708,31 @@ Keep responses concise, warm, and actionable. Use 'Mahalo' or Aloha where natura
       const r = await env.DB.prepare("SELECT * FROM crm_transactions WHERE id=?").bind(id).first();
       return r ? json(dbToTx(r)) : err("Not found", 404);
     }
-    return err("Not found", 404);
+    if (!mem.transactions) return err("Not found", 404);
+    const tidx = mem.transactions.findIndex(t => t.id === id);
+    if (tidx < 0) return err("Not found", 404);
+    const t = mem.transactions[tidx];
+    const milestonesVal = d.milestones !== undefined ? JSON.stringify(d.milestones) : undefined;
+    const commAmt = d.commissionAmount !== undefined ? d.commissionAmount : (d.salePrice !== undefined ? Math.round(d.salePrice * ((d.commissionRate || t.commission_rate || 3) / 100)) : undefined);
+    if (d.clientName !== undefined) t.client_name = d.clientName;
+    if (d.propertyAddress !== undefined) t.property_address = d.propertyAddress;
+    if (d.transactionType !== undefined) t.transaction_type = d.transactionType;
+    if (d.status !== undefined) t.status = d.status;
+    if (d.listPrice !== undefined) t.list_price = d.listPrice;
+    if (d.salePrice !== undefined) t.sale_price = d.salePrice;
+    if (d.commissionRate !== undefined) t.commission_rate = d.commissionRate;
+    if (commAmt !== undefined) t.commission_amount = commAmt;
+    if (d.contractDate !== undefined) t.contract_date = d.contractDate;
+    if (d.escrowOpenDate !== undefined) t.escrow_open_date = d.escrowOpenDate;
+    if (d.inspectionDeadline !== undefined) t.inspection_deadline = d.inspectionDeadline;
+    if (d.disclosureDeadline !== undefined) t.disclosure_deadline = d.disclosureDeadline;
+    if (d.loanContingencyDate !== undefined) t.loan_contingency_date = d.loanContingencyDate;
+    if (d.titleClearDate !== undefined) t.title_clear_date = d.titleClearDate;
+    if (d.hoaDocsDate !== undefined) t.hoa_docs_date = d.hoaDocsDate;
+    if (d.closingDate !== undefined) t.closing_date = d.closingDate;
+    if (milestonesVal !== undefined) t.milestones = milestonesVal;
+    if (d.notes !== undefined) t.notes = d.notes;
+    return json(dbToTx(t));
   }
   if (route.match(/^\/transactions\/[^/]+$/) && method === "DELETE") {
     if (!await auth(request, env)) return err("Unauthorized", 401);
@@ -741,7 +765,8 @@ Keep responses concise, warm, and actionable. Use 'Mahalo' or Aloha where natura
       const r = await env.DB.prepare("SELECT * FROM crm_leads WHERE id=?").bind(leadId).first();
       return r ? json(dbToLeadWithDna(r)) : err("Not found", 404);
     }
-    return err("Not found", 404);
+    const memLead = mem.leads.find(l => l.id === leadId);
+    return memLead ? json(dbToLeadWithDna(memLead)) : err("Not found", 404);
   }
 
   return err("Not found", 404);

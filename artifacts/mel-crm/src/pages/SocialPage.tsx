@@ -105,6 +105,7 @@ export default function SocialPage() {
           <Instagram size={22} color="#c9a96e" /> Social & Content
         </h1>
         <p className="section-sub">@mel.castanares · Instagram analytics + AI content generator</p>
+        <p style={{ fontSize: 11, color: "#a89880", marginTop: 4 }}>Analytics snapshot · last updated Mar 2026 — connect Instagram Graph API to refresh live data</p>
       </div>
 
       {/* Stats Row */}

@@ -70,6 +70,10 @@ export interface OfferStrategy {
   hawaiiSpecificWarnings: string[]; confidenceLevel: string;
 }
 export interface NurtureEmail { subject: string; body: string; }
+export interface Expense {
+  id: string; date: string; category: string; vendor: string; description: string;
+  amount: number; receiptUrl: string; taxDeductible: boolean; notes: string; createdAt: string;
+}
 
 async function req<T>(method: string, path: string, body?: unknown): Promise<T> {
   const token = localStorage.getItem("crm_token");
@@ -158,6 +162,24 @@ export const api = {
   getContentIdeas: () => req<ContentIdea[]>("GET", "/content-ideas"),
   createContentIdea: (data: Partial<ContentIdea>) => req<ContentIdea>("POST", "/content-ideas", data),
   deleteContentIdea: (id: string) => req<void>("DELETE", `/content-ideas/${id}`),
+
+  // Expenses
+  getExpenses: () => req<Expense[]>("GET", "/expenses"),
+  createExpense: (data: Partial<Expense>) => req<Expense>("POST", "/expenses", data),
+  updateExpense: (id: string, data: Partial<Expense>) => req<Expense>("PUT", `/expenses/${id}`, data),
+  deleteExpense: (id: string) => req<void>("DELETE", `/expenses/${id}`),
+  uploadReceipt: async (file: File): Promise<{ url: string; key: string }> => {
+    const token = localStorage.getItem("crm_token");
+    const form = new FormData();
+    form.append("file", file);
+    const res = await fetch(`${API}/expenses/upload`, {
+      method: "POST",
+      headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      body: form,
+    });
+    if (!res.ok) throw new Error("Upload failed");
+    return res.json();
+  },
 
   // Transactions
   getTransactions: () => req<Transaction[]>("GET", "/transactions"),
