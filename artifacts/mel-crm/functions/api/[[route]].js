@@ -5,7 +5,7 @@ function uuid() { return crypto.randomUUID ? crypto.randomUUID() : Math.random()
 function now() { return new Date().toISOString(); }
 function today() { return new Date().toISOString().slice(0, 10); }
 
-const mem = { sessions: [], leads: [], tasks: [], commissions: [], events: [], todos: [], files: [], contentIdeas: [], expenses: [], settings: {} };
+const mem = { sessions: [], leads: [], tasks: [], commissions: [], events: [], todos: [], files: [], contentIdeas: [], expenses: [], settings: {}, igCache: null };
 
 function cors(h = {}) { return new Headers({ "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS", "Access-Control-Allow-Headers": "Content-Type,Authorization", ...h }); }
 function json(data, status = 200) { return new Response(JSON.stringify(data), { status, headers: cors({ "Content-Type": "application/json" }) }); }
@@ -767,6 +767,103 @@ Keep responses concise, warm, and actionable. Use 'Mahalo' or Aloha where natura
     }
     const memLead = mem.leads.find(l => l.id === leadId);
     return memLead ? json(dbToLeadWithDna(memLead)) : err("Not found", 404);
+  }
+
+  // ── Instagram public profile scrape ──────────────────────────────────
+  if (route === "/instagram/stats" && method === "GET") {
+    const CACHE_TTL_MS = 6 * 60 * 60 * 1000; // 6 hours
+    const IG_HANDLE = "mel.castanares";
+
+    // Serve from in-memory cache if fresh
+    if (mem.igCache && Date.now() - mem.igCache.ts < CACHE_TTL_MS) {
+      return json({ ...mem.igCache.data, cached: true });
+    }
+
+    try {
+      const res = await fetch(`https://www.instagram.com/${IG_HANDLE}/`, {
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+          "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+          "Accept-Language": "en-US,en;q=0.9",
+          "Sec-Fetch-Dest": "document",
+          "Sec-Fetch-Mode": "navigate",
+          "Sec-Fetch-Site": "none",
+          "Cache-Control": "max-age=0",
+        },
+        signal: AbortSignal.timeout(10000),
+      });
+
+      if (!res.ok) throw new Error(`Instagram returned ${res.status}`);
+      const html = await res.text();
+
+      let data = null;
+
+      // Current structure: JSON in <script type="application/json" data-sjs>
+      const ssjsBlocks = [...html.matchAll(/<script[^>]+type="application\/json"[^>]*data-sjs[^>]*>([\s\S]*?)<\/script>/g)];
+      for (const block of ssjsBlocks) {
+        try {
+          const str = block[1];
+          const followersM = str.match(/"edge_followed_by":\{"count":(\d+)\}/);
+          if (!followersM) continue;
+          const followingM = str.match(/"edge_follow":\{"count":(\d+)\}/);
+          const postsM = str.match(/"edge_owner_to_timeline_media":\{"count":(\d+)/);
+          const bioM = str.match(/"biography":"((?:[^"\\]|\\.)*)"/);
+          const fullNameM = str.match(/"full_name":"((?:[^"\\]|\\.)*)"/);
+          const picM = str.match(/"profile_pic_url_hd":"((?:[^"\\]|\\.)*)"/);
+          const likesAll = [...str.matchAll(/"edge_liked_by":\{"count":(\d+)\}/g)].map(m => parseInt(m[1]));
+          const commAll = [...str.matchAll(/"edge_media_to_comment":\{"count":(\d+)\}/g)].map(m => parseInt(m[1]));
+          const avgLikes = likesAll.length ? Math.round(likesAll.reduce((a, b) => a + b, 0) / likesAll.length) : null;
+          const avgComments = commAll.length ? Math.round(commAll.reduce((a, b) => a + b, 0) / commAll.length * 10) / 10 : null;
+          const followers = parseInt(followersM[1]);
+          data = {
+            followers,
+            following: followingM ? parseInt(followingM[1]) : null,
+            posts: postsM ? parseInt(postsM[1]) : null,
+            bio: bioM ? bioM[1].replace(/\\n/g, " ").replace(/\\u0026/g, "&") : "",
+            fullName: fullNameM ? fullNameM[1] : "",
+            profilePic: picM ? picM[1].replace(/\\\//g, "/") : "",
+            avgLikes,
+            avgComments,
+            engagement: avgLikes ? ((avgLikes / followers) * 100).toFixed(2) + "%" : null,
+            fetchedAt: now(),
+            source: "live",
+          };
+          break;
+        } catch {}
+      }
+
+      // Fallback: legacy window._sharedData
+      if (!data) {
+        const sharedMatch = html.match(/window\._sharedData\s*=\s*(\{[\s\S]*?\});<\/script>/);
+        if (sharedMatch) {
+          try {
+            const parsed = JSON.parse(sharedMatch[1]);
+            const user = parsed?.entry_data?.ProfilePage?.[0]?.graphql?.user;
+            if (user) {
+              data = {
+                followers: user.edge_followed_by?.count ?? null,
+                following: user.edge_follow?.count ?? null,
+                posts: user.edge_owner_to_timeline_media?.count ?? null,
+                bio: user.biography || "",
+                fullName: user.full_name || "",
+                profilePic: user.profile_pic_url_hd || "",
+                avgLikes: null, avgComments: null, engagement: null,
+                fetchedAt: now(),
+                source: "live",
+              };
+            }
+          } catch {}
+        }
+      }
+
+      if (data) {
+        mem.igCache = { ts: Date.now(), data };
+        return json({ ...data, cached: false });
+      }
+      throw new Error("Could not parse Instagram profile data");
+    } catch (e) {
+      return json({ error: String(e.message), source: "error" }, 502);
+    }
   }
 
   return err("Not found", 404);

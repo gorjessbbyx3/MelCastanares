@@ -2,11 +2,11 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Star, Sparkles, Pin, Trash2, TrendingUp, Hash, Clock, Users,
-  Heart, MessageCircle, BarChart2, RefreshCw, Copy, CheckCircle2, Instagram
+  Heart, MessageCircle, BarChart2, RefreshCw, Copy, CheckCircle2, Instagram, AlertCircle
 } from "lucide-react";
 import { api, type ContentIdea } from "../lib/api";
 
-const INSTAGRAM_STATS = {
+const SNAPSHOT = {
   followers: 319,
   uploads: 39,
   avgLikes: 115,
@@ -69,6 +69,24 @@ export default function SocialPage() {
   const [generating, setGenerating] = useState(false);
   const [aiError, setAiError] = useState("");
 
+  const { data: igLive, isLoading: igLoading, refetch: igRefetch } = useQuery({
+    queryKey: ["ig-stats"],
+    queryFn: api.getInstagramStats,
+    staleTime: 6 * 60 * 60 * 1000, // treat as fresh for 6h
+    retry: false,
+  });
+
+  // Merge live data over snapshot — fall back to snapshot values when live is unavailable
+  const igStats = {
+    followers: igLive?.followers ?? SNAPSHOT.followers,
+    uploads: igLive?.posts ?? SNAPSHOT.uploads,
+    avgLikes: igLive?.avgLikes ?? SNAPSHOT.avgLikes,
+    avgComments: igLive?.avgComments ?? SNAPSHOT.avgComments,
+    engagement: igLive?.engagement ?? SNAPSHOT.engagement,
+  };
+  const igSource = igLive?.source === "live" ? (igLive.cached ? "cached" : "live") : "snapshot";
+  const igFetchedAt = igLive?.fetchedAt ? new Date(igLive.fetchedAt).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) : "Mar 2026";
+
   const { data: pinned = [] } = useQuery<ContentIdea[]>({ queryKey: ["content-ideas"], queryFn: api.getContentIdeas });
 
   const pinMut = useMutation({
@@ -105,18 +123,29 @@ export default function SocialPage() {
           <Instagram size={22} color="#c9a96e" /> Social & Content
         </h1>
         <p className="section-sub">@mel.castanares · Instagram analytics + AI content generator</p>
-        <p style={{ fontSize: 11, color: "#a89880", marginTop: 4 }}>Analytics snapshot · last updated Mar 2026 — connect Instagram Graph API to refresh live data</p>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 4 }}>
+          {igLoading ? (
+            <span style={{ fontSize: 11, color: "#a89880" }}>Fetching live stats…</span>
+          ) : igSource === "live" ? (
+            <span style={{ fontSize: 11, color: "#2a7a4a" }}>● Live · fetched {igFetchedAt}</span>
+          ) : igSource === "cached" ? (
+            <span style={{ fontSize: 11, color: "#c9a96e" }}>● Cached · fetched {igFetchedAt}</span>
+          ) : (
+            <span style={{ fontSize: 11, color: "#a89880", display: "flex", alignItems: "center", gap: 4 }}><AlertCircle size={11} /> Snapshot · Mar 2026 (live fetch unavailable)</span>
+          )}
+          <button onClick={() => igRefetch()} style={{ fontSize: 11, color: "#7a6a5a", background: "none", border: "1px solid #e8e0d4", borderRadius: 4, padding: "2px 8px", cursor: "pointer" }}>Refresh</button>
+        </div>
       </div>
 
       {/* Stats Row */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))", gap: 14, marginBottom: 24 }}>
         {[
-          { label: "Followers", value: "319", icon: Users, color: "#1e5a8a" },
-          { label: "Uploads", value: "39", icon: BarChart2, color: "#2a6b4a" },
-          { label: "Avg Likes", value: "115", icon: Heart, color: "#c0392b" },
-          { label: "Avg Comments", value: "14.3", icon: MessageCircle, color: "#d4851a" },
-          { label: "Engagement", value: "485%", icon: TrendingUp, color: "#7a2a7a" },
-          { label: "Posts/Week", value: "2.1", icon: RefreshCw, color: "#2a7a4a" },
+          { label: "Followers", value: igLoading ? "…" : igStats.followers?.toLocaleString() ?? "—", icon: Users, color: "#1e5a8a" },
+          { label: "Uploads", value: igLoading ? "…" : String(igStats.uploads ?? "—"), icon: BarChart2, color: "#2a6b4a" },
+          { label: "Avg Likes", value: igLoading ? "…" : String(igStats.avgLikes ?? "—"), icon: Heart, color: "#c0392b" },
+          { label: "Avg Comments", value: igLoading ? "…" : String(igStats.avgComments ?? "—"), icon: MessageCircle, color: "#d4851a" },
+          { label: "Engagement", value: igLoading ? "…" : igStats.engagement ?? "—", icon: TrendingUp, color: "#7a2a7a" },
+          { label: "Posts/Week", value: SNAPSHOT.postsPerWeek.toString(), icon: RefreshCw, color: "#2a7a4a" },
         ].map(s => (
           <div key={s.label} className="stat-card">
             <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
@@ -138,7 +167,7 @@ export default function SocialPage() {
             <span style={{ fontSize: 11, color: "#a89880", marginLeft: "auto" }}>Last 100 posts</span>
           </div>
           <div style={{ padding: "14px 18px", display: "flex", flexWrap: "wrap", gap: 8 }}>
-            {INSTAGRAM_STATS.topHashtags.map(h => (
+            {SNAPSHOT.topHashtags.map(h => (
               <div key={h.tag} style={{ display: "flex", alignItems: "center", gap: 4, background: "#f5efe7", borderRadius: 20, padding: "4px 10px" }}>
                 <span style={{ fontSize: 12, color: "#2a6b4a", fontWeight: 600 }}>{h.tag}</span>
                 <span style={{ fontSize: 10, color: "#a89880" }}>{h.count}</span>
@@ -161,14 +190,14 @@ export default function SocialPage() {
             <div style={{ background: "#f5efe7", borderRadius: 8, padding: "12px 14px" }}>
               <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "#7a6a5a", marginBottom: 8 }}>Sentiment</div>
               <div style={{ display: "flex", gap: 4 }}>
-                <div style={{ flex: INSTAGRAM_STATS.sentiment.positive, background: "#2a7a4a", height: 8, borderRadius: 4 }} title={`Positive ${INSTAGRAM_STATS.sentiment.positive}%`} />
-                <div style={{ flex: INSTAGRAM_STATS.sentiment.neutral, background: "#e8e0d4", height: 8, borderRadius: 4 }} title={`Neutral ${INSTAGRAM_STATS.sentiment.neutral}%`} />
-                <div style={{ flex: INSTAGRAM_STATS.sentiment.negative, background: "#c0392b", height: 8, borderRadius: 4 }} title={`Negative ${INSTAGRAM_STATS.sentiment.negative}%`} />
+                <div style={{ flex: SNAPSHOT.sentiment.positive, background: "#2a7a4a", height: 8, borderRadius: 4 }} title={`Positive ${SNAPSHOT.sentiment.positive}%`} />
+                <div style={{ flex: SNAPSHOT.sentiment.neutral, background: "#e8e0d4", height: 8, borderRadius: 4 }} title={`Neutral ${SNAPSHOT.sentiment.neutral}%`} />
+                <div style={{ flex: SNAPSHOT.sentiment.negative, background: "#c0392b", height: 8, borderRadius: 4 }} title={`Negative ${SNAPSHOT.sentiment.negative}%`} />
               </div>
               <div style={{ display: "flex", gap: 12, marginTop: 6, fontSize: 10, color: "#7a6a5a" }}>
-                <span>✅ Positive {INSTAGRAM_STATS.sentiment.positive}%</span>
-                <span>⚪ Neutral {INSTAGRAM_STATS.sentiment.neutral}%</span>
-                <span>🔴 Negative {INSTAGRAM_STATS.sentiment.negative}%</span>
+                <span>✅ Positive {SNAPSHOT.sentiment.positive}%</span>
+                <span>⚪ Neutral {SNAPSHOT.sentiment.neutral}%</span>
+                <span>🔴 Negative {SNAPSHOT.sentiment.negative}%</span>
               </div>
             </div>
           </div>

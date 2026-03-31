@@ -191,6 +191,14 @@ export const api = {
   getLeadWithDna: (id: string) => req<Lead & { leadDna: string; leadDnaUpdated: string }>("GET", `/leads/${id}`),
   saveLeadDna: (id: string, dna: string) => req<Lead>("PUT", `/leads/${id}/dna`, { dna }),
 
+  // Instagram public profile stats (scraped, cached 6h server-side)
+  getInstagramStats: () => req<{
+    followers: number | null; following: number | null; posts: number | null;
+    bio: string; fullName: string; profilePic: string;
+    avgLikes: number | null; avgComments: number | null; engagement: string | null;
+    fetchedAt: string; source: string; cached: boolean; error?: string;
+  }>("GET", "/instagram/stats"),
+
   // AI — calls standalone Cloudflare Worker (mel-crm-ai) with Workers AI binding
   generateContent: (topic: string) => aiReq<{ ideas: string[] }>("/ai/content", { topic }),
   aiChat: (message: string, context: AIChatContext) => aiReq<{ message: string; action?: string; event?: Partial<CRMEvent> }>("/ai/chat", { message, context }),
