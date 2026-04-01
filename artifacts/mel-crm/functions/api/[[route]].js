@@ -744,5 +744,348 @@ Keep responses concise, warm, and actionable. Use 'Mahalo' or Aloha where natura
     return err("Not found", 404);
   }
 
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // LEVEL-UP FEATURES
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  // ── 1. EMAIL SYSTEM ────────────────────────────────────────────────
+  if (route === "/email/config" && method === "GET") {
+    const row = await env.DB.prepare("SELECT * FROM crm_email_config WHERE id = 'default'").first().catch(() => null);
+    if (!row) return json({ enabled: true, fromEmail: "melcastanares@techsavvyhawaii.com", fromName: "Mel Castanares - Hawaii Realtor", autoConfirmEnabled: true, forwardCopyTo: "" });
+    return json({ enabled: !!row.enabled, fromEmail: row.from_email, fromName: row.from_name, autoConfirmEnabled: !!row.auto_confirm_enabled, forwardCopyTo: row.forward_copy_to || "" });
+  }
+  if (route === "/email/config" && method === "PATCH") {
+    const b = await request.json().catch(() => ({}));
+    const f = []; const v = [];
+    if (b.enabled !== undefined) { f.push("enabled = ?"); v.push(b.enabled ? 1 : 0); }
+    if (b.fromEmail) { f.push("from_email = ?"); v.push(b.fromEmail); }
+    if (b.fromName) { f.push("from_name = ?"); v.push(b.fromName); }
+    if (b.forwardCopyTo !== undefined) { f.push("forward_copy_to = ?"); v.push(b.forwardCopyTo); }
+    f.push("updated_at = ?"); v.push(now()); v.push("default");
+    await env.DB.prepare(`UPDATE crm_email_config SET ${f.join(", ")} WHERE id = ?`).bind(...v).run();
+    return json({ ok: true });
+  }
+  if (route === "/email/threads" && method === "GET") {
+    const folder = url.searchParams.get("folder") || "";
+    const starred = url.searchParams.get("starred") === "true";
+    const leadId = url.searchParams.get("lead_id") || "";
+    let sql = "SELECT * FROM crm_email_threads"; const c = []; const p = [];
+    if (folder) { c.push("folder = ?"); p.push(folder); }
+    if (starred) c.push("starred = 1");
+    if (leadId) { c.push("lead_id = ?"); p.push(leadId); }
+    if (c.length) sql += " WHERE " + c.join(" AND ");
+    sql += " ORDER BY last_message_at DESC LIMIT 100";
+    const { results } = await env.DB.prepare(sql).bind(...p).all();
+    return json(results || []);
+  }
+  if (route === "/email/stats" && method === "GET") {
+    const total = await env.DB.prepare("SELECT COUNT(*) as c FROM crm_email_threads").first();
+    const unread = await env.DB.prepare("SELECT COUNT(*) as c FROM crm_email_threads WHERE unread = 1 AND folder = 'inbox'").first();
+    const sent = await env.DB.prepare("SELECT COUNT(*) as c FROM crm_email_threads WHERE folder = 'sent'").first();
+    const starred = await env.DB.prepare("SELECT COUNT(*) as c FROM crm_email_threads WHERE starred = 1").first();
+    return json({ total: total?.c || 0, unread: unread?.c || 0, sent: sent?.c || 0, starred: starred?.c || 0 });
+  }
+  if (route.match(/^\/email\/threads\/[^/]+\/messages$/) && method === "GET") {
+    const tid = route.split("/")[3];
+    const { results } = await env.DB.prepare("SELECT * FROM crm_email_messages WHERE thread_id = ? ORDER BY sent_at ASC").bind(tid).all();
+    await env.DB.prepare("UPDATE crm_email_threads SET unread = 0 WHERE id = ?").bind(tid).run();
+    return json(results || []);
+  }
+  if (route.match(/^\/email\/threads\/[^/]+$/) && method === "PATCH") {
+    const tid = route.split("/")[3];
+    const b = await request.json().catch(() => ({}));
+    const f = []; const v = [];
+    if (b.starred !== undefined) { f.push("starred = ?"); v.push(b.starred ? 1 : 0); }
+    if (b.folder) { f.push("folder = ?"); v.push(b.folder); }
+    if (b.status) { f.push("status = ?"); v.push(b.status); }
+    if (b.unread !== undefined) { f.push("unread = ?"); v.push(b.unread ? 1 : 0); }
+    if (!f.length) return err("No fields to update");
+    v.push(tid);
+    await env.DB.prepare(`UPDATE crm_email_threads SET ${f.join(", ")} WHERE id = ?`).bind(...v).run();
+    return json({ ok: true });
+  }
+  if (route === "/email/send" && method === "POST") {
+    const apiKey = env.RESEND_API_KEY;
+    if (!apiKey) return err("RESEND_API_KEY not configured", 500);
+    const b = await request.json().catch(() => ({}));
+    if (!b.to || !b.subject || !b.html) return err("to, subject, and html required");
+    const cfg = await env.DB.prepare("SELECT * FROM crm_email_config WHERE id = 'default'").first().catch(() => null);
+    const fromEmail = cfg?.from_email || "melcastanares@techsavvyhawaii.com";
+    const fromName = cfg?.from_name || "Mel Castanares";
+    const r = await fetch("https://api.resend.com/emails", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` }, body: JSON.stringify({ from: `${fromName} <${fromEmail}>`, to: [b.to], subject: b.subject, html: b.html, text: b.text || undefined, reply_to: fromEmail }) });
+    if (!r.ok) return err("Failed to send: " + await r.text(), 500);
+    const rd = await r.json(); const ts = now();
+    let tid = b.threadId;
+    if (!tid) { tid = uuid(); await env.DB.prepare("INSERT INTO crm_email_threads (id, subject, lead_id, contact_email, contact_name, source, status, folder, unread, last_message_at, created_at, email_account) VALUES (?, ?, ?, ?, ?, 'direct', 'open', 'sent', 0, ?, ?, ?)").bind(tid, b.subject, b.leadId || "", b.to, b.contactName || b.to, ts, ts, fromEmail).run(); }
+    else { await env.DB.prepare("UPDATE crm_email_threads SET last_message_at = ?, status = 'replied' WHERE id = ?").bind(ts, tid).run(); }
+    const mid = uuid();
+    await env.DB.prepare("INSERT INTO crm_email_messages (id, thread_id, direction, from_email, from_name, to_email, subject, body, html_body, resend_id, status, sent_at) VALUES (?, ?, 'outbound', ?, ?, ?, ?, ?, ?, ?, 'sent', ?)").bind(mid, tid, fromEmail, fromName, b.to, b.subject, b.text || "", b.html, rd.id || "", ts).run();
+    await env.DB.prepare("INSERT INTO crm_activity_log (id, action, details, type, timestamp) VALUES (?, ?, ?, 'email', ?)").bind(uuid(), "Email Sent", `To: ${b.to} — ${b.subject}`, ts).run();
+    if (b.leadId) await env.DB.prepare("INSERT INTO crm_lead_activities (id, lead_id, type, title, description, created_at) VALUES (?, ?, 'email', ?, ?, ?)").bind(uuid(), b.leadId, `Email: ${b.subject}`, `Sent to ${b.to}`, ts).run();
+    return json({ success: true, threadId: tid, messageId: mid });
+  }
+  if (route === "/email/send-template" && method === "POST") {
+    const apiKey = env.RESEND_API_KEY;
+    if (!apiKey) return err("RESEND_API_KEY not configured", 500);
+    const b = await request.json().catch(() => ({}));
+    if (!b.templateId || !b.to) return err("templateId and to required");
+    const tmpl = await env.DB.prepare("SELECT * FROM crm_outreach_templates WHERE id = ?").bind(b.templateId).first();
+    if (!tmpl) return err("Template not found", 404);
+    let subj = tmpl.subject; let body = tmpl.html_body || `<p>${tmpl.text_body}</p>`;
+    for (const [k, val] of Object.entries(b.variables || {})) { const re = new RegExp(`\\{\\{${k}\\}\\}`, "g"); subj = subj.replace(re, val); body = body.replace(re, val); }
+    const cfg = await env.DB.prepare("SELECT * FROM crm_email_config WHERE id = 'default'").first().catch(() => null);
+    const fromEmail = cfg?.from_email || "melcastanares@techsavvyhawaii.com";
+    const fromName = cfg?.from_name || "Mel Castanares";
+    const html = `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#f8fafc;font-family:-apple-system,system-ui,sans-serif"><div style="max-width:600px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;margin-top:20px"><div style="background:linear-gradient(135deg,#1e3a5f,#2563eb);color:#fff;padding:32px 24px;text-align:center"><h1 style="margin:0;font-size:22px">Mel Castanares</h1><p style="opacity:.8;margin-top:4px;font-size:14px">Hawaii Real Estate</p></div><div style="padding:28px 24px;font-size:15px;color:#475569;line-height:1.6">${body}</div><div style="padding:16px 24px;border-top:1px solid #e2e8f0;text-align:center"><p style="font-size:12px;color:#94a3b8;margin:0">Mel Castanares · Hawaii Realtor · Powered by TechSavvy Hawaii</p></div></div></body></html>`;
+    const r = await fetch("https://api.resend.com/emails", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` }, body: JSON.stringify({ from: `${fromName} <${fromEmail}>`, to: [b.to], subject: subj, html, reply_to: fromEmail }) });
+    if (!r.ok) return err("Failed to send", 500);
+    const rd = await r.json(); const ts = now(); const tid = uuid();
+    await env.DB.prepare("INSERT INTO crm_email_threads (id, subject, lead_id, contact_email, contact_name, source, status, folder, unread, last_message_at, created_at, email_account) VALUES (?, ?, ?, ?, ?, ?, 'open', 'sent', 0, ?, ?, ?)").bind(tid, subj, b.leadId || "", b.to, b.contactName || b.to, tmpl.type, ts, ts, fromEmail).run();
+    await env.DB.prepare("INSERT INTO crm_email_messages (id, thread_id, direction, from_email, from_name, to_email, subject, body, html_body, resend_id, status, sent_at) VALUES (?, ?, 'outbound', ?, ?, ?, ?, ?, ?, ?, 'sent', ?)").bind(uuid(), tid, fromEmail, fromName, b.to, subj, tmpl.text_body, html, rd.id || "", ts).run();
+    if (b.leadId) await env.DB.prepare("INSERT INTO crm_lead_activities (id, lead_id, type, title, description, created_at) VALUES (?, ?, 'email', ?, ?, ?)").bind(uuid(), b.leadId, `Template: ${tmpl.name}`, `Sent to ${b.to}`, ts).run();
+    return json({ success: true, threadId: tid, templateType: tmpl.type });
+  }
+
+  // ── 2. ACTIVITY LOG ────────────────────────────────────────────────
+  if (route === "/activity" && method === "GET") {
+    const { results } = await env.DB.prepare("SELECT * FROM crm_activity_log ORDER BY timestamp DESC LIMIT 50").all();
+    return json(results || []);
+  }
+  if (route.match(/^\/leads\/[^/]+\/activities$/) && method === "GET") {
+    const lid = route.split("/")[2];
+    const { results } = await env.DB.prepare("SELECT * FROM crm_lead_activities WHERE lead_id = ? ORDER BY created_at DESC").bind(lid).all();
+    return json(results || []);
+  }
+  if (route.match(/^\/leads\/[^/]+\/activities$/) && method === "POST") {
+    const lid = route.split("/")[2];
+    const b = await request.json().catch(() => ({}));
+    const id = uuid(); const ts = now();
+    await env.DB.prepare("INSERT INTO crm_lead_activities (id, lead_id, transaction_id, type, title, description, metadata, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)").bind(id, lid, b.transactionId || "", b.type || "note", b.title || "", b.description || "", b.metadata || "{}", ts).run();
+    await env.DB.prepare("INSERT INTO crm_activity_log (id, action, details, type, timestamp) VALUES (?, ?, ?, ?, ?)").bind(uuid(), b.title || b.type, `Lead: ${lid}`, b.type || "note", ts).run();
+    return json({ id, leadId: lid, type: b.type, title: b.title, createdAt: ts }, 201);
+  }
+
+  // ── 3. FOLLOW-UPS ─────────────────────────────────────────────────
+  if (route === "/followups" && method === "GET") {
+    let sql = "SELECT * FROM crm_followups"; const c = []; const p = [];
+    const qs = url.searchParams.get("status"); const ql = url.searchParams.get("lead_id");
+    if (qs) { c.push("status = ?"); p.push(qs); }
+    if (ql) { c.push("lead_id = ?"); p.push(ql); }
+    if (c.length) sql += " WHERE " + c.join(" AND ");
+    sql += " ORDER BY due_date ASC, due_time ASC";
+    const { results } = await env.DB.prepare(sql).bind(...p).all();
+    return json(results || []);
+  }
+  if (route === "/followups" && method === "POST") {
+    const b = await request.json().catch(() => ({}));
+    const id = uuid(); const ts = now();
+    await env.DB.prepare("INSERT INTO crm_followups (id, lead_id, lead_name, type, method, due_date, due_time, status, notes, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?)").bind(id, b.leadId || "", b.leadName || "", b.type || "general", b.method || "email", b.dueDate || "", b.dueTime || "", b.notes || "", ts, ts).run();
+    return json({ id, status: "pending" }, 201);
+  }
+  if (route.match(/^\/followups\/[^/]+$/) && method === "PATCH") {
+    const fid = route.split("/")[2];
+    const b = await request.json().catch(() => ({}));
+    const f = []; const v = [];
+    if (b.status) { f.push("status = ?"); v.push(b.status); if (b.status === "completed") { f.push("completed_at = ?"); v.push(now()); } }
+    if (b.notes !== undefined) { f.push("notes = ?"); v.push(b.notes); }
+    if (b.dueDate) { f.push("due_date = ?"); v.push(b.dueDate); }
+    f.push("updated_at = ?"); v.push(now()); v.push(fid);
+    await env.DB.prepare(`UPDATE crm_followups SET ${f.join(", ")} WHERE id = ?`).bind(...v).run();
+    return json({ ok: true });
+  }
+
+  // ── 4. NOTIFICATIONS ──────────────────────────────────────────────
+  if (route === "/notifications" && method === "GET") {
+    const { results } = await env.DB.prepare("SELECT * FROM crm_notifications WHERE dismissed = 0 ORDER BY created_at DESC LIMIT 50").all();
+    return json(results || []);
+  }
+  if (route === "/notifications/count" && method === "GET") {
+    const row = await env.DB.prepare("SELECT COUNT(*) as c FROM crm_notifications WHERE read = 0 AND dismissed = 0").first();
+    return json({ count: row?.c || 0 });
+  }
+  if (route === "/notifications/generate" && method === "POST") {
+    const generated = []; const ts = now(); const td = today();
+    const threeDays = new Date(Date.now() + 3 * 86400000).toISOString().split("T")[0];
+    // Overdue follow-ups
+    const overdue = await env.DB.prepare("SELECT COUNT(*) as c FROM crm_followups WHERE status = 'pending' AND due_date < ?").bind(td).first();
+    if (overdue?.c > 0) {
+      await env.DB.prepare("INSERT INTO crm_notifications (id, type, title, message, action_url, created_at) VALUES (?, 'overdue', 'Overdue Follow-ups', ?, '/followups', ?)").bind(uuid(), `${overdue.c} follow-up${overdue.c > 1 ? "s" : ""} past due. Don't let leads go cold!`, ts).run();
+      await env.DB.prepare("UPDATE crm_followups SET status = 'overdue' WHERE status = 'pending' AND due_date < ?").bind(td).run();
+      generated.push("overdue_followups");
+    }
+    // Transaction deadlines
+    for (const [col, label] of [["inspection_deadline","Inspection"],["loan_contingency_date","Loan Contingency"],["closing_date","Closing"],["disclosure_deadline","Disclosure"]]) {
+      const up = await env.DB.prepare(`SELECT client_name, property_address, ${col} FROM crm_transactions WHERE status NOT IN ('closed','cancelled') AND ${col} != '' AND ${col} <= ? AND ${col} >= ?`).bind(threeDays, td).all();
+      for (const row of (up.results || [])) {
+        const days = Math.ceil((new Date(row[col]) - new Date(td)) / 86400000);
+        await env.DB.prepare("INSERT INTO crm_notifications (id, type, title, message, action_url, created_at) VALUES (?, 'deadline', ?, ?, '/transactions', ?)").bind(uuid(), `${label} in ${days} day${days !== 1 ? "s" : ""}`, `${row.client_name} — ${row.property_address}`, ts).run();
+        generated.push(col);
+      }
+    }
+    // Cold leads
+    const cold = await env.DB.prepare("SELECT COUNT(*) as c FROM crm_leads WHERE status NOT IN ('closed','lost','inactive') AND id NOT IN (SELECT DISTINCT lead_id FROM crm_lead_activities WHERE created_at > datetime('now', '-14 days') AND lead_id != '')").first();
+    if (cold?.c > 0) {
+      await env.DB.prepare("INSERT INTO crm_notifications (id, type, title, message, action_url, created_at) VALUES (?, 'lead-cold', 'Cold Leads', ?, '/leads', ?)").bind(uuid(), `${cold.c} lead${cold.c > 1 ? "s have" : " has"} gone quiet (14+ days).`, ts).run();
+      generated.push("cold_leads");
+    }
+    // Today's showings
+    const todayShow = await env.DB.prepare("SELECT COUNT(*) as c FROM crm_showings WHERE date = ? AND status != 'cancelled'").bind(td).first();
+    if (todayShow?.c > 0) {
+      await env.DB.prepare("INSERT INTO crm_notifications (id, type, title, message, action_url, created_at) VALUES (?, 'showing-reminder', 'Showings Today', ?, '/showings', ?)").bind(uuid(), `You have ${todayShow.c} showing${todayShow.c > 1 ? "s" : ""} today.`, ts).run();
+      generated.push("today_showings");
+    }
+    return json({ generated: generated.length, types: generated });
+  }
+  if (route === "/notifications/read-all" && method === "POST") {
+    await env.DB.prepare("UPDATE crm_notifications SET read = 1 WHERE read = 0").run();
+    return json({ ok: true });
+  }
+  if (route.match(/^\/notifications\/[^/]+$/) && method === "PATCH") {
+    const nid = route.split("/")[2];
+    const b = await request.json().catch(() => ({}));
+    if (b.read !== undefined) await env.DB.prepare("UPDATE crm_notifications SET read = ? WHERE id = ?").bind(b.read ? 1 : 0, nid).run();
+    if (b.dismissed) await env.DB.prepare("UPDATE crm_notifications SET dismissed = 1 WHERE id = ?").bind(nid).run();
+    return json({ ok: true });
+  }
+
+  // ── 5. OUTREACH TEMPLATES ─────────────────────────────────────────
+  if (route === "/outreach-templates" && method === "GET") {
+    const { results } = await env.DB.prepare("SELECT * FROM crm_outreach_templates ORDER BY type").all();
+    return json(results || []);
+  }
+  if (route === "/outreach-templates" && method === "POST") {
+    const b = await request.json().catch(() => ({}));
+    const id = uuid(); const ts = now();
+    await env.DB.prepare("INSERT INTO crm_outreach_templates (id, name, type, subject, html_body, text_body, variables, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)").bind(id, b.name || "", b.type || "custom", b.subject || "", b.htmlBody || "", b.textBody || "", JSON.stringify(b.variables || []), ts, ts).run();
+    return json({ id, name: b.name }, 201);
+  }
+  if (route.match(/^\/outreach-templates\/[^/]+$/) && method === "PATCH") {
+    const tid = route.split("/")[2];
+    const b = await request.json().catch(() => ({}));
+    const f = []; const v = [];
+    if (b.name) { f.push("name = ?"); v.push(b.name); }
+    if (b.subject) { f.push("subject = ?"); v.push(b.subject); }
+    if (b.htmlBody !== undefined) { f.push("html_body = ?"); v.push(b.htmlBody); }
+    if (b.textBody !== undefined) { f.push("text_body = ?"); v.push(b.textBody); }
+    f.push("updated_at = ?"); v.push(now()); v.push(tid);
+    await env.DB.prepare(`UPDATE crm_outreach_templates SET ${f.join(", ")} WHERE id = ?`).bind(...v).run();
+    return json({ ok: true });
+  }
+
+  // ── 10. SHOWINGS ──────────────────────────────────────────────────
+  if (route === "/showings" && method === "GET") {
+    let sql = "SELECT * FROM crm_showings"; const c = []; const p = [];
+    const qd = url.searchParams.get("date"); const ql = url.searchParams.get("lead_id"); const qs = url.searchParams.get("status");
+    if (qd) { c.push("date = ?"); p.push(qd); }
+    if (ql) { c.push("lead_id = ?"); p.push(ql); }
+    if (qs) { c.push("status = ?"); p.push(qs); }
+    if (c.length) sql += " WHERE " + c.join(" AND ");
+    sql += " ORDER BY date ASC, time ASC";
+    const { results } = await env.DB.prepare(sql).bind(...p).all();
+    return json(results || []);
+  }
+  if (route === "/showings" && method === "POST") {
+    const b = await request.json().catch(() => ({}));
+    const id = uuid(); const ts = now();
+    await env.DB.prepare("INSERT INTO crm_showings (id, lead_id, lead_name, property_address, property_mls, date, time, end_time, status, lat, lng, notes, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'scheduled', ?, ?, ?, ?, ?)").bind(id, b.leadId || "", b.leadName || "", b.propertyAddress || "", b.propertyMls || "", b.date || "", b.time || "", b.endTime || "", b.lat || null, b.lng || null, b.notes || "", ts, ts).run();
+    // Auto-create follow-up for day after showing
+    const nextDay = new Date(new Date(b.date || Date.now()).getTime() + 86400000).toISOString().split("T")[0];
+    await env.DB.prepare("INSERT INTO crm_followups (id, lead_id, lead_name, type, method, due_date, status, notes, created_at, updated_at) VALUES (?, ?, ?, 'showing', 'email', ?, 'pending', ?, ?, ?)").bind(uuid(), b.leadId || "", b.leadName || "", nextDay, `Follow up after showing at ${b.propertyAddress}`, ts, ts).run();
+    if (b.leadId) await env.DB.prepare("INSERT INTO crm_lead_activities (id, lead_id, type, title, description, created_at) VALUES (?, ?, 'showing', ?, ?, ?)").bind(uuid(), b.leadId, `Showing: ${b.propertyAddress}`, `Scheduled for ${b.date} at ${b.time}`, ts).run();
+    return json({ id, status: "scheduled" }, 201);
+  }
+  if (route.match(/^\/showings\/route\/.+$/) && method === "GET") {
+    const date = route.split("/showings/route/")[1];
+    const { results } = await env.DB.prepare("SELECT * FROM crm_showings WHERE date = ? AND status != 'cancelled' ORDER BY time ASC").bind(date).all();
+    const rt = (results || []).map((s, i) => ({ stop: i + 1, time: s.time, endTime: s.end_time, propertyAddress: s.property_address, leadName: s.lead_name, status: s.status }));
+    return json({ date, showings: results || [], route: rt, totalStops: rt.length });
+  }
+  if (route.match(/^\/showings\/[^/]+$/) && method === "PATCH") {
+    const sid = route.split("/")[2];
+    const b = await request.json().catch(() => ({}));
+    const f = []; const v = [];
+    for (const [k, col] of [["status","status"],["feedback","feedback"],["rating","rating"],["notes","notes"],["date","date"],["time","time"],["endTime","end_time"]]) {
+      if (b[k] !== undefined) { f.push(`${col} = ?`); v.push(b[k]); }
+    }
+    f.push("updated_at = ?"); v.push(now()); v.push(sid);
+    await env.DB.prepare(`UPDATE crm_showings SET ${f.join(", ")} WHERE id = ?`).bind(...v).run();
+    if (b.status === "completed") {
+      const s = await env.DB.prepare("SELECT * FROM crm_showings WHERE id = ?").bind(sid).first();
+      if (s?.lead_id) await env.DB.prepare("INSERT INTO crm_lead_activities (id, lead_id, type, title, description, metadata, created_at) VALUES (?, ?, 'showing', ?, ?, ?, ?)").bind(uuid(), s.lead_id, `Showing completed: ${s.property_address}`, b.feedback || "", JSON.stringify({ rating: b.rating || 0 }), now()).run();
+    }
+    return json({ ok: true });
+  }
+
+  // ── 12. CADENCES ──────────────────────────────────────────────────
+  if (route === "/cadences" && method === "GET") {
+    const { results } = await env.DB.prepare("SELECT * FROM crm_followup_cadences ORDER BY name").all();
+    return json((results || []).map(r => ({ ...r, steps: JSON.parse(r.steps || "[]") })));
+  }
+  if (route === "/cadences/enrollments" && method === "GET") {
+    const ql = url.searchParams.get("lead_id") || "";
+    let sql = "SELECT e.*, c.name as cadence_name, c.type as cadence_type, l.name as lead_name FROM crm_cadence_enrollments e LEFT JOIN crm_followup_cadences c ON e.cadence_id = c.id LEFT JOIN crm_leads l ON e.lead_id = l.id";
+    if (ql) sql += ` WHERE e.lead_id = '${ql}'`;
+    sql += " ORDER BY e.next_action_date ASC";
+    const { results } = await env.DB.prepare(sql).all();
+    return json(results || []);
+  }
+  if (route.match(/^\/cadences\/[^/]+\/enroll$/) && method === "POST") {
+    const cid = route.split("/")[2];
+    const b = await request.json().catch(() => ({}));
+    if (!b.leadId) return err("leadId required");
+    const cadence = await env.DB.prepare("SELECT * FROM crm_followup_cadences WHERE id = ?").bind(cid).first();
+    if (!cadence) return err("Cadence not found", 404);
+    const steps = JSON.parse(cadence.steps || "[]");
+    const first = steps[0];
+    const nextDate = first ? new Date(Date.now() + (first.day || 0) * 86400000).toISOString().split("T")[0] : "";
+    const id = uuid(); const ts = now();
+    await env.DB.prepare("INSERT INTO crm_cadence_enrollments (id, cadence_id, lead_id, current_step, started_at, next_action_date, status, created_at) VALUES (?, ?, ?, 0, ?, ?, 'active', ?)").bind(id, cid, b.leadId, ts, nextDate, ts).run();
+    if (first) {
+      const lead = await env.DB.prepare("SELECT name FROM crm_leads WHERE id = ?").bind(b.leadId).first();
+      await env.DB.prepare("INSERT INTO crm_followups (id, lead_id, lead_name, type, method, due_date, status, notes, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?)").bind(uuid(), b.leadId, lead?.name || "", cadence.type, first.method || "email", nextDate, first.note || `${cadence.name} — Step 1`, ts, ts).run();
+    }
+    return json({ id, cadenceId: cid, leadId: b.leadId, nextActionDate: nextDate }, 201);
+  }
+
+  // ── 13. FINANCIAL DASHBOARD ───────────────────────────────────────
+  if (route === "/financial/summary" && method === "GET") {
+    const yr = url.searchParams.get("year") || new Date().getFullYear().toString();
+    const s = `${yr}-01-01`; const e = `${yr}-12-31T23:59:59`;
+    const [inc, exp, comm, pend, closed, active, mInc, mExp, eCat] = await Promise.all([
+      env.DB.prepare("SELECT COALESCE(SUM(amount),0) as t FROM crm_income WHERE date >= ? AND date <= ?").bind(s, e).first(),
+      env.DB.prepare("SELECT COALESCE(SUM(amount),0) as t FROM crm_expenses WHERE date >= ? AND date <= ?").bind(s, e).first(),
+      env.DB.prepare("SELECT COALESCE(SUM(commission_amount),0) as t FROM crm_commissions WHERE status='paid' AND close_date >= ? AND close_date <= ?").bind(s, e).first(),
+      env.DB.prepare("SELECT COALESCE(SUM(commission_amount),0) as t FROM crm_commissions WHERE status='pending'").first(),
+      env.DB.prepare("SELECT COUNT(*) as c FROM crm_transactions WHERE status='closed' AND closing_date >= ? AND closing_date <= ?").bind(s, e).first(),
+      env.DB.prepare("SELECT COUNT(*) as c FROM crm_transactions WHERE status NOT IN ('closed','cancelled')").first(),
+      env.DB.prepare("SELECT substr(date,1,7) as month, SUM(amount) as total FROM crm_income WHERE date >= ? AND date <= ? GROUP BY month ORDER BY month").bind(s, e).all(),
+      env.DB.prepare("SELECT substr(date,1,7) as month, SUM(amount) as total FROM crm_expenses WHERE date >= ? AND date <= ? GROUP BY month ORDER BY month").bind(s, e).all(),
+      env.DB.prepare("SELECT category, SUM(amount) as total FROM crm_expenses WHERE date >= ? AND date <= ? GROUP BY category ORDER BY total DESC").bind(s, e).all(),
+    ]);
+    const i = inc?.t || 0; const x = exp?.t || 0;
+    return json({ year: yr, totalIncome: i, totalExpenses: x, netProfit: i - x, totalCommissions: comm?.t || 0, pendingCommissions: pend?.t || 0, closedDeals: closed?.c || 0, activeDeals: active?.c || 0, monthlyIncome: mInc.results || [], monthlyExpenses: mExp.results || [], expensesByCategory: eCat.results || [] });
+  }
+  if (route === "/financial/tax-summary" && method === "GET") {
+    const yr = url.searchParams.get("year") || new Date().getFullYear().toString();
+    const s = `${yr}-01-01`; const e = `${yr}-12-31T23:59:59`;
+    const [inc, ded, nonDed, totDed] = await Promise.all([
+      env.DB.prepare("SELECT COALESCE(SUM(amount),0) as t FROM crm_income WHERE date >= ? AND date <= ?").bind(s, e).first(),
+      env.DB.prepare("SELECT category, SUM(amount) as total FROM crm_expenses WHERE tax_deductible=1 AND date >= ? AND date <= ? GROUP BY category ORDER BY total DESC").bind(s, e).all(),
+      env.DB.prepare("SELECT COALESCE(SUM(amount),0) as t FROM crm_expenses WHERE (tax_deductible=0 OR tax_deductible IS NULL) AND date >= ? AND date <= ?").bind(s, e).first(),
+      env.DB.prepare("SELECT COALESCE(SUM(amount),0) as t FROM crm_expenses WHERE tax_deductible=1 AND date >= ? AND date <= ?").bind(s, e).first(),
+    ]);
+    return json({ year: yr, grossIncome: inc?.t || 0, totalDeductions: totDed?.t || 0, taxableIncome: (inc?.t || 0) - (totDed?.t || 0), nonDeductibleExpenses: nonDed?.t || 0, deductionsByCategory: ded.results || [] });
+  }
+  if (route === "/income" && method === "GET") {
+    const { results } = await env.DB.prepare("SELECT * FROM crm_income ORDER BY date DESC").all();
+    return json(results || []);
+  }
+  if (route === "/income" && method === "POST") {
+    const b = await request.json().catch(() => ({}));
+    const id = uuid(); const ts = now();
+    await env.DB.prepare("INSERT INTO crm_income (id, transaction_id, lead_id, client_name, property_address, type, amount, date, notes, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)").bind(id, b.transactionId || "", b.leadId || "", b.clientName || "", b.propertyAddress || "", b.type || "commission", b.amount || 0, b.date || today(), b.notes || "", ts).run();
+    return json({ id }, 201);
+  }
+
   return err("Not found", 404);
 }
